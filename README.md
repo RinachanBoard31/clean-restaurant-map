@@ -1,1 +1,2 @@
 # clean-restaurant-map
+test
