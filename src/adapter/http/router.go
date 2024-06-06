@@ -1,11 +1,18 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
-func TestFunc() { 
-	return {"value": "Hello"}
+type TestStruct struct {
+	Message string
+}
+
+func TestFunc(c echo.Context) error {
+	testMessage := TestStruct{Message: "Hello"}
+	return c.JSON(http.StatusOK, testMessage)
 }
 
 func ActivateRouter() {
