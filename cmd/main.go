@@ -1,6 +1,6 @@
 package main
 
-import router "clean-storemap-api/src/adapter/http"
+import router "clean-storemap-api/src/driver"
 
 func main() {
 	router.ActivateRouter()
