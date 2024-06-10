@@ -2,6 +2,8 @@ package controller
 
 import (
 	model "clean-storemap-api/src/entity"
+	//"clean-storemap-api/src/usecase/port"
+	// "errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -18,21 +20,36 @@ type StoreJson struct {
 	Stores       []storeForController
 }
 
-type StoreInputPort interface {
-	GetStores() ([]model.Store, error)
+type StoreI interface {
+	GetStores(c echo.Context) error
 }
 
-type StoreController struct {
-	StoreInputPort StoreInputPort
+//	type StoreController struct {
+//		storeInputPort port.StoreInputPort
+//	}
+type StoreController struct{}
+
+// func NewStoreController(storeInputPort port.StoreInputPort) StoreI {
+// 	return &StoreController{
+// 		storeInputPort: storeInputPort,
+// 	}
+// }
+
+func NewStoreController() StoreI {
+	return &StoreController{}
 }
 
 func (sc *StoreController) GetStores(c echo.Context) error {
-	stores, err := sc.StoreInputPort.GetStores()
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
-	}
+	//stores, err := sc.storeInputPort.GetStores() <-本当はこれを呼ぶ
+	dummyStores := make([]model.Store, 0)
+	dummyStores = append(dummyStores, model.Store{Id: 1, Name: "aa"})
+
+	// err := errors.New("")
+	// if err != nil {
+	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
+	// }
 	json_stores := make([]storeForController, 0)
-	for _, v := range stores {
+	for _, v := range dummyStores {
 		json_stores = append(json_stores, storeForController{
 			Id:   v.Id,
 			Name: v.Name,
