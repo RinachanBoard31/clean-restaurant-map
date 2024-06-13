@@ -15,9 +15,9 @@ type MockStoreInputPort struct {
 	mock.Mock
 }
 
-func (m *MockStoreInputPort) GetStores() ([]model.Store, error) {
+func (m *MockStoreInputPort) GetStores() ([]*model.Store, error) {
 	args := m.Called()
-	return args.Get(0).([]model.Store), args.Error(1)
+	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
 func newRouter() (echo.Context, *httptest.ResponseRecorder) {
@@ -31,13 +31,13 @@ func TestGetStores(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	expected := "{\"ResponseCode\":200,\"Message\":\"iine\",\"Stores\":[{\"Id\":1,\"Name\":\"aa\"}]}\n"
-	stores := make([]model.Store, 0)
-	stores = append(stores, model.Store{Id: 1, Name: "aa"})
+	stores := make([]*model.Store, 0)
+	stores = append(stores, &model.Store{Id: 1, Name: "aa"})
 
 	// InputPortのGetStoresのモックを作成
 	mockStoreInputPort := new(MockStoreInputPort)
 	mockStoreInputPort.On("GetStores").Return(stores, nil)
-	sc := &StoreController{StoreInputPort: mockStoreInputPort}
+	sc := &StoreController{storeInputPort: mockStoreInputPort}
 
 	/* Act */
 	actual := sc.GetStores(c)
