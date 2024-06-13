@@ -18,6 +18,7 @@ func (m *MockStoreRepository) GetAll() ([]*model.Store, error) {
 }
 
 func TestGetStores(t *testing.T) {
+	/* Arrange */
 	expected := make([]*model.Store, 0)
 	expected = append(expected, &model.Store{Id: 1, Name: "interactor"})
 	stores := make([]*model.Store, 0)
@@ -27,6 +28,7 @@ func TestGetStores(t *testing.T) {
 	mockStoreRepository.On("GetAll").Return(stores, nil)
 	si := &StoreInteractor{storeRepository: mockStoreRepository}
 
+	/* Act */
 	actual, _ := si.GetStores()
 
 	/* Assert */
