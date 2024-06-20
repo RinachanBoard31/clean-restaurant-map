@@ -1,31 +1,36 @@
 package interactor
 
 import (
-	model "clean-storemap-api/src/entity"
 	port "clean-storemap-api/src/usecase/port"
 )
 
-//	type StoreInteractor struct {
-//		storeRepository port.StoreRepository
-//	}
-type StoreInteractor struct{}
-
-// 本来は引数としてOutputPortが必要
-// func NewStoreInputPort(storeRepository port.StoreRepository) port.StoreInputPort {
-// 	return &StoreInteractor{
-// 		storeRepository: storeRepository,
-// 	}
-// }
-
-func NewStoreInputPort() port.StoreInputPort {
-	return &StoreInteractor{}
+type StoreInteractor struct {
+	storeRepository port.StoreRepository
+	storeOutputPort port.StoreOutputPort
 }
 
-func (si *StoreInteractor) GetStores() ([]*model.Store, error) {
-	// stores, err := si.storeRepository.GetAll()  <-本当はこれを呼ぶ
-	dummyStores := make([]*model.Store, 0)
-	dummyStores = append(dummyStores, &model.Store{Id: 1, Name: "aa"})
-	stores := dummyStores
+// type StoreInteractor struct{}
 
-	return stores, nil
+// 本来は引数としてOutputPortが必要
+func NewStoreInputPort(storeRepository port.StoreRepository, storeOutputPort port.StoreOutputPort) port.StoreInputPort {
+	return &StoreInteractor{
+		storeRepository: storeRepository,
+		storeOutputPort: storeOutputPort,
+	}
+}
+
+// func NewStoreInputPort() port.StoreInputPort {
+// 	return &StoreInteractor{}
+// }
+
+func (si *StoreInteractor) GetStores() error {
+	stores, err := si.storeRepository.GetAll()
+	if err != nil {
+		return err
+	}
+	return si.storeOutputPort.OutputAllStores(stores)
+	// dummyStores := make([]*model.Store, 0)
+	// dummyStores = append(dummyStores, &model.Store{Id: 1, Name: "aa"})
+	// stores := dummyStores
+	// return stores, nil
 }
