@@ -13,7 +13,7 @@ type StorePresenter struct {
 	c echo.Context
 }
 
-func NewPresenter(c echo.Context) port.StoreOutputPort {
+func NewStoreOutputPort(c echo.Context) port.StoreOutputPort {
 	return &StorePresenter{
 		c: c,
 	}
