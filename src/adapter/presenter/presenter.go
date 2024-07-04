@@ -14,15 +14,12 @@ type StorePresenter struct {
 }
 
 func NewStoreOutputPort(c echo.Context) port.StoreOutputPort {
-	return &StorePresenter{
-		c: c,
-	}
+	return &StorePresenter{c: c}
 }
 
 type StoreOutputJson struct {
-	ResponseCode int                 `json:"responsecode"`
-	Message      string              `json:"message"`
-	Stores       []storeForPresenter `json:"stores"`
+	Stores  []storeForPresenter `json:"stores"`
+	Message string              `json:"message"`
 }
 
 type storeForPresenter struct {
@@ -31,7 +28,6 @@ type storeForPresenter struct {
 }
 
 func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
-	// c2, rec := newRouter()
 	json_stores := make([]storeForPresenter, 0)
 	for _, v := range stores {
 		json_stores = append(json_stores, storeForPresenter{
@@ -39,8 +35,7 @@ func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 			Name: v.Name,
 		})
 	}
-
-	output_json := &StoreOutputJson{ResponseCode: 200, Message: "iine", Stores: json_stores}
+	output_json := &StoreOutputJson{Stores: json_stores, Message: "やったー！"}
 	return sp.c.JSON(http.StatusOK, output_json)
 }
 

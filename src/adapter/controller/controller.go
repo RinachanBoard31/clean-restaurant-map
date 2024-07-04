@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"clean-storemap-api/src/adapter/gateway"
 	"clean-storemap-api/src/usecase/port"
 
 	"github.com/labstack/echo/v4"
@@ -21,28 +22,36 @@ type StoreI interface {
 	GetStores(c echo.Context) error
 }
 
+type OutputFactory func(echo.Context) port.StoreOutputPort
+type InputFactory func(port.StoreRepository, port.StoreOutputPort) port.StoreInputPort
+type RepositoryFactory func(gateway.StoreDriver) port.StoreRepository
+type DriverFactory gateway.StoreDriver
+
 type StoreController struct {
-	storeInputPort port.StoreInputPort
+	storeDriverFactory     DriverFactory
+	storeOutputFactory     OutputFactory
+	storeInputFactory      InputFactory
+	storeRepositoryFactory RepositoryFactory
 }
 
-func NewStoreController(storeInputPort port.StoreInputPort) StoreI {
+func NewStoreController(storeDriverFactory DriverFactory, storeOutputFactory OutputFactory, storeInputFactory InputFactory, storeRepositoryFactory RepositoryFactory) StoreI {
 	return &StoreController{
-		storeInputPort: storeInputPort,
+		storeDriverFactory:     storeDriverFactory,
+		storeOutputFactory:     storeOutputFactory,
+		storeInputFactory:      storeInputFactory,
+		storeRepositoryFactory: storeRepositoryFactory,
 	}
 }
 
 func (sc *StoreController) GetStores(c echo.Context) error {
-	return sc.storeInputPort.GetStores()
-	// if err != nil {
-	// 	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "internal server error"})
-	// }
-	// json_stores := make([]storeForController, 0)
-	// for _, v := range stores {
-	// 	json_stores = append(json_stores, storeForController{
-	// 		Id:   v.Id,
-	// 		Name: v.Name,
-	// 	})
-	// }
-	// stores_json := &StoreJson{ResponseCode: 200, Message: "iine", Stores: json_stores}
-	// return c.JSON(http.StatusOK, stores_json)
+	return sc.newStoreInputPort(c).GetStores()
+}
+
+/* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */
+/* これによって、presenterのinterface(outputport)にecho.Contextを書かなくて良くなる */
+func (sc *StoreController) newStoreInputPort(c echo.Context) port.StoreInputPort {
+	storeOutputPort := sc.storeOutputFactory(c)
+	storeDriver := sc.storeDriverFactory
+	storeRepository := sc.storeRepositoryFactory(storeDriver)
+	return sc.storeInputFactory(storeRepository, storeOutputPort)
 }
