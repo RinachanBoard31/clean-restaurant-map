@@ -8,15 +8,16 @@ import (
 
 // Dbの要素を構造体として渡す必要がある。
 type StoreGateway struct {
-	storeDriver DbStoreDriver
+	storeDriver StoreDriver
 }
-
-type DbStoreDriver interface {
+type StoreDriver interface {
 	GetStores() ([]*db.DbStore, error)
 }
 
-func NewStoreRepository() port.StoreRepository {
-	return &StoreGateway{}
+func NewStoreRepository(storeDriver StoreDriver) port.StoreRepository {
+	return &StoreGateway{
+		storeDriver: storeDriver,
+	}
 }
 
 func (sg *StoreGateway) GetAll() ([]*model.Store, error) {
