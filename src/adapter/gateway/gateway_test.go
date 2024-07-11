@@ -9,10 +9,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func makeDummyStores() ([]*db.DbStore, error) {
-	dummyStores := make([]*db.DbStore, 0)
-	dummyStores = append(dummyStores, &db.DbStore{Id: 1, Name: "サイゼリヤ"})
-	dummyStores = append(dummyStores, &db.DbStore{Id: 2, Name: "ガスト"})
+func makeDummyStores() ([]*db.Store, error) {
+	dummyStores := make([]*db.Store, 0)
+	dummyStores = append(dummyStores, &db.Store{Id: 1, Name: "サイゼリヤ"})
+	dummyStores = append(dummyStores, &db.Store{Id: 2, Name: "ガスト"})
 	return dummyStores, nil
 }
 
@@ -20,9 +20,9 @@ type MockStoreRepository struct {
 	mock.Mock
 }
 
-func (m *MockStoreRepository) GetStores() ([]*db.DbStore, error) {
+func (m *MockStoreRepository) GetStores() ([]*db.Store, error) {
 	args := m.Called()
-	return args.Get(0).([]*db.DbStore), args.Error(1)
+	return args.Get(0).([]*db.Store), args.Error(1)
 }
 
 func TestGetAll(t *testing.T) {

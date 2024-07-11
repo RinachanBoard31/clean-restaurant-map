@@ -11,7 +11,7 @@ type StoreGateway struct {
 	storeDriver StoreDriver
 }
 type StoreDriver interface {
-	GetStores() ([]*db.DbStore, error)
+	GetStores() ([]*db.Store, error)
 }
 
 func NewStoreRepository(storeDriver StoreDriver) port.StoreRepository {

@@ -12,6 +12,7 @@ import (
 
 func ActivateRouter() {
 	e := echo.New()
+	db.InitDB()
 
 	storeDriver := NewDriverFactory()
 	storeOutputPort := NewOutputFactory()
