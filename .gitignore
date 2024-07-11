@@ -3,3 +3,4 @@
 .tool-versions
 __debug*
 main
+.env
