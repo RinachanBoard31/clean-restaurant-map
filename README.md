@@ -1,3 +1,9 @@
 # clean-restaurant-map
-test
-test2
+
+## Setup
+
+### DB
+
+```
+$ docker compose -f environments/docker-compose.yml up -d
+```

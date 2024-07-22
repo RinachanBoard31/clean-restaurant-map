@@ -1,6 +1,10 @@
 package controller
 
 import (
+	"clean-storemap-api/src/adapter/gateway"
+	"clean-storemap-api/src/driver/db"
+	model "clean-storemap-api/src/entity"
+	"clean-storemap-api/src/usecase/port"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -11,11 +15,46 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockStoreInputPort struct {
+type MockStoreDriverFactory struct {
 	mock.Mock
 }
 
-func (m *MockStoreInputPort) GetStores() error {
+type MockStoreOutputFactoryFuncObject struct {
+	mock.Mock
+}
+
+type MockStoreRepositoryFactoryFuncObject struct {
+	mock.Mock
+}
+
+type MockStoreInputFactoryFuncObject struct {
+	mock.Mock
+}
+
+func (m *MockStoreDriverFactory) GetStores() ([]*db.Store, error) {
+	args := m.Called()
+	return args.Get(0).([]*db.Store), args.Error(1)
+}
+
+func (m *MockStoreOutputFactoryFuncObject) OutputAllStores([]*model.Store) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func mockStoreOutputFactoryFunc(c echo.Context) port.StoreOutputPort {
+	return &MockStoreOutputFactoryFuncObject{}
+}
+
+func (m *MockStoreRepositoryFactoryFuncObject) GetAll() ([]*model.Store, error) {
+	args := m.Called()
+	return args.Get(0).([]*model.Store), args.Error(1)
+}
+
+func mockStoreRepositoryFactoryFunc(storeDriver gateway.StoreDriver) port.StoreRepository {
+	return &MockStoreRepositoryFactoryFuncObject{}
+}
+
+func (m *MockStoreInputFactoryFuncObject) GetStores() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -30,15 +69,25 @@ func newRouter() (echo.Context, *httptest.ResponseRecorder) {
 func TestGetStores(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
-	// expected := "{\"ResponseCode\":200,\"Message\":\"iine\",\"Stores\":[{\"Id\":1,\"Name\":\"aa\"}]}\n"
-	// stores := make([]*model.Store, 0)
-	// stores = append(stores, &model.Store{Id: 1, Name: "aa"})
 	expected := errors.New("")
 
+	// Driverだけは実体が必要
+	mockStoreDriverFactory := new(MockStoreDriverFactory)
+	mockStoreDriverFactory.On("GetStores").Return([]*db.Store{}, nil)
+
 	// InputPortのGetStoresのモックを作成
-	mockStoreInputPort := new(MockStoreInputPort)
-	mockStoreInputPort.On("GetStores").Return(expected)
-	sc := &StoreController{storeInputPort: mockStoreInputPort}
+	sc := &StoreController{
+		storeDriverFactory:     mockStoreDriverFactory,
+		storeOutputFactory:     mockStoreOutputFactoryFunc,
+		storeRepositoryFactory: mockStoreRepositoryFactoryFunc,
+	}
+
+	// newStoreInputPort.GetStores()をするためには、GetStores()を持つmockStoreInputFactoryFuncObjectがstoreInputFactoryに必要だから無名関数でreturnする必要があった
+	mockStoreInputFactoryFuncObject := new(MockStoreInputFactoryFuncObject)
+	mockStoreInputFactoryFuncObject.On("GetStores").Return(expected)
+	sc.storeInputFactory = func(repository port.StoreRepository, output port.StoreOutputPort) port.StoreInputPort {
+		return mockStoreInputFactoryFuncObject
+	}
 
 	/* Act */
 	actual := sc.GetStores(c)
@@ -48,10 +97,7 @@ func TestGetStores(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	// echoが正しく起動したか
 	assert.Equal(t, http.StatusOK, rec.Code)
-	// 指定したResponseBodyが返却されること
-	// if assert.NoError(t, actual) {
-	// assert.Equal(t, expected, rec.Body.String())
-	// }
+
 	// InputPortのGetStoresが1回呼ばれること
-	mockStoreInputPort.AssertNumberOfCalls(t, "GetStores", 1)
+	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetStores", 1)
 }
