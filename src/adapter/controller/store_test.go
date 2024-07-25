@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"gopkg.in/go-playground/validator.v9"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
@@ -59,8 +60,22 @@ func (m *MockStoreInputFactoryFuncObject) GetStores() error {
 	return args.Error(0)
 }
 
+// Validationのために必要なメソッド
+type CustomValidator struct {
+    validator *validator.Validate
+}
+
+func NewValidator() echo.Validator {
+    return &CustomValidator{validator: validator.New()}
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+    return cv.validator.Struct(i)
+}
+
 func newRouter() (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
+	e.Validator = NewValidator()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	return e.NewContext(req, rec), rec
