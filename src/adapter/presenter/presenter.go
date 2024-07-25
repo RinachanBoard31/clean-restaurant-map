@@ -3,7 +3,6 @@ package presenter
 import (
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -19,7 +18,6 @@ func NewStoreOutputPort(c echo.Context) port.StoreOutputPort {
 
 type StoreOutputJson struct {
 	Stores  []storeForPresenter `json:"stores"`
-	Message string              `json:"message"`
 }
 
 type storeForPresenter struct {
@@ -35,11 +33,6 @@ func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 			Name: v.Name,
 		})
 	}
-	output_json := &StoreOutputJson{Stores: json_stores, Message: "やったー！"}
+	output_json := &StoreOutputJson{Stores: json_stores}
 	return sp.c.JSON(http.StatusOK, output_json)
-}
-
-func (sp *StorePresenter) OutputErrors(err error) error {
-	log.Fatal(err)
-	return sp.c.JSON(http.StatusInternalServerError, err)
 }

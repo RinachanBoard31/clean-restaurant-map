@@ -28,10 +28,6 @@ func (m *MockStoreOutputPort) OutputAllStores(stores []*model.Store) error {
 
 func TestGetStores(t *testing.T) {
 	/* Arrange */
-	/* ### Repository テスト用 #################
-	expected := make([]*model.Store, 0)
-	expected = append(expected, &model.Store{Id: 1, Name: "interactor"})
-	########################################## */
 	expected := errors.New("")
 	stores := make([]*model.Store, 0)
 	stores = append(stores, &model.Store{Id: 1, Name: "interactor"})
