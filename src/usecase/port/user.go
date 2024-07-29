@@ -7,3 +7,11 @@ import (
 type UserInputPort interface {
 	CreateUser(*model.User) error
 }
+
+type UserRepository interface {
+	Create(*model.User) error
+}
+
+type UserOutputPort interface {
+	OutputCreateResult() error
+}
