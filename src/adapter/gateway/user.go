@@ -3,6 +3,7 @@ package gateway
 import (
 	"clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
+	"clean-storemap-api/src/usecase/port"
 )
 
 type UserGateway struct {
@@ -11,6 +12,12 @@ type UserGateway struct {
 
 type UserDriver interface {
 	CreateUser(*db.User) error
+}
+
+func NewUserRepository(userDriver UserDriver) port.UserRepository {
+	return &UserGateway{
+		userDriver: userDriver,
+	}
 }
 
 func (ug *UserGateway) Create(user *model.User) error {

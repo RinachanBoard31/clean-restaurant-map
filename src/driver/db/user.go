@@ -19,7 +19,7 @@ type User struct {
 }
 
 func (dbu *DbUserDriver) CreateUser(user *User) error {
-	err := DB.Create(user).Error
+	err := DB.Create(&user).Error
 	if err != nil {
 		return err
 	}

@@ -29,29 +29,56 @@ func ActivateRouter() {
 	e.Validator = NewValidator()
 	db.InitDB()
 
-	storeDriver := NewDriverFactory()
-	storeOutputPort := NewOutputFactory()
-	storeInputPort := NewInputFactory()
-	storeRepository := NewRepositoryFactory()
-	store_controller := controller.NewStoreController(storeDriver, storeOutputPort, storeInputPort, storeRepository)
+	// StoreControllerのDI
+	storeDriver := NewStoreDriverFactory()
+	storeOutputPort := NewStoreOutputFactory()
+	storeInputPort := NewStoreInputFactory()
+	storeRepository := NewStoreRepositoryFactory()
+	storeController := controller.NewStoreController(storeDriver, storeOutputPort, storeInputPort, storeRepository)
 
-	e.GET("/", store_controller.GetStores)
+	// UserControllerのDI
+	userDriver := NewUserDriverFactory()
+	userOutputPort := NewUserOutputFactory()
+	userInputPort := NewUserInputFactory()
+	userRepository := NewUserRepositoryFactory()
+	userController := controller.NewUserController(userDriver, userOutputPort, userInputPort, userRepository)
+
+	e.GET("/", storeController.GetStores)
+	e.POST("/user", userController.CreateUser)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
-func NewDriverFactory() controller.StoreDriverFactory {
+// StoreのDI
+func NewStoreDriverFactory() controller.StoreDriverFactory {
 	return &db.DbStoreDriver{}
 }
 
-func NewOutputFactory() controller.StoreOutputFactory {
+func NewStoreOutputFactory() controller.StoreOutputFactory {
 	return presenter.NewStoreOutputPort
 }
 
-func NewInputFactory() controller.StoreInputFactory {
+func NewStoreInputFactory() controller.StoreInputFactory {
 	return interactor.NewStoreInputPort
 }
 
-func NewRepositoryFactory() controller.StoreRepositoryFactory {
+func NewStoreRepositoryFactory() controller.StoreRepositoryFactory {
 	return gateway.NewStoreRepository
+}
+
+// UserのDI
+func NewUserDriverFactory() controller.UserDriverFactory {
+	return &db.DbUserDriver{}
+}
+
+func NewUserOutputFactory() controller.UserOutputFactory {
+	return presenter.NewUserOutputPort
+}
+
+func NewUserInputFactory() controller.UserInputFactory {
+	return interactor.NewUserInputPort
+}
+
+func NewUserRepositoryFactory() controller.UserRepositoryFactory {
+	return gateway.NewUserRepository
 }
