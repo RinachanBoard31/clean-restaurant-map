@@ -10,6 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"gopkg.in/go-playground/validator.v9"
+
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -59,8 +61,22 @@ func (m *MockStoreInputFactoryFuncObject) GetStores() error {
 	return args.Error(0)
 }
 
+// Validationのために必要なメソッド
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+func NewValidator() echo.Validator {
+	return &CustomValidator{validator: validator.New()}
+}
+
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
 func newRouter() (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
+	e.Validator = NewValidator()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 	return e.NewContext(req, rec), rec
@@ -97,7 +113,6 @@ func TestGetStores(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	// echoが正しく起動したか
 	assert.Equal(t, http.StatusOK, rec.Code)
-
 	// InputPortのGetStoresが1回呼ばれること
 	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetStores", 1)
 }

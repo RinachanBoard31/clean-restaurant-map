@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -16,10 +17,15 @@ func InitDB() {
 		fmt.Printf("Cannot read: %v", err)
 	}
 	dsn := os.Getenv("TESTDB_CONNECTION")
+
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
 	if err != nil {
-		panic("failed to connect database")
+		log.Fatalf("failed to connect database: %v", err)
 	}
-	DB.AutoMigrate(&Store{}) // ここで使用するすべての構造体をMigrate
+
+	// ここで使用するすべての構造体をMigrate
+	DB.AutoMigrate(&Store{})
+	DB.AutoMigrate(&User{})
 }
