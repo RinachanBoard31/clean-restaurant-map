@@ -40,18 +40,18 @@ func ActivateRouter() {
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
-func NewDriverFactory() controller.DriverFactory {
+func NewDriverFactory() controller.StoreDriverFactory {
 	return &db.DbStoreDriver{}
 }
 
-func NewOutputFactory() controller.OutputFactory {
+func NewOutputFactory() controller.StoreOutputFactory {
 	return presenter.NewStoreOutputPort
 }
 
-func NewInputFactory() controller.InputFactory {
+func NewInputFactory() controller.StoreInputFactory {
 	return interactor.NewStoreInputPort
 }
 
-func NewRepositoryFactory() controller.RepositoryFactory {
+func NewRepositoryFactory() controller.StoreRepositoryFactory {
 	return gateway.NewStoreRepository
 }

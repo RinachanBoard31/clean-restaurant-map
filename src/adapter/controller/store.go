@@ -22,19 +22,19 @@ type StoreI interface {
 	GetStores(c echo.Context) error
 }
 
-type OutputFactory func(echo.Context) port.StoreOutputPort
-type InputFactory func(port.StoreRepository, port.StoreOutputPort) port.StoreInputPort
-type RepositoryFactory func(gateway.StoreDriver) port.StoreRepository
-type DriverFactory gateway.StoreDriver
+type StoreOutputFactory func(echo.Context) port.StoreOutputPort
+type StoreInputFactory func(port.StoreRepository, port.StoreOutputPort) port.StoreInputPort
+type StoreRepositoryFactory func(gateway.StoreDriver) port.StoreRepository
+type StoreDriverFactory gateway.StoreDriver
 
 type StoreController struct {
-	storeDriverFactory     DriverFactory
-	storeOutputFactory     OutputFactory
-	storeInputFactory      InputFactory
-	storeRepositoryFactory RepositoryFactory
+	storeDriverFactory     StoreDriverFactory
+	storeOutputFactory     StoreOutputFactory
+	storeInputFactory      StoreInputFactory
+	storeRepositoryFactory StoreRepositoryFactory
 }
 
-func NewStoreController(storeDriverFactory DriverFactory, storeOutputFactory OutputFactory, storeInputFactory InputFactory, storeRepositoryFactory RepositoryFactory) StoreI {
+func NewStoreController(storeDriverFactory StoreDriverFactory, storeOutputFactory StoreOutputFactory, storeInputFactory StoreInputFactory, storeRepositoryFactory StoreRepositoryFactory) StoreI {
 	return &StoreController{
 		storeDriverFactory:     storeDriverFactory,
 		storeOutputFactory:     storeOutputFactory,
