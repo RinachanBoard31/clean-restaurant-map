@@ -27,10 +27,9 @@ func (m *MockStoreRepository) GetStores() ([]*db.Store, error) {
 
 func TestGetAll(t *testing.T) {
 	/* Arrange */
-	sg := &StoreGateway{}
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("GetStores").Return(makeDummyStores())
-	sg.storeDriver = mockStoreRepository
+	sg := &StoreGateway{storeDriver: mockStoreRepository}
 	stores := make([]*model.Store, 0)
 	stores = append(stores, &model.Store{Id: 1, Name: "サイゼリヤ"})
 	stores = append(stores, &model.Store{Id: 2, Name: "ガスト"})

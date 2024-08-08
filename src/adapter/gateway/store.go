@@ -10,6 +10,7 @@ import (
 type StoreGateway struct {
 	storeDriver StoreDriver
 }
+
 type StoreDriver interface {
 	GetStores() ([]*db.Store, error)
 }
