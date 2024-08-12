@@ -3,6 +3,7 @@ module clean-storemap-api
 go 1.22.4
 
 require (
+	github.com/google/wire v0.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/stretchr/testify v1.8.4

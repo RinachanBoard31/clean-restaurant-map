@@ -11,9 +11,13 @@ import (
 )
 
 var DB *gorm.DB
-
 func InitDB() {
-	if err := godotenv.Load(".env"); err != nil {
+	envPath := ".env"
+	// debug時の.envファイルのパス指定
+	if _, err := os.Stat(envPath); os.IsNotExist(err) {
+		envPath = "../.env"
+	}
+	if err := godotenv.Load(envPath); err != nil {
 		fmt.Printf("Cannot read: %v", err)
 	}
 	dsn := os.Getenv("TESTDB_CONNECTION")
