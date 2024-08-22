@@ -10,9 +10,11 @@ import (
 	"clean-storemap-api/src/driver/db"
 	"clean-storemap-api/src/usecase/interactor"
 	"context"
+	"os"
 
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 var echoSet = wire.NewSet(
@@ -60,6 +62,12 @@ func InitializeRouter(ctx context.Context) (RouterI, error) {
 func NewEcho() *echo.Echo {
 	e := echo.New()
 	e.Validator = NewValidator()
+	// CORS設定
+	frontUrl := os.Getenv("FRONT_URL")
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{frontUrl},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	return e
 }
 
