@@ -15,6 +15,9 @@ import (
 	"context"
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"log"
+	"os"
 )
 
 // Injectors from wire.go:
@@ -66,6 +69,14 @@ var controllerSet = wire.NewSet(controller.NewStoreController, controller.NewUse
 func NewEcho() *echo.Echo {
 	e := echo.New()
 	e.Validator = NewValidator()
+
+	frontUrl := os.Getenv("FRONT_URL")
+	log.Println("--------------------- FRONT_URL ---------------------")
+	log.Println(frontUrl)
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{frontUrl},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
 	return e
 }
 
