@@ -31,9 +31,7 @@ func ageValid(age int) error {
 }
 
 func ageFormat(age int) int {
-	if age < 0 {
-		return 0
-	}
+	// ageValidで0未満はエラーとなるので0未満は扱わない。
 	if age >= 60 {
 		return 60
 	}
@@ -65,7 +63,7 @@ func NewUser(name string, email string, age int, sex float32, gender float32) (*
 	emailValidError := emailValid(email)
 	ageValidError := ageValid(age)
 	if err := errors.Join(emailValidError, ageValidError); err != nil {
-		return &User{}, err
+		return nil, err
 	}
 	// userの作成
 	user := &User{
