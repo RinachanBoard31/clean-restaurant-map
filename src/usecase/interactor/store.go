@@ -23,3 +23,11 @@ func (si *StoreInteractor) GetStores() error {
 	}
 	return si.storeOutputPort.OutputAllStores(stores)
 }
+
+func (si *StoreInteractor) GetStoresOpeningHours() error {
+	places, err := si.storeRepository.GetOpeningHours()
+	if err != nil {
+		return err
+	}
+	return si.storeOutputPort.OutputAllStores(places)
+}

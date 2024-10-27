@@ -20,23 +20,33 @@ type StoreJson struct {
 
 type StoreI interface {
 	GetStores(c echo.Context) error
+	GetStoresOpeningHours(c echo.Context) error
 }
 
 type StoreOutputFactory func(echo.Context) port.StoreOutputPort
 type StoreInputFactory func(port.StoreRepository, port.StoreOutputPort) port.StoreInputPort
-type StoreRepositoryFactory func(gateway.StoreDriver) port.StoreRepository
+type StoreRepositoryFactory func(gateway.StoreDriver, gateway.GoogleMapDriver) port.StoreRepository
 type StoreDriverFactory gateway.StoreDriver
+type GoogleMapDriverFactory gateway.GoogleMapDriver
 
 type StoreController struct {
 	storeDriverFactory     StoreDriverFactory
+	googleMapDriverFactory GoogleMapDriverFactory
 	storeOutputFactory     StoreOutputFactory
 	storeInputFactory      StoreInputFactory
 	storeRepositoryFactory StoreRepositoryFactory
 }
 
-func NewStoreController(storeDriverFactory StoreDriverFactory, storeOutputFactory StoreOutputFactory, storeInputFactory StoreInputFactory, storeRepositoryFactory StoreRepositoryFactory) StoreI {
+func NewStoreController(
+	storeDriverFactory StoreDriverFactory,
+	googleMapDriverFactory GoogleMapDriverFactory,
+	storeOutputFactory StoreOutputFactory,
+	storeInputFactory StoreInputFactory,
+	storeRepositoryFactory StoreRepositoryFactory,
+) StoreI {
 	return &StoreController{
 		storeDriverFactory:     storeDriverFactory,
+		googleMapDriverFactory: googleMapDriverFactory,
 		storeOutputFactory:     storeOutputFactory,
 		storeInputFactory:      storeInputFactory,
 		storeRepositoryFactory: storeRepositoryFactory,
@@ -47,11 +57,16 @@ func (sc *StoreController) GetStores(c echo.Context) error {
 	return sc.newStoreInputPort(c).GetStores()
 }
 
+func (sc *StoreController) GetStoresOpeningHours(c echo.Context) error {
+	return sc.newStoreInputPort(c).GetStoresOpeningHours()
+}
+
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */
 /* これによって、presenterのinterface(outputport)にecho.Contextを書かなくて良くなる */
 func (sc *StoreController) newStoreInputPort(c echo.Context) port.StoreInputPort {
 	storeOutputPort := sc.storeOutputFactory(c)
 	storeDriver := sc.storeDriverFactory
-	storeRepository := sc.storeRepositoryFactory(storeDriver)
+	googleMapDriver := sc.googleMapDriverFactory
+	storeRepository := sc.storeRepositoryFactory(storeDriver, googleMapDriver)
 	return sc.storeInputFactory(storeRepository, storeOutputPort)
 }
