@@ -31,11 +31,6 @@ func (m *MockStoreOutputPort) OutputAllStores(stores []*model.Store) error {
 	return args.Error(0)
 }
 
-func (m *MockStoreOutputPort) OutputStoresOpeningHours(stores []*model.Store) error {
-	args := m.Called(stores)
-	return args.Error(0)
-}
-
 func TestGetStores(t *testing.T) {
 	/* Arrange */
 	expected := errors.New("")

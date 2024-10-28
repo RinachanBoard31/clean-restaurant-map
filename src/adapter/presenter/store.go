@@ -40,17 +40,3 @@ func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 	output_json := &StoreOutputJson{Stores: json_stores}
 	return sp.c.JSON(http.StatusOK, output_json)
 }
-
-func (sp *StorePresenter) OutputStoresOpeningHours(stores []*model.Store) error {
-	json_stores := make([]storeForPresenter, 0)
-	for _, v := range stores {
-		json_stores = append(json_stores, storeForPresenter{
-			Id:                  v.Id,
-			Name:                v.Name,
-			RegularOpeningHours: v.RegularOpeningHours,
-			PriceLevel:          v.PriceLevel,
-		})
-	}
-	output_json := &StoreOutputJson{Stores: json_stores}
-	return sp.c.JSON(http.StatusOK, output_json)
-}
