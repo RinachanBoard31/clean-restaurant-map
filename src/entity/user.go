@@ -14,6 +14,10 @@ type User struct {
 	Gender float32 // -1.0(男性)~1.0(女性)で表現する。中性、無回答は0となる。
 }
 
+type UserCredentials struct {
+	Email string
+}
+
 func emailValid(email string) error {
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	re := regexp.MustCompile(emailRegex)
@@ -72,6 +76,19 @@ func NewUser(name string, email string, age int, sex float32, gender float32) (*
 		Age:    ageFormat(age),
 		Sex:    sexFormat(sex),
 		Gender: genderFormat(gender),
+	}
+	return user, nil
+}
+
+func NewUserCredentials(email string) (*UserCredentials, error) {
+	// バリデーションのチェック
+	emailValidError := emailValid(email)
+	if err := errors.Join(emailValidError); err != nil {
+		return &UserCredentials{}, err
+	}
+	// userCreditialsの作成
+	user := &UserCredentials{
+		Email: email,
 	}
 	return user, nil
 }

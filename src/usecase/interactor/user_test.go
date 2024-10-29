@@ -26,6 +26,16 @@ func (m *MockUserOutputPort) OutputCreateResult() error {
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) Check(user *model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputPort) OutputCheckResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func TestCreateUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
@@ -48,4 +58,28 @@ func TestCreateUser(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
 	// OutputPortのOutputCreateResult()が1回呼ばれること
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputCreateResult", 1)
+}
+
+func TestCheckUser(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	user := &model.UserCredentials{Email: "test@example.com"}
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("Check").Return(nil)
+	mockUserOutputPort := new(MockUserOutputPort)
+	mockUserOutputPort.On("OutputCheckResult").Return(nil)
+
+	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
+
+	/* Act */
+	actual := ui.CheckUser(user)
+
+	/* Assert */
+	// CheckUser()がOutputCheckResult()を返すこと
+	assert.Equal(t, expected, actual)
+	// RepositoryのCheckが1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "Check", 1)
+	// OutputPortのOutputCheckResult()が1回呼ばれること
+	mockUserOutputPort.AssertNumberOfCalls(t, "OutputCheckResult", 1)
 }

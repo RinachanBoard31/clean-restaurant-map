@@ -63,7 +63,22 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserInputPort) CreateUser(*model.User) error {
+func (m *MockUserDriverFactory) CheckUser(*db.User) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputCheckResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserRepositoryFactoryFuncObject) Check(*model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserInputFactoryFuncObject) CheckUser(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -106,4 +121,44 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	// InputPortのCreateUserが1回呼ばれること
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "CreateUser", 1)
+}
+
+func TestCheckUser(t *testing.T) {
+	/* Arrange */
+	c, rec := newRouter()
+	var expected error = nil
+	// デフォルトでリクエストメソッドがGETのため、POSTに変更。こういうPOSTリクエストが来たことにする
+	reqBody := `{"email":"johnathan@example.com"}`
+	req := httptest.NewRequest(http.MethodPost, "/user/check", bytes.NewBufferString(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
+
+	// Driverだけは実体が必要
+	mockUserDriverFactory := new(MockUserDriverFactory)
+	mockUserDriverFactory.On("CheckUser").Return(true)
+
+	// InputPortのCheckUserのモックを作成
+	uc := &UserController{
+		userDriverFactory:     mockUserDriverFactory,
+		userOutputFactory:     mockUserOutputFactoryFunc,
+		userRepositoryFactory: mockUserRepositoryFactoryFunc,
+	}
+
+	// newUserInputPort.CheckUser()をするためには、CheckUser()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
+	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
+	mockUserInputFactoryFuncObject.On("CheckUser").Return(expected)
+	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
+		return mockUserInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := uc.CheckUser(c)
+
+	/* Assert */
+	// uc.CheckUser()がUserInputPort.CheckUser()を返すこと
+	assert.Equal(t, expected, actual)
+	// echoが正しく起動したか
+	assert.Equal(t, http.StatusOK, rec.Code)
+	// InputPortのCheckUserが1回呼ばれること
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "CheckUser", 1)
 }

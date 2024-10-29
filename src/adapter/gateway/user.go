@@ -33,3 +33,7 @@ func (ug *UserGateway) Create(user *model.User) error {
 	}
 	return nil
 }
+
+func (ug *UserGateway) Check(user *model.UserCredentials) error {
+	return nil
+}

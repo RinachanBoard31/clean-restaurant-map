@@ -26,3 +26,13 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	}
 	return nil
 }
+
+func (ui *UserInteractor) CheckUser(user *model.UserCredentials) error {
+	if err := ui.userRepository.Check(user); err != nil {
+		return err
+	}
+	if err := ui.userOutputPort.OutputCheckResult(); err != nil {
+		return err
+	}
+	return nil
+}
