@@ -4,6 +4,7 @@ import (
 	"clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
+	"errors"
 )
 
 type UserGateway struct {
@@ -12,6 +13,7 @@ type UserGateway struct {
 
 type UserDriver interface {
 	CreateUser(*db.User) error
+	CheckUser(string) error
 }
 
 func NewUserRepository(userDriver UserDriver) port.UserRepository {
@@ -35,5 +37,8 @@ func (ug *UserGateway) Create(user *model.User) error {
 }
 
 func (ug *UserGateway) Check(user *model.UserCredentials) error {
+	if err := ug.userDriver.CheckUser(user.Email); err != nil {
+		return errors.New("emailが異なっています。")
+	}
 	return nil
 }

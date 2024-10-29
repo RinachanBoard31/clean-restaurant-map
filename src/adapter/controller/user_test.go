@@ -63,7 +63,7 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserDriverFactory) CheckUser(*db.User) error {
+func (m *MockUserDriverFactory) CheckUser(string) error {
 	args := m.Called()
 	return args.Error(0)
 }

@@ -80,7 +80,11 @@ func (uc *UserController) CheckUser(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return uc.newUserInputPort(c).CheckUser(user)
+
+	if err := uc.newUserInputPort(c).CheckUser(user); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return nil
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */
