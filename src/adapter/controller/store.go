@@ -20,7 +20,7 @@ type StoreJson struct {
 
 type StoreI interface {
 	GetStores(c echo.Context) error
-	GetStoresOpeningHours(c echo.Context) error
+	GetNearStores(c echo.Context) error
 }
 
 type StoreOutputFactory func(echo.Context) port.StoreOutputPort
@@ -57,8 +57,8 @@ func (sc *StoreController) GetStores(c echo.Context) error {
 	return sc.newStoreInputPort(c).GetStores()
 }
 
-func (sc *StoreController) GetStoresOpeningHours(c echo.Context) error {
-	return sc.newStoreInputPort(c).GetStoresOpeningHours()
+func (sc *StoreController) GetNearStores(c echo.Context) error {
+	return sc.newStoreInputPort(c).GetNearStores()
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

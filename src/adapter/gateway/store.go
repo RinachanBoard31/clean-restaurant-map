@@ -46,7 +46,7 @@ func (sg *StoreGateway) GetAll() ([]*model.Store, error) {
 	return stores, nil
 }
 
-func (sg *StoreGateway) GetOpeningHours() ([]*model.Store, error) {
+func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 	apiStores, err := sg.googleMapDriver.GetStores()
 	if err != nil {
 		return nil, err

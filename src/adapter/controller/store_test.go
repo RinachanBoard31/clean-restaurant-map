@@ -62,7 +62,7 @@ func (m *MockStoreRepositoryFactoryFuncObject) GetAll() ([]*model.Store, error) 
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepositoryFactoryFuncObject) GetOpeningHours() ([]*model.Store, error) {
+func (m *MockStoreRepositoryFactoryFuncObject) GetNearStores() ([]*model.Store, error) {
 	args := m.Called()
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
@@ -76,7 +76,7 @@ func (m *MockStoreInputFactoryFuncObject) GetStores() error {
 	return args.Error(0)
 }
 
-func (m *MockStoreInputFactoryFuncObject) GetStoresOpeningHours() error {
+func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -137,7 +137,7 @@ func TestGetStores(t *testing.T) {
 	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetStores", 1)
 }
 
-func TestGetStoresOpeningHours(t *testing.T) {
+func TestGetNearStores(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	expected := errors.New("")
@@ -152,16 +152,16 @@ func TestGetStoresOpeningHours(t *testing.T) {
 	}
 
 	mockStoreInputFactoryFuncObject := new(MockStoreInputFactoryFuncObject)
-	mockStoreInputFactoryFuncObject.On("GetStoresOpeningHours").Return(expected)
+	mockStoreInputFactoryFuncObject.On("GetNearStores").Return(expected)
 	sc.storeInputFactory = func(repository port.StoreRepository, output port.StoreOutputPort) port.StoreInputPort {
 		return mockStoreInputFactoryFuncObject
 	}
 
 	/* Act */
-	actual := sc.GetStoresOpeningHours(c)
+	actual := sc.GetNearStores(c)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetStoresOpeningHours", 1)
+	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetNearStores", 1)
 }

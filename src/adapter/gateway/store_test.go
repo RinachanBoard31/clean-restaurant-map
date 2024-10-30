@@ -98,7 +98,7 @@ func TestGetAll(t *testing.T) {
 	mockStoreRepository.AssertNumberOfCalls(t, "GetStores", 1)
 }
 
-func TestGetOpeningHours(t *testing.T) {
+func TestGetNearStores(t *testing.T) {
 	/* Arrange */
 	mockGoogleMapRepository := new(MockGoogleMapRepository)
 	mockGoogleMapRepository.On("GetStores").Return(makeDummyApiStores())
@@ -122,7 +122,7 @@ func TestGetOpeningHours(t *testing.T) {
 	expected := stores
 
 	/* Act */
-	actual, _ := sg.GetOpeningHours()
+	actual, _ := sg.GetNearStores()
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

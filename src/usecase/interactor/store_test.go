@@ -21,7 +21,7 @@ func (m *MockStoreRepository) GetAll() ([]*model.Store, error) {
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepository) GetOpeningHours() ([]*model.Store, error) {
+func (m *MockStoreRepository) GetNearStores() ([]*model.Store, error) {
 	args := m.Called()
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
@@ -66,7 +66,7 @@ func TestGetStores(t *testing.T) {
 	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
 }
 
-func TestGetStoresOpeningHours(t *testing.T) {
+func TestGetNearStores(t *testing.T) {
 	/* Arrange */
 	expected := errors.New("")
 	stores := make([]*model.Store, 0)
@@ -81,18 +81,18 @@ func TestGetStoresOpeningHours(t *testing.T) {
 	)
 
 	mockStoreRepository := new(MockStoreRepository)
-	mockStoreRepository.On("GetOpeningHours").Return(stores, nil)
+	mockStoreRepository.On("GetNearStores").Return(stores, nil)
 	mockStoreOutputPort := new(MockStoreOutputPort)
 	mockStoreOutputPort.On("OutputAllStores", stores).Return(expected)
 
 	si := &StoreInteractor{storeRepository: mockStoreRepository, storeOutputPort: mockStoreOutputPort}
 
 	/* Act */
-	actual := si.GetStoresOpeningHours()
+	actual := si.GetNearStores()
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
-	mockStoreRepository.AssertNumberOfCalls(t, "GetOpeningHours", 1)
+	mockStoreRepository.AssertNumberOfCalls(t, "GetNearStores", 1)
 	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputAllStores", 1)
 	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
 }
