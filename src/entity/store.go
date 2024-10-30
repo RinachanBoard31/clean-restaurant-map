@@ -1,6 +1,8 @@
 package model
 
 type Store struct {
-	Id   int
-	Name string
+	Id                  string
+	Name                string
+	RegularOpeningHours string
+	PriceLevel          string
 }

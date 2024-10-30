@@ -7,6 +7,7 @@ import (
 	controller "clean-storemap-api/src/adapter/controller"
 	"clean-storemap-api/src/adapter/gateway"
 	"clean-storemap-api/src/adapter/presenter"
+	"clean-storemap-api/src/driver/api"
 	"clean-storemap-api/src/driver/db"
 	"clean-storemap-api/src/usecase/interactor"
 	"context"
@@ -24,6 +25,7 @@ var echoSet = wire.NewSet(
 var driverSet = wire.NewSet(
 	NewStoreDriverFactory,
 	NewUserDriverFactory,
+	NewGoogleMapDriverFactory,
 )
 
 var inputPortSet = wire.NewSet(
@@ -74,6 +76,10 @@ func NewEcho() *echo.Echo {
 // StoreのDI
 func NewStoreDriverFactory() controller.StoreDriverFactory {
 	return &db.DbStoreDriver{}
+}
+
+func NewGoogleMapDriverFactory() controller.GoogleMapDriverFactory {
+	return &api.ApiGoogleMapDriver{}
 }
 
 func NewStoreOutputFactory() controller.StoreOutputFactory {

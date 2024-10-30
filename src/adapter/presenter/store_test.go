@@ -2,12 +2,14 @@ package presenter
 
 import (
 	model "clean-storemap-api/src/entity"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"net/http"
+	"net/http/httptest"
+
 	"github.com/stretchr/testify/assert"
+
+	"github.com/labstack/echo/v4"
 )
 
 func newRouter() (echo.Context, *httptest.ResponseRecorder) {
@@ -20,9 +22,17 @@ func newRouter() (echo.Context, *httptest.ResponseRecorder) {
 
 func TestOutputAllStores(t *testing.T) {
 	/* Arrange */
-	expected := "{\"stores\":[{\"id\":1,\"name\":\"aa\"}]}\n"
+	expected := "{\"stores\":[{\"id\":\"Id001\",\"name\":\"UEC cafe\",\"regularOpeningHours\":\"Sat: 06:00 - 22:00, Sun: 06:00 - 22:00\",\"priceLevel\":\"PRICE_LEVEL_MODERATE\"}]}\n"
 	stores := make([]*model.Store, 0)
-	stores = append(stores, &model.Store{Id: 1, Name: "aa"})
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id001",
+			Name:                "UEC cafe",
+			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+			PriceLevel:          "PRICE_LEVEL_MODERATE",
+		},
+	)
 	c, rec := newRouter()
 	sp := &StorePresenter{c: c}
 
