@@ -16,6 +16,8 @@ type Store struct {
 	Name                string
 	RegularOpeningHours string
 	PriceLevel          string
+	Latitude            string
+	Longitude           string
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 }

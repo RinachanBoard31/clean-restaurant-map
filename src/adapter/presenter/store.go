@@ -20,11 +20,17 @@ type StoreOutputJson struct {
 	Stores []storeForPresenter `json:"stores"`
 }
 
+type locationForPresenter struct {
+	Latitude  string `json:"latitude"`
+	Longitude string `json:"longitude"`
+}
+
 type storeForPresenter struct {
-	Id                  string `json:"id"`
-	Name                string `json:"name"`
-	RegularOpeningHours string `json:"regularOpeningHours"`
-	PriceLevel          string `json:"priceLevel"`
+	Id                  string               `json:"id"`
+	Name                string               `json:"name"`
+	RegularOpeningHours string               `json:"regularOpeningHours"`
+	PriceLevel          string               `json:"priceLevel"`
+	Location            locationForPresenter `json:"location"`
 }
 
 func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
@@ -35,6 +41,10 @@ func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 			Name:                v.Name,
 			RegularOpeningHours: v.RegularOpeningHours,
 			PriceLevel:          v.PriceLevel,
+			Location: locationForPresenter{
+				Latitude:  v.Location.Lat,
+				Longitude: v.Location.Lng,
+			},
 		})
 	}
 	output_json := &StoreOutputJson{Stores: json_stores}

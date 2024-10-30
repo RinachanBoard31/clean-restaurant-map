@@ -22,7 +22,7 @@ func newRouter() (echo.Context, *httptest.ResponseRecorder) {
 
 func TestOutputAllStores(t *testing.T) {
 	/* Arrange */
-	expected := "{\"stores\":[{\"id\":\"Id001\",\"name\":\"UEC cafe\",\"regularOpeningHours\":\"Sat: 06:00 - 22:00, Sun: 06:00 - 22:00\",\"priceLevel\":\"PRICE_LEVEL_MODERATE\"}]}\n"
+	expected := "{\"stores\":[{\"id\":\"Id001\",\"name\":\"UEC cafe\",\"regularOpeningHours\":\"Sat: 06:00 - 22:00, Sun: 06:00 - 22:00\",\"priceLevel\":\"PRICE_LEVEL_MODERATE\",\"location\":{\"latitude\":\"35.713\",\"longitude\":\"139.762\"}}]}\n"
 	stores := make([]*model.Store, 0)
 	stores = append(
 		stores,
@@ -31,6 +31,7 @@ func TestOutputAllStores(t *testing.T) {
 			Name:                "UEC cafe",
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 		},
 	)
 	c, rec := newRouter()
