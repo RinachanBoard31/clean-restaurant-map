@@ -17,20 +17,24 @@ func NewStoreOutputPort(c echo.Context) port.StoreOutputPort {
 }
 
 type StoreOutputJson struct {
-	Stores  []storeForPresenter `json:"stores"`
+	Stores []storeForPresenter `json:"stores"`
 }
 
 type storeForPresenter struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
+	Id                  string `json:"id"`
+	Name                string `json:"name"`
+	RegularOpeningHours string `json:"regularOpeningHours"`
+	PriceLevel          string `json:"priceLevel"`
 }
 
 func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 	json_stores := make([]storeForPresenter, 0)
 	for _, v := range stores {
 		json_stores = append(json_stores, storeForPresenter{
-			Id:   v.Id,
-			Name: v.Name,
+			Id:                  v.Id,
+			Name:                v.Name,
+			RegularOpeningHours: v.RegularOpeningHours,
+			PriceLevel:          v.PriceLevel,
 		})
 	}
 	output_json := &StoreOutputJson{Stores: json_stores}

@@ -10,13 +10,13 @@ import (
 	"clean-storemap-api/src/adapter/controller"
 	"clean-storemap-api/src/adapter/gateway"
 	"clean-storemap-api/src/adapter/presenter"
+	"clean-storemap-api/src/driver/api"
 	"clean-storemap-api/src/driver/db"
 	"clean-storemap-api/src/usecase/interactor"
 	"context"
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"log"
 	"os"
 )
 
@@ -25,10 +25,11 @@ import (
 func InitializeRouter(ctx context.Context) (RouterI, error) {
 	echo := NewEcho()
 	storeDriverFactory := NewStoreDriverFactory()
+	googleMapDriverFactory := NewGoogleMapDriverFactory()
 	storeOutputFactory := NewStoreOutputFactory()
 	storeInputFactory := NewStoreInputFactory()
 	storeRepositoryFactory := NewStoreRepositoryFactory()
-	storeI := controller.NewStoreController(storeDriverFactory, storeOutputFactory, storeInputFactory, storeRepositoryFactory)
+	storeI := controller.NewStoreController(storeDriverFactory, googleMapDriverFactory, storeOutputFactory, storeInputFactory, storeRepositoryFactory)
 	userDriverFactory := NewUserDriverFactory()
 	userOutputFactory := NewUserOutputFactory()
 	userInputFactory := NewUserInputFactory()
@@ -47,6 +48,7 @@ var echoSet = wire.NewSet(
 var driverSet = wire.NewSet(
 	NewStoreDriverFactory,
 	NewUserDriverFactory,
+	NewGoogleMapDriverFactory,
 )
 
 var inputPortSet = wire.NewSet(
@@ -71,8 +73,6 @@ func NewEcho() *echo.Echo {
 	e.Validator = NewValidator()
 
 	frontUrl := os.Getenv("FRONT_URL")
-	log.Println("--------------------- FRONT_URL ---------------------")
-	log.Println(frontUrl)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{frontUrl},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
@@ -83,6 +83,10 @@ func NewEcho() *echo.Echo {
 // StoreのDI
 func NewStoreDriverFactory() controller.StoreDriverFactory {
 	return &db.DbStoreDriver{}
+}
+
+func NewGoogleMapDriverFactory() controller.GoogleMapDriverFactory {
+	return &api.ApiGoogleMapDriver{}
 }
 
 func NewStoreOutputFactory() controller.StoreOutputFactory {

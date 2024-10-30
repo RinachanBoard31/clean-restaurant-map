@@ -21,6 +21,11 @@ func (m *MockStoreRepository) GetAll() ([]*model.Store, error) {
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
+func (m *MockStoreRepository) GetNearStores() ([]*model.Store, error) {
+	args := m.Called()
+	return args.Get(0).([]*model.Store), args.Error(1)
+}
+
 func (m *MockStoreOutputPort) OutputAllStores(stores []*model.Store) error {
 	args := m.Called(stores)
 	return args.Error(0)
@@ -30,7 +35,15 @@ func TestGetStores(t *testing.T) {
 	/* Arrange */
 	expected := errors.New("")
 	stores := make([]*model.Store, 0)
-	stores = append(stores, &model.Store{Id: 1, Name: "interactor"})
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id001",
+			Name:                "UEC cafe",
+			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+			PriceLevel:          "PRICE_LEVEL_MODERATE",
+		},
+	)
 
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("GetAll").Return(stores, nil)
@@ -50,5 +63,36 @@ func TestGetStores(t *testing.T) {
 	// OutputPortのOutputAllStoresが1回呼ばれること
 	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputAllStores", 1)
 	// OutputPortのOutputAllStoresがstoresを引数として呼ばれること
+	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
+}
+
+func TestGetNearStores(t *testing.T) {
+	/* Arrange */
+	expected := errors.New("")
+	stores := make([]*model.Store, 0)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id001",
+			Name:                "UEC cafe",
+			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+			PriceLevel:          "PRICE_LEVEL_MODERATE",
+		},
+	)
+
+	mockStoreRepository := new(MockStoreRepository)
+	mockStoreRepository.On("GetNearStores").Return(stores, nil)
+	mockStoreOutputPort := new(MockStoreOutputPort)
+	mockStoreOutputPort.On("OutputAllStores", stores).Return(expected)
+
+	si := &StoreInteractor{storeRepository: mockStoreRepository, storeOutputPort: mockStoreOutputPort}
+
+	/* Act */
+	actual := si.GetNearStores()
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockStoreRepository.AssertNumberOfCalls(t, "GetNearStores", 1)
+	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputAllStores", 1)
 	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
 }

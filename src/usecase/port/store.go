@@ -6,10 +6,12 @@ import (
 
 type StoreInputPort interface {
 	GetStores() error
+	GetNearStores() error
 }
 
 type StoreRepository interface {
 	GetAll() ([]*model.Store, error)
+	GetNearStores() ([]*model.Store, error)
 }
 
 type StoreOutputPort interface {

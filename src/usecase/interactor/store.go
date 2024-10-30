@@ -23,3 +23,11 @@ func (si *StoreInteractor) GetStores() error {
 	}
 	return si.storeOutputPort.OutputAllStores(stores)
 }
+
+func (si *StoreInteractor) GetNearStores() error {
+	places, err := si.storeRepository.GetNearStores()
+	if err != nil {
+		return err
+	}
+	return si.storeOutputPort.OutputAllStores(places)
+}
