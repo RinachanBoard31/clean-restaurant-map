@@ -13,7 +13,7 @@ type UserGateway struct {
 
 type UserDriver interface {
 	CreateUser(*db.User) error
-	CheckUser(string) error
+	FindUserByEmail(string) error
 }
 
 func NewUserRepository(userDriver UserDriver) port.UserRepository {
@@ -36,8 +36,8 @@ func (ug *UserGateway) Create(user *model.User) error {
 	return nil
 }
 
-func (ug *UserGateway) Check(user *model.UserCredentials) error {
-	if err := ug.userDriver.CheckUser(user.Email); err != nil {
+func (ug *UserGateway) FindUserByUserCredentials(user *model.UserCredentials) error {
+	if err := ug.userDriver.FindUserByEmail(user.Email); err != nil {
 		return errors.New("emailが異なっています。")
 	}
 	return nil

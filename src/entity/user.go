@@ -86,7 +86,6 @@ func NewUserCredentials(email string) (*UserCredentials, error) {
 	if err := errors.Join(emailValidError); err != nil {
 		return &UserCredentials{}, err
 	}
-	// userCreditialsの作成
 	user := &UserCredentials{
 		Email: email,
 	}

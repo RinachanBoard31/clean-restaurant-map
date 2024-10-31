@@ -29,9 +29,9 @@ $ curl http://localhost:8080
 $ curl -H "Content-Type: application/json" -X POST -d "@example/create_user_api_example.json" http://localhost:8080/user
 ```
 
-### Check user
-- dbにcheck_user_api_example.jsonに記載されているemailがある => {}
-- dbにcheck_user_api_example.jsonに記載されているemailがない => エラーメッセージとなる
+### Login user
+- dbにlogin_user_api_example.jsonに記載されているemailがある => {}
+- dbにlogin_user_api_example.jsonに記載されているemailがない => エラーメッセージとなる
 ```
-$ curl -H "Content-Type: application/json" -X POST -d "@example/check_user_api_example.json" http://localhost:8080/user-check
+$ curl -H "Content-Type: application/json" -X POST -d "@example/login_user_api_example.json" http://localhost:8080/login
 ```

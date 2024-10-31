@@ -13,7 +13,7 @@ import (
 
 type UserI interface {
 	CreateUser(c echo.Context) error
-	CheckUser(c echo.Context) error
+	LoginUser(c echo.Context) error
 }
 
 type UserOutputFactory func(echo.Context) port.UserOutputPort
@@ -67,7 +67,7 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 	return uc.newUserInputPort(c).CreateUser(user)
 }
 
-func (uc *UserController) CheckUser(c echo.Context) error {
+func (uc *UserController) LoginUser(c echo.Context) error {
 	// UserCredentialsの値を受け取りuserが既に登録されているかを確かめるキー用の型を作成する
 	var u UserCredentialsRequestBody
 	if err := c.Bind(&u); err != nil {
@@ -81,7 +81,7 @@ func (uc *UserController) CheckUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := uc.newUserInputPort(c).CheckUser(user); err != nil {
+	if err := uc.newUserInputPort(c).LoginUser(user); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return nil

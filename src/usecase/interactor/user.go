@@ -27,11 +27,11 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	return nil
 }
 
-func (ui *UserInteractor) CheckUser(user *model.UserCredentials) error {
-	if err := ui.userRepository.Check(user); err != nil {
+func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
+	if err := ui.userRepository.FindUserByUserCredentials(user); err != nil {
 		return err
 	}
-	if err := ui.userOutputPort.OutputCheckResult(); err != nil {
+	if err := ui.userOutputPort.OutputLoginResult(); err != nil {
 		return err
 	}
 	return nil
