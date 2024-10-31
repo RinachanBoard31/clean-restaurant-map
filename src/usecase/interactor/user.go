@@ -3,6 +3,7 @@ package interactor
 import (
 	model "clean-storemap-api/src/entity"
 	port "clean-storemap-api/src/usecase/port"
+	"errors"
 )
 
 type UserInteractor struct {
@@ -29,7 +30,7 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 
 func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
 	if err := ui.userRepository.FindUserByUserCredentials(user); err != nil {
-		return err
+		return errors.New("Loginできません。")
 	}
 	if err := ui.userOutputPort.OutputLoginResult(); err != nil {
 		return err
