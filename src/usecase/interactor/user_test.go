@@ -26,7 +26,7 @@ func (m *MockUserOutputPort) OutputCreateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) FindUserByUserCredentials(user *model.UserCredentials) error {
+func (m *MockUserRepository) FindBy(user *model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -66,7 +66,7 @@ func TestLoginUser(t *testing.T) {
 	user := &model.UserCredentials{Email: "test@example.com"}
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindUserByUserCredentials").Return(nil)
+	mockUserRepository.On("FindBy").Return(nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputLoginResult").Return(nil)
 
@@ -78,8 +78,8 @@ func TestLoginUser(t *testing.T) {
 	/* Assert */
 	// LoginUser()がOutputLoginResult()を返すこと
 	assert.Equal(t, expected, actual)
-	// RepositoryのFindUserByUserCredentials()が1回呼ばれること
-	mockUserRepository.AssertNumberOfCalls(t, "FindUserByUserCredentials", 1)
+	// RepositoryのFindBy()が1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "FindBy", 1)
 	// OutputPortのOutputLoginResult()が1回呼ばれること
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputLoginResult", 1)
 }

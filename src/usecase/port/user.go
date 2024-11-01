@@ -11,7 +11,7 @@ type UserInputPort interface {
 
 type UserRepository interface {
 	Create(*model.User) error
-	FindUserByUserCredentials(*model.UserCredentials) error
+	FindBy(*model.UserCredentials) error
 }
 
 type UserOutputPort interface {

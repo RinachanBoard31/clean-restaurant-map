@@ -63,7 +63,7 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserDriverFactory) FindUserByEmail(string) error {
+func (m *MockUserDriverFactory) FindByEmail(string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -73,7 +73,7 @@ func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) FindUserByUserCredentials(*model.UserCredentials) error {
+func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -135,7 +135,7 @@ func TestLoginUser(t *testing.T) {
 
 	// Driverだけは実体が必要
 	mockUserDriverFactory := new(MockUserDriverFactory)
-	mockUserDriverFactory.On("FindUserByEmail").Return(true)
+	mockUserDriverFactory.On("FindByEmail").Return(true)
 
 	// InputPortのCheckUserのモックを作成
 	uc := &UserController{

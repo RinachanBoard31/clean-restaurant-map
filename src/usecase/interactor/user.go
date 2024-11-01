@@ -29,7 +29,7 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 }
 
 func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
-	if err := ui.userRepository.FindUserByUserCredentials(user); err != nil {
+	if err := ui.userRepository.FindBy(user); err != nil {
 		return errors.New("Loginできません。")
 	}
 	if err := ui.userOutputPort.OutputLoginResult(); err != nil {

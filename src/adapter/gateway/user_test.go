@@ -18,7 +18,7 @@ func (m *MockUserRepository) CreateUser(*db.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) FindUserByEmail(string) error {
+func (m *MockUserRepository) FindByEmail(string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -51,18 +51,18 @@ func TestCheckCredentials(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindUserByEmail").Return(nil)
+	mockUserRepository.On("FindByEmail").Return(nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 	user := &model.UserCredentials{
 		Email: "noiman@groovex.co.jp",
 	}
 
 	/* Act */
-	actual := ug.FindUserByUserCredentials(user)
+	actual := ug.FindBy(user)
 
 	/* Assert */
 	// 返り値が正しいこと
 	assert.Equal(t, expected, actual)
-	// userDriver.FindUserByEmail()が1回呼ばれること
-	mockUserRepository.AssertNumberOfCalls(t, "FindUserByEmail", 1)
+	// userDriver.FindByEmail()が1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
 }
