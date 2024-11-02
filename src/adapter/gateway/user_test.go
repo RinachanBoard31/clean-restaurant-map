@@ -18,6 +18,11 @@ func (m *MockUserRepository) CreateUser(*db.User) error {
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) GenerateUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
+
 func TestCreate(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
@@ -40,4 +45,21 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	// userDriver.CreateUser()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "CreateUser", 1)
+}
+
+func TestGenerateGoogleAuthUrl(t *testing.T) {
+	/* Arrange */
+	expected := "https://www.google.com"
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("GenerateUrl").Return(expected)
+	ug := &UserGateway{
+		googleOAuthDriver: mockUserRepository,
+	}
+
+	/* Act */
+	actual := ug.GenerateGoogleAuthUrl()
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "GenerateUrl", 1)
 }

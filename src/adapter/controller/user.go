@@ -13,18 +13,21 @@ import (
 
 type UserI interface {
 	CreateUser(c echo.Context) error
+	GetGoogleAuthUrl(c echo.Context) error
 }
 
 type UserOutputFactory func(echo.Context) port.UserOutputPort
 type UserInputFactory func(port.UserRepository, port.UserOutputPort) port.UserInputPort
-type UserRepositoryFactory func(gateway.UserDriver) port.UserRepository
+type UserRepositoryFactory func(gateway.UserDriver, gateway.GoogleOAuthDriver) port.UserRepository
 type UserDriverFactory gateway.UserDriver
+type GoogleOAuthDriverFactory gateway.GoogleOAuthDriver
 
 type UserController struct {
-	userDriverFactory     UserDriverFactory
-	userOutputFactory     UserOutputFactory
-	userInputFactory      UserInputFactory
-	userRepositoryFactory UserRepositoryFactory
+	userDriverFactory        UserDriverFactory
+	googleOAuthDriverFactory GoogleOAuthDriverFactory
+	userOutputFactory        UserOutputFactory
+	userInputFactory         UserInputFactory
+	userRepositoryFactory    UserRepositoryFactory
 }
 
 // 0が存在しないとして扱われるため数字型(int, float32)にvalidate:"required"を使用していない。(requiredがなくても型確認はされます。)
@@ -38,12 +41,19 @@ type UserRequestBody struct {
 	Gender float32 `json:"gender"`
 }
 
-func NewUserController(userDriverFactory UserDriverFactory, userOutputFactory UserOutputFactory, userInputFactory UserInputFactory, userRepositoryFactory UserRepositoryFactory) UserI {
+func NewUserController(
+	userDriverFactory UserDriverFactory,
+	googleOAuthDriverFactory GoogleOAuthDriverFactory,
+	userOutputFactory UserOutputFactory,
+	userInputFactory UserInputFactory,
+	userRepositoryFactory UserRepositoryFactory,
+) UserI {
 	return &UserController{
-		userDriverFactory:     userDriverFactory,
-		userOutputFactory:     userOutputFactory,
-		userInputFactory:      userInputFactory,
-		userRepositoryFactory: userRepositoryFactory,
+		userDriverFactory:        userDriverFactory,
+		googleOAuthDriverFactory: googleOAuthDriverFactory,
+		userOutputFactory:        userOutputFactory,
+		userInputFactory:         userInputFactory,
+		userRepositoryFactory:    userRepositoryFactory,
 	}
 }
 
@@ -62,11 +72,17 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 	return uc.newUserInputPort(c).CreateUser(user)
 }
 
+func (uc *UserController) GetGoogleAuthUrl(c echo.Context) error {
+	url := uc.newUserInputPort(c).GetGoogleAuthUrl()
+	return c.Redirect(http.StatusFound, url) // 認証ページへのリダイレクトを行う
+}
+
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */
 /* これによって、presenterのinterface(outputport)にecho.Contextを書かなくて良くなる */
 func (uc *UserController) newUserInputPort(c echo.Context) port.UserInputPort {
 	userOutputPort := uc.userOutputFactory(c)
 	userDriver := uc.userDriverFactory
-	userRepository := uc.userRepositoryFactory(userDriver)
+	googleOAuthDriver := uc.googleOAuthDriverFactory
+	userRepository := uc.userRepositoryFactory(userDriver, googleOAuthDriver)
 	return uc.userInputFactory(userRepository, userOutputPort)
 }

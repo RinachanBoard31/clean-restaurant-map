@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"clean-storemap-api/src/adapter/gateway"
-	"clean-storemap-api/src/driver/db"
+	db "clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
@@ -19,7 +19,7 @@ type MockUserDriverFactory struct {
 	mock.Mock
 }
 
-type MockUserInputPort struct {
+type MockGoogleOAuthFactory struct {
 	mock.Mock
 }
 
@@ -40,9 +40,19 @@ func (m *MockUserDriverFactory) CreateUser(*db.User) error {
 	return args.Error(0)
 }
 
+func (m *MockGoogleOAuthFactory) GenerateUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
+
 func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputGoogleAuthUrl(url string) string {
+	args := m.Called()
+	return args.Get(0).(string)
 }
 
 func mockUserOutputFactoryFunc(c echo.Context) port.UserOutputPort {
@@ -54,7 +64,12 @@ func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) error {
 	return args.Error(0)
 }
 
-func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver) port.UserRepository {
+func (m *MockUserRepositoryFactoryFuncObject) GenerateGoogleAuthUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
+
+func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
 	return &MockUserRepositoryFactoryFuncObject{}
 }
 
@@ -63,9 +78,9 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserInputPort) CreateUser(*model.User) error {
+func (m *MockUserInputFactoryFuncObject) GetGoogleAuthUrl() string {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(string)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -106,4 +121,37 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	// InputPortのCreateUserが1回呼ばれること
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "CreateUser", 1)
+}
+
+func TestGetAuthenticationUrl(t *testing.T) {
+	/* Arrange */
+	c, rec := newRouter()
+	url := "https://www.google.com"
+	var expected error = nil
+
+	// Driverだけは実体が必要
+	mockGoogleOAuthFactory := new(MockGoogleOAuthFactory)
+	mockGoogleOAuthFactory.On("GenerateUrl").Return(url)
+
+	// InputPortのGetGoogleAuthUrlのモックを作成
+	uc := &UserController{
+		googleOAuthDriverFactory: mockGoogleOAuthFactory,
+		userOutputFactory:        mockUserOutputFactoryFunc,
+		userRepositoryFactory:    mockUserRepositoryFactoryFunc,
+	}
+
+	// newUserInputPort.GetGoogleAuthUrl()をするためには、GetGoogleAuthUrl()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
+	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
+	mockUserInputFactoryFuncObject.On("GetGoogleAuthUrl").Return(url)
+	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
+		return mockUserInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := uc.GetGoogleAuthUrl(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, http.StatusFound, rec.Code)
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetGoogleAuthUrl", 1)
 }

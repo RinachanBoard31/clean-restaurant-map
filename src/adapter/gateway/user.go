@@ -7,16 +7,22 @@ import (
 )
 
 type UserGateway struct {
-	userDriver UserDriver
+	userDriver        UserDriver
+	googleOAuthDriver GoogleOAuthDriver
 }
 
 type UserDriver interface {
 	CreateUser(*db.User) error
 }
 
-func NewUserRepository(userDriver UserDriver) port.UserRepository {
+type GoogleOAuthDriver interface {
+	GenerateUrl() string
+}
+
+func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver) port.UserRepository {
 	return &UserGateway{
-		userDriver: userDriver,
+		userDriver:        userDriver,
+		googleOAuthDriver: googleOAuthDriver,
 	}
 }
 
@@ -32,4 +38,8 @@ func (ug *UserGateway) Create(user *model.User) error {
 		return err
 	}
 	return nil
+}
+
+func (ug *UserGateway) GenerateGoogleAuthUrl() string {
+	return ug.googleOAuthDriver.GenerateUrl()
 }
