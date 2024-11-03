@@ -13,6 +13,7 @@ import (
 
 type UserI interface {
 	CreateUser(c echo.Context) error
+	LoginUser(c echo.Context) error
 }
 
 type UserOutputFactory func(echo.Context) port.UserOutputPort
@@ -38,6 +39,10 @@ type UserRequestBody struct {
 	Gender float32 `json:"gender"`
 }
 
+type UserCredentialsRequestBody struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
 func NewUserController(userDriverFactory UserDriverFactory, userOutputFactory UserOutputFactory, userInputFactory UserInputFactory, userRepositoryFactory UserRepositoryFactory) UserI {
 	return &UserController{
 		userDriverFactory:     userDriverFactory,
@@ -60,6 +65,26 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return uc.newUserInputPort(c).CreateUser(user)
+}
+
+func (uc *UserController) LoginUser(c echo.Context) error {
+	// UserCredentialsの値を受け取りuserが既に登録されているかを確かめるキー用の型を作成する
+	var u UserCredentialsRequestBody
+	if err := c.Bind(&u); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if err := c.Validate(&u); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
+	}
+	user, err := model.NewUserCredentials(u.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := uc.newUserInputPort(c).LoginUser(user); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return nil
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

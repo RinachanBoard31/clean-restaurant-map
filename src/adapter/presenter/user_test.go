@@ -21,3 +21,19 @@ func TestOutputCreateResult(t *testing.T) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
 }
+
+func TestOutputLoginResult(t *testing.T) {
+	/* Arrange */
+	expected := "{}\n"
+	c, rec := newRouter()
+	up := &UserPresenter{c: c}
+
+	/* Act */
+	actual := up.OutputLoginResult()
+
+	/* Assert */
+	// up.OutputLoginResultがJSONを返すこと
+	if assert.NoError(t, actual) {
+		assert.Equal(t, expected, rec.Body.String())
+	}
+}

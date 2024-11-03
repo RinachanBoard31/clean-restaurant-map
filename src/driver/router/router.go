@@ -41,8 +41,9 @@ func NewRouter(echo *echo.Echo, storeController controller.StoreI, userControlle
 
 func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/", router.storeController.GetStores)
-	router.echo.POST("/user", router.userController.CreateUser)
 	router.echo.GET("/stores/opening-hours", router.storeController.GetNearStores)
+	router.echo.POST("/user", router.userController.CreateUser)
+	router.echo.POST("/login", router.userController.LoginUser)
 
 	router.echo.Logger.Fatal(router.echo.Start(":8080"))
 }
