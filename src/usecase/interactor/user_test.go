@@ -30,10 +30,19 @@ func (m *MockUserOutputPort) OutputCreateResult() error {
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *MockUserRepository) FindBy(user *model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
 
 func (m *MockUserOutputPort) OutputGoogleAuthUrl(url string) string {
 	args := m.Called()
 	return args.Get(0).(string)
+}
+
+func (m *MockUserOutputPort) OutputLoginResult() error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -58,6 +67,30 @@ func TestCreateUser(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
 	// OutputPortのOutputCreateResult()が1回呼ばれること
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputCreateResult", 1)
+}
+
+func TestLoginUser(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	user := &model.UserCredentials{Email: "test@example.com"}
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("FindBy").Return(nil)
+	mockUserOutputPort := new(MockUserOutputPort)
+	mockUserOutputPort.On("OutputLoginResult").Return(nil)
+
+	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
+
+	/* Act */
+	actual := ui.LoginUser(user)
+
+	/* Assert */
+	// LoginUser()がOutputLoginResult()を返すこと
+	assert.Equal(t, expected, actual)
+	// RepositoryのFindBy()が1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "FindBy", 1)
+	// OutputPortのOutputLoginResult()が1回呼ばれること
+	mockUserOutputPort.AssertNumberOfCalls(t, "OutputLoginResult", 1)
 }
 
 func TestGetGoogleAuthUrl(t *testing.T) {

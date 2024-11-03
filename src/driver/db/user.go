@@ -28,3 +28,13 @@ func (dbu *DbUserDriver) CreateUser(user *User) error {
 	}
 	return nil
 }
+
+func (dbu *DbUserDriver) FindByEmail(email string) error {
+	var user []*User
+	// 一致するemailがあるかを確認する
+	result := DB.Where("email = ?", email).First(&user)
+	if err := result.Error; err != nil {
+		return err
+	}
+	return nil
+}

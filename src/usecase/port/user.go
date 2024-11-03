@@ -7,14 +7,17 @@ import (
 type UserInputPort interface {
 	CreateUser(*model.User) error
 	GetGoogleAuthUrl() string
+	LoginUser(*model.UserCredentials) error
 }
 
 type UserRepository interface {
 	Create(*model.User) error
+	FindBy(*model.UserCredentials) error
 	GenerateGoogleAuthUrl() string
 }
 
 type UserOutputPort interface {
 	OutputCreateResult() error
+	OutputLoginResult() error
 	OutputGoogleAuthUrl(url string) string
 }

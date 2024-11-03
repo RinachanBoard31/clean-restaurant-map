@@ -27,6 +27,16 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	return nil
 }
 
+func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
+	if err := ui.userRepository.FindBy(user); err != nil {
+		return err
+	}
+	if err := ui.userOutputPort.OutputLoginResult(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ui *UserInteractor) GetGoogleAuthUrl() string {
 	url := ui.userRepository.GenerateGoogleAuthUrl()
 	return ui.userOutputPort.OutputGoogleAuthUrl(url)

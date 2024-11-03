@@ -73,6 +73,11 @@ func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDri
 	return &MockUserRepositoryFactoryFuncObject{}
 }
 
+func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	args := m.Called()
 	return args.Error(0)
@@ -81,6 +86,20 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 func (m *MockUserInputFactoryFuncObject) GetGoogleAuthUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
+}
+func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserDriverFactory) FindByEmail(string) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -123,6 +142,46 @@ func TestCreateUser(t *testing.T) {
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "CreateUser", 1)
 }
 
+func TestLoginUser(t *testing.T) {
+	/* Arrange */
+	c, rec := newRouter()
+	var expected error = nil
+	// デフォルトでリクエストメソッドがGETのため、POSTに変更。こういうPOSTリクエストが来たことにする
+	reqBody := `{"email":"johnathan@example.com"}`
+	req := httptest.NewRequest(http.MethodPost, "/user/login", bytes.NewBufferString(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
+
+	// Driverだけは実体が必要
+	mockUserDriverFactory := new(MockUserDriverFactory)
+	mockUserDriverFactory.On("FindByEmail").Return(true)
+
+	// InputPortのCheckUserのモックを作成
+	uc := &UserController{
+		userDriverFactory:     mockUserDriverFactory,
+		userOutputFactory:     mockUserOutputFactoryFunc,
+		userRepositoryFactory: mockUserRepositoryFactoryFunc,
+	}
+
+	// newUserInputPort.LoginUser()をするためには、LoginUser()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
+	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
+	mockUserInputFactoryFuncObject.On("LoginUser").Return(expected)
+	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
+		return mockUserInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := uc.LoginUser(c)
+
+	/* Assert */
+	// uc.LoginUser()がUserInputPort.LoginUser()を返すこと
+	assert.Equal(t, expected, actual)
+	// echoが正しく起動したか
+	assert.Equal(t, http.StatusOK, rec.Code)
+	// InputPortのLoginUser()が1回呼ばれること
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "LoginUser", 1)
+}
+
 func TestGetAuthenticationUrl(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
@@ -146,8 +205,6 @@ func TestGetAuthenticationUrl(t *testing.T) {
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
-
-	/* Act */
 	actual := uc.GetGoogleAuthUrl(c)
 
 	/* Assert */

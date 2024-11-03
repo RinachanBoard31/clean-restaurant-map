@@ -13,6 +13,7 @@ type UserGateway struct {
 
 type UserDriver interface {
 	CreateUser(*db.User) error
+	FindByEmail(string) error
 }
 
 type GoogleOAuthDriver interface {
@@ -35,6 +36,13 @@ func (ug *UserGateway) Create(user *model.User) error {
 		Gender: user.Gender,
 	}
 	if err := ug.userDriver.CreateUser(dbUser); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
+	if err := ug.userDriver.FindByEmail(user.Email); err != nil {
 		return err
 	}
 	return nil

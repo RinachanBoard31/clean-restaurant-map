@@ -13,6 +13,7 @@ import (
 
 type UserI interface {
 	CreateUser(c echo.Context) error
+	LoginUser(c echo.Context) error
 	GetGoogleAuthUrl(c echo.Context) error
 }
 
@@ -39,6 +40,9 @@ type UserRequestBody struct {
 	Age    int     `json:"age"`
 	Sex    float32 `json:"sex"`
 	Gender float32 `json:"gender"`
+}
+type UserCredentialsRequestBody struct {
+	Email string `json:"email" validate:"required,email"`
 }
 
 func NewUserController(
@@ -72,6 +76,25 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 	return uc.newUserInputPort(c).CreateUser(user)
 }
 
+func (uc *UserController) LoginUser(c echo.Context) error {
+	// UserCredentialsの値を受け取りuserが既に登録されているかを確かめるキー用の型を作成する
+	var u UserCredentialsRequestBody
+	if err := c.Bind(&u); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if err := c.Validate(&u); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
+	}
+	user, err := model.NewUserCredentials(u.Email)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := uc.newUserInputPort(c).LoginUser(user); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return nil
+}
 func (uc *UserController) GetGoogleAuthUrl(c echo.Context) error {
 	url := uc.newUserInputPort(c).GetGoogleAuthUrl()
 	return c.Redirect(http.StatusFound, url) // 認証ページへのリダイレクトを行う
