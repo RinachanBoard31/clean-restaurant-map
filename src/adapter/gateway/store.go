@@ -5,6 +5,7 @@ import (
 	db "clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
+	"fmt"
 	"strings"
 )
 
@@ -41,6 +42,10 @@ func (sg *StoreGateway) GetAll() ([]*model.Store, error) {
 			Name:                v.Name,
 			RegularOpeningHours: v.RegularOpeningHours,
 			PriceLevel:          v.PriceLevel,
+			Location: model.Location{
+				Lat: v.Latitude,
+				Lng: v.Longitude,
+			},
 		})
 	}
 	return stores, nil
@@ -58,6 +63,10 @@ func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 			Name:                v.Name,
 			RegularOpeningHours: strings.Join(v.RegularOpeningHours, ", "),
 			PriceLevel:          v.PriceLevel,
+			Location: model.Location{
+				Lat: fmt.Sprintf("%f", v.Location.Lat),
+				Lng: fmt.Sprintf("%f", v.Location.Lng),
+			},
 		})
 	}
 	return stores, nil

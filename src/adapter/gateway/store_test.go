@@ -17,12 +17,16 @@ func makeDummyDbStores() ([]*db.Store, error) {
 		Name:                "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
+		Latitude:            "35.713",
+		Longitude:           "139.762",
 	})
 	dummyStores = append(dummyStores, &db.Store{
 		Id:                  "Id002",
 		Name:                "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 		PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+		Latitude:            "35.714",
+		Longitude:           "139.763",
 	})
 	return dummyStores, nil
 }
@@ -34,12 +38,14 @@ func makeDummyApiStores() ([]*api.Store, error) {
 		Name:                "UEC cafe",
 		RegularOpeningHours: []string{"Sat: 06:00 - 22:00", "Sun: 06:00 - 22:00"},
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
+		Location:            api.Location{Lat: 35.713, Lng: 139.762},
 	})
 	dummyStores = append(dummyStores, &api.Store{
 		Id:                  "Id002",
 		Name:                "UEC restaurant",
 		RegularOpeningHours: []string{"Sat: 11:00 - 20:00", "Sun: 11:00 - 20:00"},
 		PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+		Location:            api.Location{Lat: 35.714, Lng: 139.763},
 	})
 	return dummyStores, nil
 }
@@ -75,6 +81,7 @@ func TestGetAll(t *testing.T) {
 			Name:                "UEC cafe",
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 		},
 	)
 	stores = append(
@@ -84,6 +91,7 @@ func TestGetAll(t *testing.T) {
 			Name:                "UEC restaurant",
 			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+			Location:            model.Location{Lat: "35.714", Lng: "139.763"},
 		},
 	)
 	expected := stores
@@ -111,12 +119,14 @@ func TestGetNearStores(t *testing.T) {
 			Name:                "UEC cafe",
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713000", Lng: "139.762000"},
 		},
 		&model.Store{
 			Id:                  "Id002",
 			Name:                "UEC restaurant",
 			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+			Location:            model.Location{Lat: "35.714000", Lng: "139.763000"},
 		},
 	)
 	expected := stores

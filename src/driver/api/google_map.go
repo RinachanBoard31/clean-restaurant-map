@@ -12,8 +12,8 @@ import (
 type ApiGoogleMapDriver struct{}
 
 type Location struct {
-	Lat string `json:"location.lat"`
-	Lng string `json:"location.lng"`
+	Lat float64 `json:"latitude"`
+	Lng float64 `json:"longitude"`
 }
 
 type GeolocationApiResponse struct {
@@ -33,7 +33,8 @@ type PlacesApiResponse struct {
 		RegularOpeningHours struct {
 			WeekdayDescriptions []string `json:"weekdayDescriptions"`
 		} `json:"regularOpeningHours"`
-		PriceLevel string `json:"priceLevel"`
+		PriceLevel string   `json:"priceLevel"`
+		Location   Location `json:"location"`
 	} `json:"places"`
 }
 
@@ -42,6 +43,7 @@ type Store struct {
 	Name                string   `json:"places.displayName.text"`
 	RegularOpeningHours []string `json:"places.regularOpeningHours.weekdayDescriptions"`
 	PriceLevel          string   `json:"places.priceLevel"`
+	Location            Location `json:"places.location"`
 }
 
 func NewGoogleMapDriver() *ApiGoogleMapDriver {
@@ -82,8 +84,8 @@ func getCurrentLocation() (Location, error) {
 		return Location{}, err
 	}
 	location := Location{
-		Lat: fmt.Sprintf("%f", response.Location.Lat),
-		Lng: fmt.Sprintf("%f", response.Location.Lng),
+		Lat: response.Location.Lat,
+		Lng: response.Location.Lng,
 	}
 	return location, nil
 }
@@ -96,7 +98,7 @@ func searchStoresNearby(location Location) ([]*Store, error) {
 		"regionCode": "JP",
 		"locationRestriction": {
 			"circle": {
-				"center": {"latitude": "%s", "longitude": "%s"},
+				"center": {"latitude": "%f", "longitude": "%f"},
 				"radius": 500.0
 			}
 		}
@@ -112,7 +114,7 @@ func searchStoresNearby(location Location) ([]*Store, error) {
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Goog-Api-Key", os.Getenv("GOOGLE_MAP_API_KEY"))
-	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.regularOpeningHours.weekdayDescriptions,places.priceLevel")
+	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.regularOpeningHours.weekdayDescriptions,places.priceLevel,places.location")
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -134,6 +136,10 @@ func searchStoresNearby(location Location) ([]*Store, error) {
 			Name:                place.DisplayName.Text,
 			RegularOpeningHours: place.RegularOpeningHours.WeekdayDescriptions,
 			PriceLevel:          place.PriceLevel,
+			Location: Location{
+				Lat: place.Location.Lat,
+				Lng: place.Location.Lng,
+			},
 		})
 	}
 	return stores, nil

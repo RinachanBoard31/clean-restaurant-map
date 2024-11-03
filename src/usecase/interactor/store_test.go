@@ -42,6 +42,7 @@ func TestGetStores(t *testing.T) {
 			Name:                "UEC cafe",
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 		},
 	)
 
@@ -77,6 +78,7 @@ func TestGetNearStores(t *testing.T) {
 			Name:                "UEC cafe",
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 		},
 	)
 
