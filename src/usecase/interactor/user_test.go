@@ -93,6 +93,7 @@ func TestLoginUser(t *testing.T) {
 	// OutputPortのOutputLoginResult()が1回呼ばれること
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputLoginResult", 1)
 }
+
 func TestGetAuthUrl(t *testing.T) {
 	/* Arrange */
 	url := "https://www.google.com"
@@ -116,3 +117,4 @@ func TestGetAuthUrl(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "GenerateAuthUrl", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputAuthUrl", 1)
 }
+

@@ -51,7 +51,7 @@ func TestCreate(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "CreateUser", 1)
 }
 
-func TestFindUserByUserCredentials(t *testing.T) {
+func TestFindBy(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	mockUserRepository := new(MockUserRepository)
@@ -70,6 +70,7 @@ func TestFindUserByUserCredentials(t *testing.T) {
 	// userDriver.FindByEmail()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
 }
+
 func TestGenerateAuthUrl(t *testing.T) {
 	/* Arrange */
 	expected := "https://www.google.com"

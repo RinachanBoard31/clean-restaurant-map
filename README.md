@@ -55,7 +55,6 @@ $ curl -H "Content-Type: application/json" -X POST -d "@example/create_user_api_
 ```
 $ curl -H "Content-Type: application/json" -X POST -d "@example/login_user_api_example.json" http://localhost:8080/login
 ```
-
 ### Auth
 ```
 $ curl http://localhost:8080/auth

@@ -93,12 +93,16 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
-	args := m.Called()
+
+
+
+
+func (m *MockUserInputFactoryFuncObject) GetAuthUrl() error {
+  args := m.Called()
 	return args.Error(0)
 }
 
-func (m *MockUserInputFactoryFuncObject) GetAuthUrl() error {
+func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -157,6 +161,7 @@ func TestLoginUser(t *testing.T) {
 	mockUserDriverFactory := new(MockUserDriverFactory)
 	mockUserDriverFactory.On("FindByEmail").Return(true)
 
+
 	// InputPortのLoginUserのモックを作成
 	uc := &UserController{
 		userDriverFactory:     mockUserDriverFactory,
@@ -170,6 +175,7 @@ func TestLoginUser(t *testing.T) {
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
+
 	/* Act */
 	actual := uc.LoginUser(c)
 
@@ -213,3 +219,4 @@ func TestGetAuthUrl(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetAuthUrl", 1)
 }
+
