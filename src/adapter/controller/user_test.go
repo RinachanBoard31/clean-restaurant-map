@@ -19,7 +19,7 @@ type MockUserDriverFactory struct {
 	mock.Mock
 }
 
-type MockGoogleOAuthFactory struct {
+type MockGoogleOAuthDriverFactory struct {
 	mock.Mock
 }
 
@@ -45,7 +45,7 @@ func (m *MockUserDriverFactory) FindByEmail(string) error {
 	return args.Error(0)
 }
 
-func (m *MockGoogleOAuthFactory) GenerateUrl() string {
+func (m *MockGoogleOAuthDriverFactory) GenerateUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
 }
@@ -188,12 +188,12 @@ func TestGetAuthUrl(t *testing.T) {
 	var expected error = nil
 
 	// Driverだけは実体が必要
-	mockGoogleOAuthFactory := new(MockGoogleOAuthFactory)
-	mockGoogleOAuthFactory.On("GenerateUrl").Return(url)
+	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
+	mockGoogleOAuthDriverFactory.On("GenerateUrl").Return(url)
 
 	// InputPortのGetGoogleAuthUrlのモックを作成
 	uc := &UserController{
-		googleOAuthDriverFactory: mockGoogleOAuthFactory,
+		googleOAuthDriverFactory: mockGoogleOAuthDriverFactory,
 		userOutputFactory:        mockUserOutputFactoryFunc,
 		userRepositoryFactory:    mockUserRepositoryFactoryFunc,
 	}
