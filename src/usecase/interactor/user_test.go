@@ -26,11 +26,12 @@ func (m *MockUserRepository) GenerateGoogleAuthUrl() string {
 	return args.Get(0).(string)
 }
 
-func (m *MockUserOutputPort) OutputCreateResult() error {
+func (m *MockUserRepository) FindBy(user *model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserRepository) FindBy(user *model.UserCredentials) error {
+
+func (m *MockUserOutputPort) OutputCreateResult() error {
 	args := m.Called()
 	return args.Error(0)
 }

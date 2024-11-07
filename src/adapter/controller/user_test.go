@@ -40,6 +40,11 @@ func (m *MockUserDriverFactory) CreateUser(*db.User) error {
 	return args.Error(0)
 }
 
+func (m *MockUserDriverFactory) FindByEmail(string) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockGoogleOAuthFactory) GenerateUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
@@ -53,6 +58,11 @@ func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
 func (m *MockUserOutputFactoryFuncObject) OutputGoogleAuthUrl(url string) string {
 	args := m.Called()
 	return args.Get(0).(string)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func mockUserOutputFactoryFunc(c echo.Context) port.UserOutputPort {
@@ -69,13 +79,13 @@ func (m *MockUserRepositoryFactoryFuncObject) GenerateGoogleAuthUrl() string {
 	return args.Get(0).(string)
 }
 
-func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
-	return &MockUserRepositoryFactoryFuncObject{}
-}
-
 func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
+	return &MockUserRepositoryFactoryFuncObject{}
 }
 
 func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
@@ -88,16 +98,6 @@ func (m *MockUserInputFactoryFuncObject) GetGoogleAuthUrl() string {
 	return args.Get(0).(string)
 }
 func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
-	args := m.Called()
-	return args.Error(0)
-}
-
-func (m *MockUserDriverFactory) FindByEmail(string) error {
-	args := m.Called()
-	return args.Error(0)
-}
-
-func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -169,7 +169,6 @@ func TestLoginUser(t *testing.T) {
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
-
 	/* Act */
 	actual := uc.LoginUser(c)
 
@@ -182,7 +181,7 @@ func TestLoginUser(t *testing.T) {
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "LoginUser", 1)
 }
 
-func TestGetAuthenticationUrl(t *testing.T) {
+func TestGetAuthUrl(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	url := "https://www.google.com"
@@ -205,6 +204,8 @@ func TestGetAuthenticationUrl(t *testing.T) {
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
+
+	/* Act */
 	actual := uc.GetGoogleAuthUrl(c)
 
 	/* Assert */

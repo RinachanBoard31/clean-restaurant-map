@@ -6,8 +6,8 @@ import (
 
 type UserInputPort interface {
 	CreateUser(*model.User) error
-	GetGoogleAuthUrl() string
 	LoginUser(*model.UserCredentials) error
+	GetGoogleAuthUrl() string
 }
 
 type UserRepository interface {
