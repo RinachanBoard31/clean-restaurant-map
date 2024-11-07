@@ -21,7 +21,7 @@ func (m *MockUserRepository) Create(user *model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) GenerateGoogleAuthUrl() string {
+func (m *MockUserRepository) GenerateAuthUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
 }
@@ -36,7 +36,7 @@ func (m *MockUserOutputPort) OutputCreateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputGoogleAuthUrl(url string) string {
+func (m *MockUserOutputPort) OutputAuthUrl(url string) string {
 	args := m.Called()
 	return args.Get(0).(string)
 }
@@ -93,15 +93,14 @@ func TestLoginUser(t *testing.T) {
 	// OutputPortのOutputLoginResult()が1回呼ばれること
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputLoginResult", 1)
 }
-
-func TestGetGoogleAuthUrl(t *testing.T) {
+func TestGetAuthUrl(t *testing.T) {
 	/* Arrange */
 	expected := "https://www.google.com"
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GenerateGoogleAuthUrl").Return(expected)
+	mockUserRepository.On("GenerateAuthUrl").Return(expected)
 	mockUserOutputPort := new(MockUserOutputPort)
-	mockUserOutputPort.On("OutputGoogleAuthUrl").Return(expected)
+	mockUserOutputPort.On("OutputAuthUrl").Return(expected)
 
 	ui := &UserInteractor{
 		userRepository: mockUserRepository,
@@ -109,10 +108,10 @@ func TestGetGoogleAuthUrl(t *testing.T) {
 	}
 
 	/* Act */
-	actual := ui.GetGoogleAuthUrl()
+	actual := ui.GetAuthUrl()
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
-	mockUserRepository.AssertNumberOfCalls(t, "GenerateGoogleAuthUrl", 1)
-	mockUserOutputPort.AssertNumberOfCalls(t, "OutputGoogleAuthUrl", 1)
+	mockUserRepository.AssertNumberOfCalls(t, "GenerateAuthUrl", 1)
+	mockUserOutputPort.AssertNumberOfCalls(t, "OutputAuthUrl", 1)
 }

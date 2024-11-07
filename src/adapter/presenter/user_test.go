@@ -37,8 +37,7 @@ func TestOutputLoginResult(t *testing.T) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
 }
-
-func TestOutputGoogleAuthUrl(t *testing.T) {
+func TestOutputAuthUrl(t *testing.T) {
 	/* Arrange */
 	url := "https://example.com"
 	expected := url
@@ -46,7 +45,7 @@ func TestOutputGoogleAuthUrl(t *testing.T) {
 	up := &UserPresenter{c: c}
 
 	/* Act */
-	actual := up.OutputGoogleAuthUrl(url)
+	actual := up.OutputAuthUrl(url)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

@@ -47,7 +47,6 @@ func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
 	}
 	return nil
 }
-
-func (ug *UserGateway) GenerateGoogleAuthUrl() string {
+func (ug *UserGateway) GenerateAuthUrl() string {
 	return ug.googleOAuthDriver.GenerateUrl()
 }

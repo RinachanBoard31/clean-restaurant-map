@@ -55,7 +55,7 @@ func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputGoogleAuthUrl(url string) string {
+func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) string {
 	args := m.Called()
 	return args.Get(0).(string)
 }
@@ -74,7 +74,7 @@ func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) GenerateGoogleAuthUrl() string {
+func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
 }
@@ -93,13 +93,13 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserInputFactoryFuncObject) GetGoogleAuthUrl() string {
-	args := m.Called()
-	return args.Get(0).(string)
-}
 func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
+}
+func (m *MockUserInputFactoryFuncObject) GetAuthUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -156,7 +156,7 @@ func TestLoginUser(t *testing.T) {
 	mockUserDriverFactory := new(MockUserDriverFactory)
 	mockUserDriverFactory.On("FindByEmail").Return(true)
 
-	// InputPortのCheckUserのモックを作成
+	// InputPortのLoginUserのモックを作成
 	uc := &UserController{
 		userDriverFactory:     mockUserDriverFactory,
 		userOutputFactory:     mockUserOutputFactoryFunc,
@@ -198,18 +198,19 @@ func TestGetAuthUrl(t *testing.T) {
 		userRepositoryFactory:    mockUserRepositoryFactoryFunc,
 	}
 
-	// newUserInputPort.GetGoogleAuthUrl()をするためには、GetGoogleAuthUrl()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
+	// newUserInputPort.GetAuthUrl()をするためには、GetAuthUrl()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
 	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
-	mockUserInputFactoryFuncObject.On("GetGoogleAuthUrl").Return(url)
+	mockUserInputFactoryFuncObject.On("GetAuthUrl").Return(url)
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
 
 	/* Act */
-	actual := uc.GetGoogleAuthUrl(c)
+
+	actual := uc.GetAuthUrl(c)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	assert.Equal(t, http.StatusFound, rec.Code)
-	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetGoogleAuthUrl", 1)
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetAuthUrl", 1)
 }

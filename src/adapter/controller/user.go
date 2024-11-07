@@ -14,7 +14,7 @@ import (
 type UserI interface {
 	CreateUser(c echo.Context) error
 	LoginUser(c echo.Context) error
-	GetGoogleAuthUrl(c echo.Context) error
+	GetAuthUrl(c echo.Context) error
 }
 
 type UserOutputFactory func(echo.Context) port.UserOutputPort
@@ -95,8 +95,8 @@ func (uc *UserController) LoginUser(c echo.Context) error {
 	}
 	return nil
 }
-func (uc *UserController) GetGoogleAuthUrl(c echo.Context) error {
-	url := uc.newUserInputPort(c).GetGoogleAuthUrl()
+func (uc *UserController) GetAuthUrl(c echo.Context) error {
+	url := uc.newUserInputPort(c).GetAuthUrl()
 	return c.Redirect(http.StatusFound, url) // 認証ページへのリダイレクトを行う
 }
 

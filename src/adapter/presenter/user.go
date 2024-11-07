@@ -22,7 +22,6 @@ func (up *UserPresenter) OutputCreateResult() error {
 func (up *UserPresenter) OutputLoginResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
-
-func (up *UserPresenter) OutputGoogleAuthUrl(url string) string {
+func (up *UserPresenter) OutputAuthUrl(url string) string {
 	return url
 }
