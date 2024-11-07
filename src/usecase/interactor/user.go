@@ -36,7 +36,8 @@ func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
 	}
 	return nil
 }
-func (ui *UserInteractor) GetAuthUrl() string {
+
+func (ui *UserInteractor) GetAuthUrl() error {
 	url := ui.userRepository.GenerateAuthUrl()
 	return ui.userOutputPort.OutputAuthUrl(url)
 }

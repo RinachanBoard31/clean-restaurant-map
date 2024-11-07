@@ -55,9 +55,9 @@ func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) string {
+func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) error {
 	args := m.Called()
-	return args.Get(0).(string)
+	return args.Error(0)
 }
 
 func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
@@ -97,9 +97,10 @@ func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserInputFactoryFuncObject) GetAuthUrl() string {
+
+func (m *MockUserInputFactoryFuncObject) GetAuthUrl() error {
 	args := m.Called()
-	return args.Get(0).(string)
+	return args.Error(0)
 }
 
 func TestCreateUser(t *testing.T) {
@@ -183,7 +184,7 @@ func TestLoginUser(t *testing.T) {
 
 func TestGetAuthUrl(t *testing.T) {
 	/* Arrange */
-	c, rec := newRouter()
+	c, _ := newRouter()
 	url := "https://www.google.com"
 	var expected error = nil
 
@@ -200,17 +201,15 @@ func TestGetAuthUrl(t *testing.T) {
 
 	// newUserInputPort.GetAuthUrl()をするためには、GetAuthUrl()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
 	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
-	mockUserInputFactoryFuncObject.On("GetAuthUrl").Return(url)
+	mockUserInputFactoryFuncObject.On("GetAuthUrl").Return(nil)
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
 
 	/* Act */
-
 	actual := uc.GetAuthUrl(c)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
-	assert.Equal(t, http.StatusFound, rec.Code)
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetAuthUrl", 1)
 }

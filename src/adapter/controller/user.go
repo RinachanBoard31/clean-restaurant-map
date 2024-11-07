@@ -96,8 +96,7 @@ func (uc *UserController) LoginUser(c echo.Context) error {
 	return nil
 }
 func (uc *UserController) GetAuthUrl(c echo.Context) error {
-	url := uc.newUserInputPort(c).GetAuthUrl()
-	return c.Redirect(http.StatusFound, url) // 認証ページへのリダイレクトを行う
+	return uc.newUserInputPort(c).GetAuthUrl()
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -37,16 +38,22 @@ func TestOutputLoginResult(t *testing.T) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
 }
+
 func TestOutputAuthUrl(t *testing.T) {
 	/* Arrange */
-	url := "https://example.com"
+	url := "https://www.google.com"
 	expected := url
-	c, _ := newRouter()
+	c, rec := newRouter()
 	up := &UserPresenter{c: c}
 
 	/* Act */
 	actual := up.OutputAuthUrl(url)
 
 	/* Assert */
-	assert.Equal(t, expected, actual)
+	// up.OutputAuthUrlがJSONを返すこと
+	if assert.NoError(t, actual) {
+		assert.Equal(t, http.StatusFound, rec.Code)
+		// リダイレクト先のURLが正しいこと
+		assert.Equal(t, expected, rec.HeaderMap["Location"][0])
+	}
 }

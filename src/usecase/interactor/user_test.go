@@ -36,12 +36,12 @@ func (m *MockUserOutputPort) OutputCreateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputAuthUrl(url string) string {
+func (m *MockUserOutputPort) OutputLoginResult() error {
 	args := m.Called()
-	return args.Get(0).(string)
+	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputLoginResult() error {
+func (m *MockUserOutputPort) OutputAuthUrl(url string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -95,12 +95,13 @@ func TestLoginUser(t *testing.T) {
 }
 func TestGetAuthUrl(t *testing.T) {
 	/* Arrange */
-	expected := "https://www.google.com"
+	url := "https://www.google.com"
+	var expected error = nil
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GenerateAuthUrl").Return(expected)
+	mockUserRepository.On("GenerateAuthUrl").Return(url)
 	mockUserOutputPort := new(MockUserOutputPort)
-	mockUserOutputPort.On("OutputAuthUrl").Return(expected)
+	mockUserOutputPort.On("OutputAuthUrl").Return(nil)
 
 	ui := &UserInteractor{
 		userRepository: mockUserRepository,
