@@ -21,3 +21,17 @@ func TestOutputCreateResult(t *testing.T) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
 }
+
+func TestOutputGoogleAuthUrl(t *testing.T) {
+	/* Arrange */
+	url := "https://example.com"
+	expected := url
+	c, _ := newRouter()
+	up := &UserPresenter{c: c}
+
+	/* Act */
+	actual := up.OutputGoogleAuthUrl(url)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+}
