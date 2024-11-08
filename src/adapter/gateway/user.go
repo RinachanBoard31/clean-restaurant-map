@@ -18,6 +18,7 @@ type UserDriver interface {
 
 type GoogleOAuthDriver interface {
 	GenerateUrl() string
+	GetEmail(string) (string, error)
 }
 
 func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver) port.UserRepository {
@@ -49,4 +50,12 @@ func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
 }
 func (ug *UserGateway) GenerateAuthUrl() string {
 	return ug.googleOAuthDriver.GenerateUrl()
+}
+
+func (ug *UserGateway) GetUserInfoWithAuthCode(code string) (string, error) {
+	email, err := ug.googleOAuthDriver.GetEmail(code)
+	if err != nil {
+		return "", err
+	}
+	return email, nil
 }

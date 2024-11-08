@@ -3,6 +3,7 @@ package presenter
 import (
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,5 +25,10 @@ func (up *UserPresenter) OutputLoginResult() error {
 }
 
 func (up *UserPresenter) OutputAuthUrl(url string) error {
+	return up.c.Redirect(http.StatusFound, url)
+}
+
+func (up *UserPresenter) OutputSignupWithAuth() error {
+	url := os.Getenv("BACKEND_URL") + "/inputUserInfo" // 認証以外のユーザ情報を入力するページ
 	return up.c.Redirect(http.StatusFound, url)
 }

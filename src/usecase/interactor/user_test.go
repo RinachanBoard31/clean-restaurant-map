@@ -31,6 +31,11 @@ func (m *MockUserRepository) FindBy(user *model.UserCredentials) error {
 	return args.Error(0)
 }
 
+func (m *MockUserRepository) GetUserInfoWithAuthCode(string) (string, error) {
+	args := m.Called()
+	return args.Get(0).(string), args.Error(1)
+}
+
 func (m *MockUserOutputPort) OutputCreateResult() error {
 	args := m.Called()
 	return args.Error(0)
@@ -42,6 +47,11 @@ func (m *MockUserOutputPort) OutputLoginResult() error {
 }
 
 func (m *MockUserOutputPort) OutputAuthUrl(url string) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputPort) OutputSignupWithAuth() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -118,3 +128,29 @@ func TestGetAuthUrl(t *testing.T) {
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputAuthUrl", 1)
 }
 
+func TestSignupDraft(t *testing.T) {
+	/* Arrange */
+	code := ""
+	email := "sample@example.com"
+	var expected error = nil
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("GetUserInfoWithAuthCode").Return(email, nil)
+	mockUserRepository.On("Create").Return(nil)
+	mockUserOutputPort := new(MockUserOutputPort)
+	mockUserOutputPort.On("OutputSignupWithAuth").Return(nil)
+
+	ui := &UserInteractor{
+		userRepository: mockUserRepository,
+		userOutputPort: mockUserOutputPort,
+	}
+
+	/* Act */
+	actual := ui.SignupDraft(code)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "GetUserInfoWithAuthCode", 1)
+	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
+	mockUserOutputPort.AssertNumberOfCalls(t, "OutputSignupWithAuth", 1)
+}

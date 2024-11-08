@@ -57,3 +57,19 @@ func TestOutputAuthUrl(t *testing.T) {
 		assert.Equal(t, expected, rec.HeaderMap["Location"][0])
 	}
 }
+func TestOutputSignupWithAuth(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	c, rec := newRouter()
+	up := &UserPresenter{c: c}
+
+	/* Act */
+	actual := up.OutputSignupWithAuth()
+
+	/* Assert */
+	// up.OutputLoginResultがJSONを返すこと
+	if assert.NoError(t, actual) {
+		assert.Equal(t, http.StatusFound, rec.Code)
+		assert.Equal(t, expected, actual)
+	}
+}

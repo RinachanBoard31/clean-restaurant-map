@@ -44,7 +44,8 @@ func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/stores/opening-hours", router.storeController.GetNearStores)
 	router.echo.POST("/user", router.userController.CreateUser)
 	router.echo.POST("/login", router.userController.LoginUser)
-	router.echo.GET("/auth", router.userController.GetAuthUrl) // Google認証用のURLを取得し返す(ユーザの登録はsignupで行う)
-	// router.echo.POST("/signup", router.userController.SignUp) // Google認証後のユーザー登録(未実装)
+	router.echo.GET("/auth", router.userController.GetAuthUrl)            // Google認証用のURLを取得し返す
+	router.echo.GET("/auth/signup", router.userController.SignupWithAuth) // ユーザの認証を確認し仮登録する(本登録は未実装,UpdateUserで行う)
+	// router.echo.PATCH("/user", router.userController.UpdateUser)
 	router.echo.Logger.Fatal(router.echo.Start(":8080"))
 }

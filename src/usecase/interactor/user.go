@@ -41,3 +41,27 @@ func (ui *UserInteractor) GetAuthUrl() error {
 	url := ui.userRepository.GenerateAuthUrl()
 	return ui.userOutputPort.OutputAuthUrl(url)
 }
+
+func (ui *UserInteractor) SignupDraft(code string) error {
+	email, err := ui.userRepository.GetUserInfoWithAuthCode(code)
+	if err != nil {
+		return err
+	}
+
+	// 先にemailのみで登録する(仮登録)
+	user := &model.User{
+		Name:   "",
+		Email:  email,
+		Age:    0,
+		Sex:    0.0,
+		Gender: 0.0,
+	}
+	if err := ui.userRepository.Create(user); err != nil {
+		return err
+	}
+
+	if err := ui.userOutputPort.OutputSignupWithAuth(); err != nil {
+		return err
+	}
+	return nil
+}

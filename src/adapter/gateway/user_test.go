@@ -27,6 +27,11 @@ func (m *MockUserRepository) GenerateUrl() string {
 	return args.Get(0).(string)
 }
 
+func (m *MockUserRepository) GetEmail(string) (string, error) {
+	args := m.Called()
+	return args.Get(0).(string), args.Error(1)
+}
+
 func TestCreate(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
@@ -86,4 +91,23 @@ func TestGenerateAuthUrl(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockUserRepository.AssertNumberOfCalls(t, "GenerateUrl", 1)
+}
+
+func TestGetUserInfoWithAuthCode(t *testing.T) {
+	/* Arrange */
+	code := ""
+	email := "sample@example.com"
+	expected := email
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("GetEmail").Return(email, nil)
+	ug := &UserGateway{
+		googleOAuthDriver: mockUserRepository,
+	}
+
+	/* Act */
+	actual, _ := ug.GetUserInfoWithAuthCode(code)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "GetEmail", 1)
 }
