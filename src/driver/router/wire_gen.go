@@ -12,6 +12,7 @@ import (
 	"clean-storemap-api/src/adapter/presenter"
 	"clean-storemap-api/src/driver/api"
 	"clean-storemap-api/src/driver/db"
+	"clean-storemap-api/src/driver/oauth"
 	"clean-storemap-api/src/usecase/interactor"
 	"context"
 	"github.com/google/wire"
@@ -31,10 +32,11 @@ func InitializeRouter(ctx context.Context) (RouterI, error) {
 	storeRepositoryFactory := NewStoreRepositoryFactory()
 	storeI := controller.NewStoreController(storeDriverFactory, googleMapDriverFactory, storeOutputFactory, storeInputFactory, storeRepositoryFactory)
 	userDriverFactory := NewUserDriverFactory()
+	googleOAuthDriverFactory := NewGoogleOAuthDriverFactory()
 	userOutputFactory := NewUserOutputFactory()
 	userInputFactory := NewUserInputFactory()
 	userRepositoryFactory := NewUserRepositoryFactory()
-	userI := controller.NewUserController(userDriverFactory, userOutputFactory, userInputFactory, userRepositoryFactory)
+	userI := controller.NewUserController(userDriverFactory, googleOAuthDriverFactory, userOutputFactory, userInputFactory, userRepositoryFactory)
 	routerI := NewRouter(echo, storeI, userI)
 	return routerI, nil
 }
@@ -49,6 +51,7 @@ var driverSet = wire.NewSet(
 	NewStoreDriverFactory,
 	NewUserDriverFactory,
 	NewGoogleMapDriverFactory,
+	NewGoogleOAuthDriverFactory,
 )
 
 var inputPortSet = wire.NewSet(
@@ -104,6 +107,10 @@ func NewStoreRepositoryFactory() controller.StoreRepositoryFactory {
 // UserのDI
 func NewUserDriverFactory() controller.UserDriverFactory {
 	return &db.DbUserDriver{}
+}
+
+func NewGoogleOAuthDriverFactory() controller.GoogleOAuthDriverFactory {
+	return &oauth.GoogleOAuthDriver{}
 }
 
 func NewUserOutputFactory() controller.UserOutputFactory {

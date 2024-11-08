@@ -22,6 +22,10 @@ func (m *MockUserRepository) FindByEmail(string) error {
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *MockUserRepository) GenerateUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
 
 func TestCreate(t *testing.T) {
 	/* Arrange */
@@ -47,7 +51,7 @@ func TestCreate(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "CreateUser", 1)
 }
 
-func TestCheckCredentials(t *testing.T) {
+func TestFindBy(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	mockUserRepository := new(MockUserRepository)
@@ -65,4 +69,21 @@ func TestCheckCredentials(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	// userDriver.FindByEmail()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
+}
+
+func TestGenerateAuthUrl(t *testing.T) {
+	/* Arrange */
+	expected := "https://www.google.com"
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("GenerateUrl").Return(expected)
+	ug := &UserGateway{
+		googleOAuthDriver: mockUserRepository,
+	}
+
+	/* Act */
+	actual := ug.GenerateAuthUrl()
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "GenerateUrl", 1)
 }

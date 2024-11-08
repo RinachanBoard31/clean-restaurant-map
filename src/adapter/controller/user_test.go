@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"clean-storemap-api/src/adapter/gateway"
-	"clean-storemap-api/src/driver/db"
+	db "clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
@@ -19,7 +19,7 @@ type MockUserDriverFactory struct {
 	mock.Mock
 }
 
-type MockUserInputPort struct {
+type MockGoogleOAuthDriverFactory struct {
 	mock.Mock
 }
 
@@ -40,7 +40,27 @@ func (m *MockUserDriverFactory) CreateUser(*db.User) error {
 	return args.Error(0)
 }
 
+func (m *MockUserDriverFactory) FindByEmail(string) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockGoogleOAuthDriverFactory) GenerateUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
+
 func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -54,7 +74,17 @@ func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) error {
 	return args.Error(0)
 }
 
-func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver) port.UserRepository {
+func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
+
+func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
 	return &MockUserRepositoryFactoryFuncObject{}
 }
 
@@ -63,18 +93,12 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserDriverFactory) FindByEmail(string) error {
-	args := m.Called()
-	return args.Error(0)
-}
 
-func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
-	args := m.Called()
-	return args.Error(0)
-}
 
-func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
-	args := m.Called()
+
+
+func (m *MockUserInputFactoryFuncObject) GetAuthUrl() error {
+  args := m.Called()
 	return args.Error(0)
 }
 
@@ -137,7 +161,8 @@ func TestLoginUser(t *testing.T) {
 	mockUserDriverFactory := new(MockUserDriverFactory)
 	mockUserDriverFactory.On("FindByEmail").Return(true)
 
-	// InputPortのCheckUserのモックを作成
+
+	// InputPortのLoginUserのモックを作成
 	uc := &UserController{
 		userDriverFactory:     mockUserDriverFactory,
 		userOutputFactory:     mockUserOutputFactoryFunc,
@@ -162,3 +187,36 @@ func TestLoginUser(t *testing.T) {
 	// InputPortのLoginUser()が1回呼ばれること
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "LoginUser", 1)
 }
+
+func TestGetAuthUrl(t *testing.T) {
+	/* Arrange */
+	c, _ := newRouter()
+	url := "https://www.google.com"
+	var expected error = nil
+
+	// Driverだけは実体が必要
+	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
+	mockGoogleOAuthDriverFactory.On("GenerateUrl").Return(url)
+
+	// InputPortのGetGoogleAuthUrlのモックを作成
+	uc := &UserController{
+		googleOAuthDriverFactory: mockGoogleOAuthDriverFactory,
+		userOutputFactory:        mockUserOutputFactoryFunc,
+		userRepositoryFactory:    mockUserRepositoryFactoryFunc,
+	}
+
+	// newUserInputPort.GetAuthUrl()をするためには、GetAuthUrl()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
+	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
+	mockUserInputFactoryFuncObject.On("GetAuthUrl").Return(nil)
+	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
+		return mockUserInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := uc.GetAuthUrl(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetAuthUrl", 1)
+}
+

@@ -7,7 +7,8 @@ import (
 )
 
 type UserGateway struct {
-	userDriver UserDriver
+	userDriver        UserDriver
+	googleOAuthDriver GoogleOAuthDriver
 }
 
 type UserDriver interface {
@@ -15,9 +16,14 @@ type UserDriver interface {
 	FindByEmail(string) error
 }
 
-func NewUserRepository(userDriver UserDriver) port.UserRepository {
+type GoogleOAuthDriver interface {
+	GenerateUrl() string
+}
+
+func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver) port.UserRepository {
 	return &UserGateway{
-		userDriver: userDriver,
+		userDriver:        userDriver,
+		googleOAuthDriver: googleOAuthDriver,
 	}
 }
 
@@ -40,4 +46,7 @@ func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
 		return err
 	}
 	return nil
+}
+func (ug *UserGateway) GenerateAuthUrl() string {
+	return ug.googleOAuthDriver.GenerateUrl()
 }
