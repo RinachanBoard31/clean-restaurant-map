@@ -22,7 +22,7 @@ $ docker compose -f environments/docker-compose.yml up -d
 #### 認証情報の追加
 1. 「アプリケーションの種類」をウェブアプリケーションにする
 2. 「承認済みの JavaScript 生成元」をバックエンドのものにする(http://localhost:PORT番号)
-3. 「承認済みのリダイレクト URI」をバックエンドのものにする(http://localhost:PORT番号/signup)
+3. 「承認済みのリダイレクト URI」をバックエンドのものにする(http://localhost:PORT番号/auth/signup)
 4. 「クライアント ID」と「クライアント シークレット」を環境変数にセットする
 5. 環境変数のBACKEND_URLに"http://localhost:PORT番号"をセットする
 
