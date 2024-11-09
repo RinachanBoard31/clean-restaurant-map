@@ -51,7 +51,7 @@ func (m *MockUserOutputPort) OutputAuthUrl(url string) error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputSignupWithAuth() error {
+func (m *MockUserOutputPort) OutputSignupWithAuth(id int) error {
 	args := m.Called()
 	return args.Error(0)
 }

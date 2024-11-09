@@ -70,7 +70,7 @@ func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth() error {
+func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(int) error {
 	args := m.Called()
 	return args.Error(0)
 }

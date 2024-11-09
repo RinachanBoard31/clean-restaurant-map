@@ -59,8 +59,8 @@ func (ui *UserInteractor) SignupDraft(code string) error {
 	if user, err = ui.userRepository.Create(user); err != nil {
 		return err
 	}
-
-	if err := ui.userOutputPort.OutputSignupWithAuth(); err != nil {
+	// urlのクエリパラメータにidを付与してそのidをユーザの更新時に受け取りどのユーザを更新するかを判別する
+	if err := ui.userOutputPort.OutputSignupWithAuth(user.Id); err != nil {
 		return err
 	}
 	return nil
