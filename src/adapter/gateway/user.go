@@ -12,7 +12,7 @@ type UserGateway struct {
 }
 
 type UserDriver interface {
-	CreateUser(*db.User) error
+	CreateUser(*db.User) (*db.User, error)
 	FindByEmail(string) error
 }
 
@@ -28,7 +28,7 @@ func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDrive
 	}
 }
 
-func (ug *UserGateway) Create(user *model.User) error {
+func (ug *UserGateway) Create(user *model.User) (*model.User, error) {
 	dbUser := &db.User{
 		Name:   user.Name,
 		Email:  user.Email,
@@ -36,10 +36,13 @@ func (ug *UserGateway) Create(user *model.User) error {
 		Sex:    user.Sex,
 		Gender: user.Gender,
 	}
-	if err := ug.userDriver.CreateUser(dbUser); err != nil {
-		return err
+
+	dbUser, err := ug.userDriver.CreateUser(dbUser)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	user.Id = dbUser.Id // createが成功していればidを取得できるのでセットする
+	return user, nil
 }
 
 func (ug *UserGateway) FindBy(user *model.UserCredentials) error {

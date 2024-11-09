@@ -12,7 +12,7 @@ type UserInputPort interface {
 }
 
 type UserRepository interface {
-	Create(*model.User) error
+	Create(*model.User) (*model.User, error)
 	FindBy(*model.UserCredentials) error
 	GenerateAuthUrl() string
 	GetUserInfoWithAuthCode(string) (string, error)
@@ -21,6 +21,6 @@ type UserRepository interface {
 type UserOutputPort interface {
 	OutputCreateResult() error
 	OutputLoginResult() error
-	OutputAuthUrl(url string) error
+	OutputAuthUrl(string) error
 	OutputSignupWithAuth() error
 }

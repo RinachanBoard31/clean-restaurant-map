@@ -21,12 +21,13 @@ type User struct {
 	UpdatedAt time.Time
 }
 
-func (dbu *DbUserDriver) CreateUser(user *User) error {
-	err := DB.Create(&user).Error
+func (dbu *DbUserDriver) CreateUser(user *User) (*User, error) {
+	result := DB.Create(&user)
+	err := result.Error
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return user, err
 }
 
 func (dbu *DbUserDriver) FindByEmail(email string) error {

@@ -13,9 +13,9 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) CreateUser(*db.User) error {
+func (m *MockUserRepository) CreateUser(*db.User) (*db.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*db.User), args.Error(1)
 }
 
 func (m *MockUserRepository) FindByEmail(string) error {
@@ -34,10 +34,6 @@ func (m *MockUserRepository) GetEmail(string) (string, error) {
 
 func TestCreate(t *testing.T) {
 	/* Arrange */
-	var expected error = nil
-	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("CreateUser").Return(nil)
-	ug := &UserGateway{userDriver: mockUserRepository}
 	user := &model.User{
 		Name:   "noiman",
 		Email:  "noiman@groovex.co.jp",
@@ -45,9 +41,22 @@ func TestCreate(t *testing.T) {
 		Sex:    1.0,
 		Gender: -0.5,
 	}
+	dbUser := &db.User{
+		Id:     1,
+		Name:   user.Name,
+		Email:  user.Email,
+		Age:    user.Age,
+		Sex:    user.Sex,
+		Gender: user.Gender,
+	}
+	expected := user
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("CreateUser").Return(dbUser, nil)
+	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
-	actual := ug.Create(user)
+	actual, _ := ug.Create(user)
 
 	/* Assert */
 	// 返り値が正しいこと

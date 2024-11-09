@@ -18,7 +18,7 @@ func NewUserInputPort(userRepository port.UserRepository, userOutputPort port.Us
 }
 
 func (ui *UserInteractor) CreateUser(user *model.User) error {
-	if err := ui.userRepository.Create(user); err != nil {
+	if _, err := ui.userRepository.Create(user); err != nil {
 		return err
 	}
 	if err := ui.userOutputPort.OutputCreateResult(); err != nil {
@@ -56,7 +56,7 @@ func (ui *UserInteractor) SignupDraft(code string) error {
 		Sex:    0.0,
 		Gender: 0.0,
 	}
-	if err := ui.userRepository.Create(user); err != nil {
+	if user, err = ui.userRepository.Create(user); err != nil {
 		return err
 	}
 

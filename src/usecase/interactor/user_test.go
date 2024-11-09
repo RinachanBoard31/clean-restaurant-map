@@ -16,9 +16,9 @@ type MockUserOutputPort struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) Create(user *model.User) error {
+func (m *MockUserRepository) Create(user *model.User) (*model.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockUserRepository) GenerateAuthUrl() string {
@@ -59,10 +59,12 @@ func (m *MockUserOutputPort) OutputSignupWithAuth() error {
 func TestCreateUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
-	user := &model.User{Id: 1, Name: "natori", Email: "test@example.com", Age: 52, Sex: -0.2, Gender: 1.0}
+	user := &model.User{Name: "natori", Email: "test@example.com", Age: 52, Sex: -0.2, Gender: 1.0}
+	returnedUser := user
+	returnedUser.Id = 1
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("Create").Return(nil)
+	mockUserRepository.On("Create").Return(returnedUser, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputCreateResult").Return(nil)
 
@@ -136,7 +138,7 @@ func TestSignupDraft(t *testing.T) {
 
 	mockUserRepository := new(MockUserRepository)
 	mockUserRepository.On("GetUserInfoWithAuthCode").Return(email, nil)
-	mockUserRepository.On("Create").Return(nil)
+	mockUserRepository.On("Create").Return(&model.User{}, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputSignupWithAuth").Return(nil)
 

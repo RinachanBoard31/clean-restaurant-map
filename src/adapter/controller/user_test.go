@@ -35,9 +35,9 @@ type MockUserInputFactoryFuncObject struct {
 	mock.Mock
 }
 
-func (m *MockUserDriverFactory) CreateUser(*db.User) error {
+func (m *MockUserDriverFactory) CreateUser(*db.User) (*db.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*db.User), args.Error(1)
 }
 
 func (m *MockUserDriverFactory) FindByEmail(string) error {
@@ -79,9 +79,9 @@ func mockUserOutputFactoryFunc(c echo.Context) port.UserOutputPort {
 	return &MockUserOutputFactoryFuncObject{}
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) error {
+func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) (*model.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
