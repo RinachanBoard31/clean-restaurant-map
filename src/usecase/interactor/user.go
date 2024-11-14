@@ -18,6 +18,10 @@ func NewUserInputPort(userRepository port.UserRepository, userOutputPort port.Us
 }
 
 func (ui *UserInteractor) CreateUser(user *model.User) error {
+	// 存在しない場合にerrが返ってくるため、nilであればすでに存在しているということ
+	if err := ui.userRepository.Exist(user); err == nil {
+		return err
+	}
 	if _, err := ui.userRepository.Create(user); err != nil {
 		return err
 	}

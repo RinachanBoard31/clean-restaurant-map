@@ -45,6 +45,13 @@ func (ug *UserGateway) Create(user *model.User) (*model.User, error) {
 	return user, nil
 }
 
+func (ug *UserGateway) Exist(user *model.User) error {
+	if err := ug.userDriver.FindByEmail(user.Email); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
 	if err := ug.userDriver.FindByEmail(user.Email); err != nil {
 		return err

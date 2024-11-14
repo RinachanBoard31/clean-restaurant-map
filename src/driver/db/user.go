@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"time"
 )
 
@@ -32,10 +33,11 @@ func (dbu *DbUserDriver) CreateUser(user *User) (*User, error) {
 
 func (dbu *DbUserDriver) FindByEmail(email string) error {
 	var user []*User
-	// 一致するemailがあるかを確認する
-	result := DB.Where("email = ?", email).First(&user)
-	if err := result.Error; err != nil {
-		return err
+	// Firstだと存在しない場合にサーバー側でエラーが発生してしまうため、Findでエラーを発生しないようにしている
+	result := DB.Where("email = ?", email).Find(&user)
+	// 存在しない場合にエラーは発生しないので、エラーを作成する
+	if result.RowsAffected == 0 {
+		return errors.New("user is not found")
 	}
 	return nil
 }

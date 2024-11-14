@@ -65,6 +65,31 @@ func TestCreate(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "CreateUser", 1)
 }
 
+func TestExist(t *testing.T) {
+	/* Arrange */
+	user := &model.User{
+		Name:   "noiman",
+		Email:  "noiman@groovex.co.jp",
+		Age:    35,
+		Sex:    1.0,
+		Gender: -0.5,
+	}
+	var expected error = nil
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("FindByEmail").Return(nil)
+	ug := &UserGateway{userDriver: mockUserRepository}
+
+	/* Act */
+	actual := ug.Exist(user)
+
+	/* Assert */
+	// 返り値が正しいこと
+	assert.Equal(t, expected, actual)
+	// userDriver.CreateUser()が1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
+}
+
 func TestFindBy(t *testing.T) {
 	/* Arrange */
 	var expected error = nil

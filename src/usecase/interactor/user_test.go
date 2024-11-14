@@ -2,6 +2,7 @@ package interactor
 
 import (
 	model "clean-storemap-api/src/entity"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,11 @@ type MockUserOutputPort struct {
 func (m *MockUserRepository) Create(user *model.User) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
+}
+
+func (m *MockUserRepository) Exist(user *model.User) error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func (m *MockUserRepository) GenerateAuthUrl() string {
@@ -59,11 +65,13 @@ func (m *MockUserOutputPort) OutputSignupWithAuth(id int) error {
 func TestCreateUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
+	err := errors.New("user is not found")
 	user := &model.User{Name: "natori", Email: "test@example.com", Age: 52, Sex: -0.2, Gender: 1.0}
 	returnedUser := user
 	returnedUser.Id = 1
 
 	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("Exist").Return(err) // 存在していない場合にエラーが返る
 	mockUserRepository.On("Create").Return(returnedUser, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputCreateResult").Return(nil)
@@ -74,11 +82,9 @@ func TestCreateUser(t *testing.T) {
 	actual := ui.CreateUser(user)
 
 	/* Assert */
-	// CreateUser()がOutputCreateResult()を返すこと
 	assert.Equal(t, expected, actual)
-	// RepositoryのCreateが1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "Exist", 1)
 	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
-	// OutputPortのOutputCreateResult()が1回呼ばれること
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputCreateResult", 1)
 }
 
@@ -153,6 +159,5 @@ func TestSignupDraft(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockUserRepository.AssertNumberOfCalls(t, "GetUserInfoWithAuthCode", 1)
-	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputSignupWithAuth", 1)
 }

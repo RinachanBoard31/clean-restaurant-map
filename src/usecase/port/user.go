@@ -12,6 +12,7 @@ type UserInputPort interface {
 }
 
 type UserRepository interface {
+	Exist(*model.User) error
 	Create(*model.User) (*model.User, error)
 	FindBy(*model.UserCredentials) error
 	GenerateAuthUrl() string

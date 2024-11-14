@@ -83,7 +83,10 @@ func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) (*model.User, 
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
-
+func (m *MockUserRepositoryFactoryFuncObject) Exist(*model.User) error {
+	args := m.Called()
+	return args.Error(0)
+}
 func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
