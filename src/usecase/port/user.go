@@ -24,4 +24,5 @@ type UserOutputPort interface {
 	OutputLoginResult() error
 	OutputAuthUrl(string) error
 	OutputSignupWithAuth(int) error
+	OutputAlreadySignedup() error
 }

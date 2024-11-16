@@ -42,7 +42,7 @@ func NewRouter(echo *echo.Echo, storeController controller.StoreI, userControlle
 func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/", router.storeController.GetStores)
 	router.echo.GET("/stores/opening-hours", router.storeController.GetNearStores)
-	router.echo.POST("/user", router.userController.CreateUser)
+	router.echo.POST("/user", router.userController.CreateUser) // こっちは時期に使わなくなります。
 	router.echo.POST("/login", router.userController.LoginUser)
 	router.echo.GET("/auth", router.userController.GetAuthUrl)            // Google認証用のURLを取得し返す
 	router.echo.GET("/auth/signup", router.userController.SignupWithAuth) // ユーザの認証を確認し仮登録する(本登録は未実装,UpdateUserで行う)

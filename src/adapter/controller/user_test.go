@@ -75,6 +75,11 @@ func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(int) error {
 	return args.Error(0)
 }
 
+func (m *MockUserOutputFactoryFuncObject) OutputAlreadySignedup() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func mockUserOutputFactoryFunc(c echo.Context) port.UserOutputPort {
 	return &MockUserOutputFactoryFuncObject{}
 }

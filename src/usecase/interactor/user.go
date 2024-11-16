@@ -18,10 +18,7 @@ func NewUserInputPort(userRepository port.UserRepository, userOutputPort port.Us
 }
 
 func (ui *UserInteractor) CreateUser(user *model.User) error {
-	// 存在しない場合にerrが返ってくるため、nilであればすでに存在しているということ
-	if err := ui.userRepository.Exist(user); err == nil {
-		return err
-	}
+
 	if _, err := ui.userRepository.Create(user); err != nil {
 		return err
 	}
@@ -59,6 +56,14 @@ func (ui *UserInteractor) SignupDraft(code string) error {
 		Age:    0,
 		Sex:    0.0,
 		Gender: 0.0,
+	}
+	// 存在しない場合にerrが返ってくるため、nilであればすでに存在しているということ
+	if err := ui.userRepository.Exist(user); err == nil {
+		// すでに登録されている場合はログイン画面に遷移させる
+		if err := ui.userOutputPort.OutputAlreadySignedup(); err != nil {
+			return err
+		}
+		return err
 	}
 	if user, err = ui.userRepository.Create(user); err != nil {
 		return err
