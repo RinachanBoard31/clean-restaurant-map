@@ -19,6 +19,7 @@ type StoreGateway struct {
 
 type StoreDriver interface {
 	GetStores() ([]*db.FavoriteStore, error)
+	FindFavorite(storeId string, userId int) (*db.FavoriteStore, error)
 	SaveStore(*db.FavoriteStore) error
 }
 
@@ -75,7 +76,15 @@ func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 	return stores, nil
 }
 
-func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId string) error {
+func (sg *StoreGateway) ExistFavorite(store *model.Store, userId int) (bool, error) {
+	_, err := sg.storeDriver.FindFavorite(store.Id, userId)
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId int) error {
 	dbStore := &db.FavoriteStore{
 		Id:                  uuid.New().String(),
 		UserId:              userId,
@@ -94,3 +103,6 @@ func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId string) err
 
 	return nil
 }
+
+// DoesDuplicateFavorite()
+// -> storeId && userIdが favorite store tableに存在するかどうかを確認する

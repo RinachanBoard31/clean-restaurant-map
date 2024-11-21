@@ -33,7 +33,14 @@ func (si *StoreInteractor) GetNearStores() error {
 	return si.storeOutputPort.OutputAllStores(places)
 }
 
-func (si *StoreInteractor) SaveFavoriteStore(store *model.Store, userId string) error {
+func (si *StoreInteractor) SaveFavoriteStore(store *model.Store, userId int) error {
+	exist, err := si.storeRepository.ExistFavorite(store, userId)
+	if err != nil {
+		return err
+	}
+	if exist {
+		return si.storeOutputPort.OutputAlreadyExistFavorite()
+	}
 	if err := si.storeRepository.SaveFavoriteStore(store, userId); err != nil {
 		return err
 	}

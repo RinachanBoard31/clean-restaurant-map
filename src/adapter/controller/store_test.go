@@ -44,6 +44,11 @@ func (m *MockStoreDriverFactory) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
+func (m *MockStoreDriverFactory) FindFavorite(string, int) (*db.FavoriteStore, error) {
+	args := m.Called()
+	return args.Get(0).(*db.FavoriteStore), args.Error(1)
+}
+
 func (m *MockStoreDriverFactory) SaveStore(*db.FavoriteStore) error {
 	args := m.Called()
 	return args.Error(0)
@@ -64,6 +69,11 @@ func (m *MockStoreOutputFactoryFuncObject) OutputSaveFavoriteStoreResult() error
 	return args.Error(0)
 }
 
+func (m *MockStoreOutputFactoryFuncObject) OutputAlreadyExistFavorite() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func mockStoreOutputFactoryFunc(c echo.Context) port.StoreOutputPort {
 	return &MockStoreOutputFactoryFuncObject{}
 }
@@ -78,7 +88,12 @@ func (m *MockStoreRepositoryFactoryFuncObject) GetNearStores() ([]*model.Store, 
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId string) error {
+func (m *MockStoreRepositoryFactoryFuncObject) ExistFavorite(store *model.Store, userId int) (bool, error) {
+	args := m.Called(store, userId)
+	return args.Get(0).(bool), args.Error(1)
+}
+
+func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -97,7 +112,7 @@ func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 	return args.Error(0)
 }
 
-func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId string) error {
+func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -194,7 +209,7 @@ func TestFavoriteSaveStore(t *testing.T) {
 	c, rec := newRouter()
 
 	reqBody := `{
-		"userId": "test@example.com",
+		"userId": 1,
 		"storeId": "Id001",
 		"storeName": "UEC cafe",
 		"regularOpeningHours": "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",

@@ -11,7 +11,7 @@ import (
 )
 
 type StoreRequestBody struct {
-	UserId              string `json:"userId" validate:"required"`
+	UserId              int    `json:"userId" validate:"required"`
 	StoreId             string `json:"storeId" validate:"required"`
 	StoreName           string `json:"storeName" validate:"required"`
 	RegularOpeningHours string `json:"regularOpeningHours"`

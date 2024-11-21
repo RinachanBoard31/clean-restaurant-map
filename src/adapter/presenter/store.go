@@ -54,3 +54,8 @@ func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 func (sp *StorePresenter) OutputSaveFavoriteStoreResult() error {
 	return sp.c.JSON(http.StatusOK, map[string]interface{}{})
 }
+
+func (sp *StorePresenter) OutputAlreadyExistFavorite() error {
+	errMsg := "Already exist favorite store"
+	return sp.c.JSON(http.StatusConflict, map[string]interface{}{"error": errMsg})
+}

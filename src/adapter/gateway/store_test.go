@@ -59,6 +59,11 @@ func (m *MockStoreRepository) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
+func (m *MockStoreRepository) FindFavorite(storeId string, userId int) (*db.FavoriteStore, error) {
+	args := m.Called(storeId, userId)
+	return args.Get(0).(*db.FavoriteStore), args.Error(1)
+}
+
 func (m *MockStoreRepository) SaveStore(dbStore *db.FavoriteStore) error {
 	args := m.Called(dbStore)
 	return args.Error(0)
@@ -150,7 +155,7 @@ func TestSaveFavoriteStore(t *testing.T) {
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("SaveStore", mock.MatchedBy(func(dbStore *db.FavoriteStore) bool {
 		// UUIDはテストで完全一致が不可能なため、dbStore.id以外のフィールドを検証
-		return dbStore.UserId == "test@example.com" &&
+		return dbStore.UserId == 1 &&
 			dbStore.StoreId == "Id001" &&
 			dbStore.StoreName == "UEC cafe" &&
 			dbStore.RegularOpeningHours == "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00" &&
@@ -167,7 +172,7 @@ func TestSaveFavoriteStore(t *testing.T) {
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
 		Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 	}
-	userId := "test@example.com"
+	userId := 1
 
 	/* Act */
 	actual := sg.SaveFavoriteStore(store, userId)
