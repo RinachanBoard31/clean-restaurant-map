@@ -22,6 +22,7 @@ type StoreRequestBody struct {
 type StoreI interface {
 	GetStores(c echo.Context) error
 	GetNearStores(c echo.Context) error
+	SaveFavoriteStore(c echo.Context) error
 }
 
 type StoreOutputFactory func(echo.Context) port.StoreOutputPort
