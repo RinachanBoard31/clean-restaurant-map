@@ -126,6 +126,3 @@ func (sg *StoreGateway) GetTopFavoriteStores() ([]*model.Store, error) {
 
 	return stores, nil
 }
-
-// DoesDuplicateFavorite()
-// -> storeId && userIdが favorite store tableに存在するかどうかを確認する

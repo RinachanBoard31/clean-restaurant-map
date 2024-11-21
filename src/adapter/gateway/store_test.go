@@ -13,6 +13,8 @@ import (
 func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	dummyStores := make([]*db.FavoriteStore, 0)
 	dummyStores = append(dummyStores, &db.FavoriteStore{
+		Id:                  "id_1",
+		UserId:              1,
 		StoreId:             "Id001",
 		StoreName:           "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
@@ -21,6 +23,8 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 		Longitude:           "139.762",
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
+		Id:                  "id_2",
+		UserId:              1,
 		StoreId:             "Id002",
 		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
@@ -29,6 +33,8 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 		Longitude:           "139.763",
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
+		Id:                  "id_2",
+		UserId:              2,
 		StoreId:             "Id002",
 		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
@@ -100,7 +106,7 @@ func TestGetAll(t *testing.T) {
 	stores = append(
 		stores,
 		&model.Store{
-			Id:                  "Id001",
+			Id:                  "id_1",
 			Name:                "UEC cafe",
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
@@ -110,7 +116,7 @@ func TestGetAll(t *testing.T) {
 	stores = append(
 		stores,
 		&model.Store{
-			Id:                  "Id002",
+			Id:                  "id_2",
 			Name:                "UEC restaurant",
 			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
@@ -120,7 +126,7 @@ func TestGetAll(t *testing.T) {
 	stores = append(
 		stores,
 		&model.Store{
-			Id:                  "Id002",
+			Id:                  "id_2",
 			Name:                "UEC restaurant",
 			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
