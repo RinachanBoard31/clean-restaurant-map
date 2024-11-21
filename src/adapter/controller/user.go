@@ -15,6 +15,7 @@ type UserI interface {
 	CreateUser(c echo.Context) error
 	LoginUser(c echo.Context) error
 	GetAuthUrl(c echo.Context) error
+	SignupWithAuth(c echo.Context) error
 }
 
 type UserOutputFactory func(echo.Context) port.UserOutputPort
@@ -95,8 +96,14 @@ func (uc *UserController) LoginUser(c echo.Context) error {
 	}
 	return nil
 }
+
 func (uc *UserController) GetAuthUrl(c echo.Context) error {
 	return uc.newUserInputPort(c).GetAuthUrl()
+}
+
+func (uc *UserController) SignupWithAuth(c echo.Context) error {
+	codeParameter := c.QueryParam("code") // パラメータの取得
+	return uc.newUserInputPort(c).SignupDraft(codeParameter)
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

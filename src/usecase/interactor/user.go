@@ -18,7 +18,8 @@ func NewUserInputPort(userRepository port.UserRepository, userOutputPort port.Us
 }
 
 func (ui *UserInteractor) CreateUser(user *model.User) error {
-	if err := ui.userRepository.Create(user); err != nil {
+
+	if _, err := ui.userRepository.Create(user); err != nil {
 		return err
 	}
 	if err := ui.userOutputPort.OutputCreateResult(); err != nil {
@@ -40,4 +41,36 @@ func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
 func (ui *UserInteractor) GetAuthUrl() error {
 	url := ui.userRepository.GenerateAuthUrl()
 	return ui.userOutputPort.OutputAuthUrl(url)
+}
+
+func (ui *UserInteractor) SignupDraft(code string) error {
+	email, err := ui.userRepository.GetUserInfoWithAuthCode(code)
+	if err != nil {
+		return err
+	}
+
+	// 先にemailのみで登録する(仮登録)
+	user := &model.User{
+		Name:   "",
+		Email:  email,
+		Age:    0,
+		Sex:    0.0,
+		Gender: 0.0,
+	}
+	// 存在しない場合にerrが返ってくるため、nilであればすでに存在しているということ
+	if err := ui.userRepository.Exist(user); err == nil {
+		// すでに登録されている場合はログイン画面に遷移させる
+		if err := ui.userOutputPort.OutputAlreadySignedup(); err != nil {
+			return err
+		}
+		return err
+	}
+	if user, err = ui.userRepository.Create(user); err != nil {
+		return err
+	}
+	// urlのクエリパラメータにidを付与してそのidをユーザの更新時に受け取りどのユーザを更新するかを判別する
+	if err := ui.userOutputPort.OutputSignupWithAuth(user.Id); err != nil {
+		return err
+	}
+	return nil
 }
