@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"clean-storemap-api/src/adapter/gateway"
 	api "clean-storemap-api/src/driver/api"
 	db "clean-storemap-api/src/driver/db"
@@ -81,7 +82,7 @@ func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 	return args.Error(0)
 }
 
-func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore() error {
+func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(*model.Store) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -171,10 +172,23 @@ func TestGetNearStores(t *testing.T) {
 	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetNearStores", 1)
 }
 
-func TestSaveStore(t *testing.T) {
+func TestFavoriteSaveStore(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	expected := errors.New("")
+
+	reqBody := `{
+		"id": "Id001",
+		"name": "UEC cafe",
+		"regularOpeningHours": "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+		"priceLevel": "PRICE_LEVEL_MODERATE",
+		"latitude": "35.713",
+		"longitude": "139.762"
+	}`
+
+	req := httptest.NewRequest(http.MethodPost, "/favorite-store", bytes.NewBufferString(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)

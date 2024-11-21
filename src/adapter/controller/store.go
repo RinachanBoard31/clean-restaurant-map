@@ -2,20 +2,21 @@ package controller
 
 import (
 	"clean-storemap-api/src/adapter/gateway"
+	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"gopkg.in/go-playground/validator.v9"
 )
 
-type storeForController struct {
-	Id   int
-	Name string
-}
-
-type StoreJson struct {
-	ResponseCode int
-	Message      string
-	Stores       []storeForController
+type StoreRequestBody struct {
+	Id                  string `json:"id" validate:"required"`
+	Name                string `json:"name" validate:"required"`
+	RegularOpeningHours string `json:"regularOpeningHours"`
+	PriceLevel          string `json:"priceLevel"`
+	Latitude            string `json:"latitude" validate:"required"`
+	Longitude           string `json:"longitude" validate:"required"`
 }
 
 type StoreI interface {
@@ -62,7 +63,18 @@ func (sc *StoreController) GetNearStores(c echo.Context) error {
 }
 
 func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
-	return sc.newStoreInputPort(c).SaveFavoriteStore()
+	var s StoreRequestBody
+	if err := c.Bind(&s); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if err := c.Validate(&s); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
+	}
+	store, err := model.NewStore(s.Id, s.Name, s.RegularOpeningHours, s.PriceLevel, s.Latitude, s.Longitude)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return sc.newStoreInputPort(c).SaveFavoriteStore(store)
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

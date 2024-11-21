@@ -7,7 +7,7 @@ import (
 type StoreInputPort interface {
 	GetStores() error
 	GetNearStores() error
-	SaveFavoriteStore() error
+	SaveFavoriteStore(*model.Store) error
 }
 
 type StoreRepository interface {

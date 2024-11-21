@@ -1,6 +1,7 @@
 package interactor
 
 import (
+	model "clean-storemap-api/src/entity"
 	port "clean-storemap-api/src/usecase/port"
 )
 
@@ -30,4 +31,8 @@ func (si *StoreInteractor) GetNearStores() error {
 		return err
 	}
 	return si.storeOutputPort.OutputAllStores(places)
+}
+
+func (si *StoreInteractor) SaveFavoriteStore(store *model.Store) error {
+	return nil
 }
