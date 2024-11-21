@@ -13,11 +13,11 @@ func NewStoreDriver() *DbStoreDriver {
 /* interfaceと型は同義。仮にgatewayがDBの型を知ったとしても、どんなDBから来たかわかるわけではないのでおk */
 type FavoriteStore struct {
 	Id                  string `gorm:"primaryKey"`
-	Name                string
+	Name                string `gorm:"not null"`
 	RegularOpeningHours string
 	PriceLevel          string
-	Latitude            string
-	Longitude           string
+	Latitude            string `gorm:"not null"`
+	Longitude           string `gorm:"not null"`
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 }

@@ -46,3 +46,19 @@ func TestOutputAllStores(t *testing.T) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
 }
+
+func TestOutputSaveFavoriteStoreResult(t *testing.T) {
+	/* Arrange */
+	expected := "{}\n"
+	c, rec := newRouter()
+	sp := &StorePresenter{c: c}
+
+	/* Act */
+	actual := sp.OutputSaveFavoriteStoreResult()
+
+	/* Assert */
+	// sp.OutputSaveFavoriteStoreResult()がJSONを返すこ
+	if assert.NoError(t, actual) {
+		assert.Equal(t, expected, rec.Body.String())
+	}
+}

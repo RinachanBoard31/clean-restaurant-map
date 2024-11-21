@@ -50,3 +50,7 @@ func (sp *StorePresenter) OutputAllStores(stores []*model.Store) error {
 	output_json := &StoreOutputJson{Stores: json_stores}
 	return sp.c.JSON(http.StatusOK, output_json)
 }
+
+func (sp *StorePresenter) OutputSaveFavoriteStoreResult() error {
+	return sp.c.JSON(http.StatusOK, map[string]interface{}{})
+}
