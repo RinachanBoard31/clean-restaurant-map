@@ -26,8 +26,8 @@ func (m *MockStoreRepository) GetNearStores() ([]*model.Store, error) {
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepository) SaveFavoriteStore(*model.Store) error {
-	args := m.Called()
+func (m *MockStoreRepository) SaveFavoriteStore(store *model.Store) error {
+	args := m.Called(store)
 	return args.Error(0)
 }
 
@@ -111,7 +111,7 @@ func TestGetNearStores(t *testing.T) {
 
 func TestSaveFavoriteStore(t *testing.T) {
 	/* Arrange */
-	expected := errors.New("")
+	var expected error = nil
 	store := &model.Store{
 		Id:                  "Id001",
 		Name:                "UEC cafe",
@@ -121,8 +121,9 @@ func TestSaveFavoriteStore(t *testing.T) {
 	}
 
 	mockStoreRepository := new(MockStoreRepository)
-	mockStoreRepository.On("SaveFavoriteStore").Return(expected)
+	mockStoreRepository.On("SaveFavoriteStore", store).Return(nil)
 	mockStoreOutputPort := new(MockStoreOutputPort)
+	mockStoreOutputPort.On("OutputSaveFavoriteStoreResult").Return(nil)
 
 	si := &StoreInteractor{storeRepository: mockStoreRepository, storeOutputPort: mockStoreOutputPort}
 
@@ -132,4 +133,7 @@ func TestSaveFavoriteStore(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockStoreRepository.AssertNumberOfCalls(t, "SaveFavoriteStore", 1)
+	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputSaveFavoriteStoreResult", 1)
+	// RepositoryのSaveFavoriteStoreがstoreを引数として呼ばれること
+	mockStoreRepository.AssertCalled(t, "SaveFavoriteStore", store)
 }

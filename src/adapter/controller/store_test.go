@@ -44,12 +44,22 @@ func (m *MockStoreDriverFactory) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
+func (m *MockStoreDriverFactory) SaveStore(*db.FavoriteStore) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockGoogleMapDriverFactory) GetStores() ([]*api.Store, error) {
 	args := m.Called()
 	return args.Get(0).([]*api.Store), args.Error(1)
 }
 
 func (m *MockStoreOutputFactoryFuncObject) OutputAllStores([]*model.Store) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockStoreOutputFactoryFuncObject) OutputSaveFavoriteStoreResult() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -66,6 +76,11 @@ func (m *MockStoreRepositoryFactoryFuncObject) GetAll() ([]*model.Store, error) 
 func (m *MockStoreRepositoryFactoryFuncObject) GetNearStores() ([]*model.Store, error) {
 	args := m.Called()
 	return args.Get(0).([]*model.Store), args.Error(1)
+}
+
+func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(*model.Store) error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func mockStoreRepositoryFactoryFunc(storeDriver gateway.StoreDriver, googleMapDriver gateway.GoogleMapDriver) port.StoreRepository {
@@ -116,6 +131,7 @@ func TestGetStores(t *testing.T) {
 	// Driverだけは実体が必要
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
+	mockStoreDriverFactory.On("SaveStore").Return(nil)
 
 	// InputPortのGetStoresのモックを作成
 	sc := &StoreController{
@@ -174,8 +190,8 @@ func TestGetNearStores(t *testing.T) {
 
 func TestFavoriteSaveStore(t *testing.T) {
 	/* Arrange */
+	var expected error = nil
 	c, rec := newRouter()
-	expected := errors.New("")
 
 	reqBody := `{
 		"id": "Id001",
@@ -192,6 +208,7 @@ func TestFavoriteSaveStore(t *testing.T) {
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
+	mockStoreDriverFactory.On("SaveStore").Return(nil)
 
 	sc := &StoreController{
 		storeDriverFactory:     mockStoreDriverFactory,
@@ -200,7 +217,7 @@ func TestFavoriteSaveStore(t *testing.T) {
 	}
 
 	mockStoreInputFactoryFuncObject := new(MockStoreInputFactoryFuncObject)
-	mockStoreInputFactoryFuncObject.On("SaveFavoriteStore").Return(expected)
+	mockStoreInputFactoryFuncObject.On("SaveFavoriteStore").Return(nil)
 	sc.storeInputFactory = func(repository port.StoreRepository, output port.StoreOutputPort) port.StoreInputPort {
 		return mockStoreInputFactoryFuncObject
 	}
