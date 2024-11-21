@@ -61,6 +61,10 @@ func (sc *StoreController) GetNearStores(c echo.Context) error {
 	return sc.newStoreInputPort(c).GetNearStores()
 }
 
+func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
+	return sc.newStoreInputPort(c).SaveFavoriteStore()
+}
+
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */
 /* これによって、presenterのinterface(outputport)にecho.Contextを書かなくて良くなる */
 func (sc *StoreController) newStoreInputPort(c echo.Context) port.StoreInputPort {

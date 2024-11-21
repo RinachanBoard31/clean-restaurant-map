@@ -11,7 +11,7 @@ func NewStoreDriver() *DbStoreDriver {
 }
 
 /* interfaceと型は同義。仮にgatewayがDBの型を知ったとしても、どんなDBから来たかわかるわけではないのでおk */
-type Store struct {
+type FavoriteStore struct {
 	Id                  string `gorm:"primaryKey"`
 	Name                string
 	RegularOpeningHours string
@@ -22,8 +22,8 @@ type Store struct {
 	UpdatedAt           time.Time
 }
 
-func (dbs *DbStoreDriver) GetStores() ([]*Store, error) {
-	var stores []*Store
+func (dbs *DbStoreDriver) GetStores() ([]*FavoriteStore, error) {
+	var stores []*FavoriteStore
 	err := DB.Find(&stores).Error
 	if err != nil {
 		return nil, err

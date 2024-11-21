@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func makeDummyDbStores() ([]*db.Store, error) {
-	dummyStores := make([]*db.Store, 0)
-	dummyStores = append(dummyStores, &db.Store{
+func makeDummyDbStores() ([]*db.FavoriteStore, error) {
+	dummyStores := make([]*db.FavoriteStore, 0)
+	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "Id001",
 		Name:                "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
@@ -20,7 +20,7 @@ func makeDummyDbStores() ([]*db.Store, error) {
 		Latitude:            "35.713",
 		Longitude:           "139.762",
 	})
-	dummyStores = append(dummyStores, &db.Store{
+	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "Id002",
 		Name:                "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
@@ -54,9 +54,9 @@ type MockStoreRepository struct {
 	mock.Mock
 }
 
-func (m *MockStoreRepository) GetStores() ([]*db.Store, error) {
+func (m *MockStoreRepository) GetStores() ([]*db.FavoriteStore, error) {
 	args := m.Called()
-	return args.Get(0).([]*db.Store), args.Error(1)
+	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
 type MockGoogleMapRepository struct {

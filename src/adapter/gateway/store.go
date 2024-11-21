@@ -16,7 +16,7 @@ type StoreGateway struct {
 }
 
 type StoreDriver interface {
-	GetStores() ([]*db.Store, error)
+	GetStores() ([]*db.FavoriteStore, error)
 }
 
 type GoogleMapDriver interface {

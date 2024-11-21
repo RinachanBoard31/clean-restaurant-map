@@ -38,9 +38,9 @@ type MockStoreInputFactoryFuncObject struct {
 	mock.Mock
 }
 
-func (m *MockStoreDriverFactory) GetStores() ([]*db.Store, error) {
+func (m *MockStoreDriverFactory) GetStores() ([]*db.FavoriteStore, error) {
 	args := m.Called()
-	return args.Get(0).([]*db.Store), args.Error(1)
+	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
 func (m *MockGoogleMapDriverFactory) GetStores() ([]*api.Store, error) {
@@ -81,6 +81,11 @@ func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 	return args.Error(0)
 }
 
+func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 // Validationのために必要なメソッド
 type CustomValidator struct {
 	validator *validator.Validate
@@ -109,7 +114,7 @@ func TestGetStores(t *testing.T) {
 
 	// Driverだけは実体が必要
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
-	mockStoreDriverFactory.On("GetStores").Return([]*db.Store{}, nil)
+	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
 
 	// InputPortのGetStoresのモックを作成
 	sc := &StoreController{
@@ -164,4 +169,33 @@ func TestGetNearStores(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	assert.Equal(t, http.StatusOK, rec.Code)
 	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetNearStores", 1)
+}
+
+func TestSaveStore(t *testing.T) {
+	/* Arrange */
+	c, rec := newRouter()
+	expected := errors.New("")
+
+	mockStoreDriverFactory := new(MockStoreDriverFactory)
+	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
+
+	sc := &StoreController{
+		storeDriverFactory:     mockStoreDriverFactory,
+		storeOutputFactory:     mockStoreOutputFactoryFunc,
+		storeRepositoryFactory: mockStoreRepositoryFactoryFunc,
+	}
+
+	mockStoreInputFactoryFuncObject := new(MockStoreInputFactoryFuncObject)
+	mockStoreInputFactoryFuncObject.On("SaveFavoriteStore").Return(expected)
+	sc.storeInputFactory = func(repository port.StoreRepository, output port.StoreOutputPort) port.StoreInputPort {
+		return mockStoreInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := sc.SaveFavoriteStore(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "SaveFavoriteStore", 1)
 }

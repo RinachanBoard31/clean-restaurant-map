@@ -9,6 +9,7 @@ import (
 )
 
 var DB *gorm.DB
+
 func InitDB() {
 	dsn := os.Getenv("TESTDB_CONNECTION")
 
@@ -20,6 +21,6 @@ func InitDB() {
 	}
 
 	// ここで使用するすべての構造体をMigrate
-	DB.AutoMigrate(&Store{})
+	DB.AutoMigrate(&FavoriteStore{})
 	DB.AutoMigrate(&User{})
 }

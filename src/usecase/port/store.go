@@ -7,6 +7,7 @@ import (
 type StoreInputPort interface {
 	GetStores() error
 	GetNearStores() error
+	SaveFavoriteStore() error
 }
 
 type StoreRepository interface {
