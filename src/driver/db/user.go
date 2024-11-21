@@ -42,15 +42,15 @@ func (dbu *DbUserDriver) FindByEmail(email string) (*User, error) {
 	return user, nil
 }
 
-func (dbu *DbUserDriver) UpdateUser(user *User, updateColumns map[string]interface{}) error {
-	result := DB.Model(&user).Updates(updateColumns)
+func (dbu *DbUserDriver) UpdateUser(user *User, updateData map[string]interface{}) error {
+	result := DB.Model(&user).Updates(updateData)
 	if err := result.Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (dbu *DbUserDriver) GetUser(id int) (*User, error) {
+func (dbu *DbUserDriver) FindById(id int) (*User, error) {
 	var user *User
 	// Firstだと存在しない場合にサーバー側でエラーが発生してしまうため、Findでエラーを発生しないようにしている
 	result := DB.Find(&user, id)

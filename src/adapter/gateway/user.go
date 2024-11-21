@@ -14,7 +14,7 @@ type UserGateway struct {
 type UserDriver interface {
 	CreateUser(*db.User) (*db.User, error)
 	UpdateUser(*db.User, map[string]interface{}) error
-	GetUser(int) (*db.User, error)
+	FindById(int) (*db.User, error)
 	FindByEmail(string) (*db.User, error)
 }
 
@@ -54,7 +54,7 @@ func (ug *UserGateway) Exist(user *model.User) error {
 	return nil
 }
 
-func (ug *UserGateway) Update(user *model.User, updatedUserData map[string]interface{}) error {
+func (ug *UserGateway) Update(user *model.User, updateData model.ChangeForUser) error {
 	// updateされるUserをdb.Userに変換
 	dbUser := &db.User{
 		Id:     user.Id,
@@ -64,14 +64,14 @@ func (ug *UserGateway) Update(user *model.User, updatedUserData map[string]inter
 		Sex:    user.Sex,
 		Gender: user.Gender,
 	}
-	if err := ug.userDriver.UpdateUser(dbUser, updatedUserData); err != nil {
+	if err := ug.userDriver.UpdateUser(dbUser, updateData); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (ug *UserGateway) Get(id int) (*model.User, error) {
-	dbUser, err := ug.userDriver.GetUser(id)
+	dbUser, err := ug.userDriver.FindById(id)
 	if err != nil {
 		return nil, err
 	}

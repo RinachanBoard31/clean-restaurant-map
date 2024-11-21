@@ -44,7 +44,7 @@ func (m *MockUserDriverFactory) UpdateUser(*db.User, map[string]interface{}) err
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserDriverFactory) GetUser(int) (*db.User, error) {
+func (m *MockUserDriverFactory) FindById(int) (*db.User, error) {
 	args := m.Called()
 	return args.Get(0).(*db.User), args.Error(1)
 }
@@ -107,7 +107,7 @@ func (m *MockUserRepositoryFactoryFuncObject) Exist(*model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) Update(*model.User, map[string]interface{}) error {
+func (m *MockUserRepositoryFactoryFuncObject) Update(*model.User, model.ChangeForUser) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -140,7 +140,7 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserInputFactoryFuncObject) UpdateUser(map[string]interface{}) error {
+func (m *MockUserInputFactoryFuncObject) UpdateUser(int, model.ChangeForUser) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -204,11 +204,13 @@ func TestUpdateUser(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	var expected error = nil
-	// 更新するデータ
-	reqBody := `{"id":1,"name":"noiman","age":10,"sex":0.4, "gender":0}`
-	req := httptest.NewRequest(http.MethodPatch, "/user", bytes.NewBufferString(reqBody))
+	reqBody := `{"name":"test","age":10,"sex":0.4, "gender":0}`
+	req := httptest.NewRequest(http.MethodPut, "/user/1", bytes.NewBufferString(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
+	// パスパラメータを設定
+	c.SetParamNames("id")
+	c.SetParamValues("1")
 
 	// Driver用
 	mockUserDriverFactory := new(MockUserDriverFactory)

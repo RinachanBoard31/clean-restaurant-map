@@ -3,6 +3,7 @@ package interactor
 import (
 	model "clean-storemap-api/src/entity"
 	port "clean-storemap-api/src/usecase/port"
+	"errors"
 )
 
 type UserInteractor struct {
@@ -28,15 +29,26 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	return nil
 }
 
-func (ui *UserInteractor) UpdateUser(updatedData map[string]interface{}) error {
-	// データの整形(entityのカラムの有効範囲に基づいて整形するので、controllerではなくusecaseで行う)
-	formatedData, err := model.UserFormat(updatedData)
-	if err != nil {
-		return err
+func (ui *UserInteractor) UpdateUser(id int, updateData model.ChangeForUser) error {
+	// emailを更新しようとした場合にはエラーを返す
+	if _, ok := updateData["email"]; ok {
+		return errors.New("emailは更新できません")
 	}
-	// idを取得しidは更新しないので削除
-	id := formatedData["id"].(int)
-	delete(formatedData, "id")
+	// 整形する
+	if age, ok := updateData["age"].(int); ok {
+		if err := model.AgeValid(age); err != nil {
+			return err
+		}
+		updateData["age"] = model.AgeFormat(age)
+	}
+
+	if sex, ok := updateData["sex"].(float32); ok {
+		updateData["sex"] = model.SexFormat(sex)
+	}
+
+	if gender, ok := updateData["gender"].(float32); ok {
+		updateData["gender"] = model.GenderFormat(gender)
+	}
 
 	// userが存在するか確認
 	user, err := ui.userRepository.Get(id)
@@ -44,7 +56,7 @@ func (ui *UserInteractor) UpdateUser(updatedData map[string]interface{}) error {
 		return err
 	}
 
-	if err := ui.userRepository.Update(user, formatedData); err != nil {
+	if err := ui.userRepository.Update(user, updateData); err != nil {
 		return err
 	}
 	if err := ui.userOutputPort.OutputUpdateResult(); err != nil {

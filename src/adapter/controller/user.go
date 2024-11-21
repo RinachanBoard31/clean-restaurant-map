@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
@@ -81,16 +82,61 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 }
 
 func (uc *UserController) UpdateUser(c echo.Context) error {
-	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまい、今回、int型の0を有効な値としているためkeyの判断がつかないのでUserRequestBodyにバインドさせずに取得する
+	idStr := c.Param("id")
+	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまうため、UserRequestBodyにバインドさせずに取得する
 	var requestBody map[string]interface{}
+	// 数字 -> float64, 文字列-> stringと変換される
 	if err := json.NewDecoder(c.Request().Body).Decode(&requestBody); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	// updateの条件を満たすかを確認する
-	if err := model.UpdateConditions(requestBody); err != nil {
-		return err
+
+	updateData := make(model.ChangeForUser)
+	// 更新データを型変換しつつ格納する
+	// id
+	var id int
+	var err error
+	if id, err = strconv.Atoi(idStr); err != nil {
+		return c.JSON(http.StatusInternalServerError, "id is not int")
 	}
-	return uc.newUserInputPort(c).UpdateUser(requestBody)
+
+	// name
+	if name, ok := requestBody["name"]; ok {
+		updateData["name"] = name
+	}
+
+	// email
+	if email, ok := requestBody["email"]; ok {
+		updateData["email"] = email
+	}
+
+	// age
+	if age, ok := requestBody["age"].(string); ok {
+		updateData["age"], _ = strconv.Atoi(age)
+	} else if age, ok := requestBody["age"].(float64); ok {
+		updateData["age"] = int(age)
+	} else {
+		updateData["age"] = requestBody["age"]
+	}
+
+	// sex
+	if sex, ok := requestBody["sex"].(string); ok {
+		updateData["sex"], _ = strconv.ParseFloat(sex, 32)
+	} else if sex, ok := requestBody["sex"].(float64); ok {
+		updateData["sex"] = float32(sex)
+	} else {
+		updateData["sex"] = requestBody["sex"]
+	}
+
+	// gender
+	if gender, ok := requestBody["gender"].(string); ok {
+		updateData["gender"], _ = strconv.ParseFloat(gender, 32)
+	} else if gender, ok := requestBody["gender"].(float64); ok {
+		updateData["gender"] = float32(gender)
+	} else {
+		updateData["gender"] = requestBody["gender"]
+	}
+
+	return uc.newUserInputPort(c).UpdateUser(id, updateData)
 }
 
 func (uc *UserController) LoginUser(c echo.Context) error {

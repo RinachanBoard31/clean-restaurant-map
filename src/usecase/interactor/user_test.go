@@ -26,7 +26,7 @@ func (m *MockUserRepository) Exist(user *model.User) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserRepository) Update(*model.User, map[string]interface{}) error {
+func (m *MockUserRepository) Update(*model.User, model.ChangeForUser) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -114,7 +114,7 @@ func TestUpdateUser(t *testing.T) {
 		Sex:    0.1,
 		Gender: -0.1,
 	}
-	updatedColumns := map[string]interface{}{"id": 1, "name": "sample2", "sex": 1.0, "gender": -1.0}
+	updateData := model.ChangeForUser{"name": "sample2", "sex": 1.0, "gender": -1.0}
 
 	mockUserRepository := new(MockUserRepository)
 	mockUserRepository.On("Get").Return(existUser, nil)
@@ -125,7 +125,7 @@ func TestUpdateUser(t *testing.T) {
 	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
 
 	/* Act */
-	actual := ui.UpdateUser(updatedColumns)
+	actual := ui.UpdateUser(id, updateData)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

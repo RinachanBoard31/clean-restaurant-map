@@ -23,7 +23,7 @@ func (m *MockUserRepository) UpdateUser(*db.User, map[string]interface{}) error 
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) GetUser(int) (*db.User, error) {
+func (m *MockUserRepository) FindById(int) (*db.User, error) {
 	args := m.Called()
 	return args.Get(0).(*db.User), args.Error(1)
 }
@@ -114,27 +114,23 @@ func TestUpdate(t *testing.T) {
 		Gender: -0.1,
 	}
 	// 更新後のデータ
-	updatedUserData := map[string]interface{}{"name": "sample2", "sex": 1.0, "gender": -1.0}
+	updatedUserData := model.ChangeForUser{"name": "sample2", "sex": 1.0, "gender": -1.0}
 
 	mockUserRepository := new(MockUserRepository)
 	mockUserRepository.On("UpdateUser").Return(nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
-	// ug := &UserGateway{userDriver: &db.DbUserDriver{}}
 
 	/* Act */
 	actual := ug.Update(user, updatedUserData)
 
 	/* Assert */
-	// 返り値が正しいこと
 	assert.Equal(t, expected, actual)
-	// userDriver.CreateUser()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "UpdateUser", 1)
 }
 
 func TestGet(t *testing.T) {
 	/* Arrange */
 	id := 1
-	var expectedError error = nil
 	dbUser := &db.User{
 		Id:     id,
 		Name:   "sample",
@@ -144,6 +140,7 @@ func TestGet(t *testing.T) {
 		Gender: -0.5,
 	}
 
+	var expectedError error = nil
 	expectedUser := &model.User{
 		Id:     dbUser.Id,
 		Name:   dbUser.Name,
@@ -154,7 +151,7 @@ func TestGet(t *testing.T) {
 	}
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GetUser").Return(dbUser, nil)
+	mockUserRepository.On("FindById").Return(dbUser, nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
@@ -165,7 +162,7 @@ func TestGet(t *testing.T) {
 	assert.Equal(t, expectedUser, actual)
 	assert.Equal(t, expectedError, actualErr)
 	// userDriver.CreateUser()が1回呼ばれること
-	mockUserRepository.AssertNumberOfCalls(t, "GetUser", 1)
+	mockUserRepository.AssertNumberOfCalls(t, "FindById", 1)
 }
 
 func TestFindBy(t *testing.T) {
