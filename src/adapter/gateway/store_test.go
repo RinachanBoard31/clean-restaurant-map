@@ -13,7 +13,7 @@ import (
 func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	dummyStores := make([]*db.FavoriteStore, 0)
 	dummyStores = append(dummyStores, &db.FavoriteStore{
-		Id:                  "Id001",
+		StoreId:             "Id001",
 		StoreName:           "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
@@ -21,7 +21,15 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 		Longitude:           "139.762",
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
-		Id:                  "Id002",
+		StoreId:             "Id002",
+		StoreName:           "UEC restaurant",
+		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
+		PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+		Latitude:            "35.714",
+		Longitude:           "139.763",
+	})
+	dummyStores = append(dummyStores, &db.FavoriteStore{
+		StoreId:             "Id002",
 		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 		PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
@@ -69,6 +77,11 @@ func (m *MockStoreRepository) SaveStore(dbStore *db.FavoriteStore) error {
 	return args.Error(0)
 }
 
+func (m *MockStoreRepository) GetTopStores() ([]*db.FavoriteStore, error) {
+	args := m.Called()
+	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
+}
+
 type MockGoogleMapRepository struct {
 	mock.Mock
 }
@@ -92,6 +105,16 @@ func TestGetAll(t *testing.T) {
 			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 			PriceLevel:          "PRICE_LEVEL_MODERATE",
 			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
+		},
+	)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id002",
+			Name:                "UEC restaurant",
+			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
+			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+			Location:            model.Location{Lat: "35.714", Lng: "139.763"},
 		},
 	)
 	stores = append(
@@ -180,4 +203,50 @@ func TestSaveFavoriteStore(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockStoreRepository.AssertNumberOfCalls(t, "SaveStore", 1)
+}
+
+func TestGetTopFavoriteStores(t *testing.T) {
+	/* Arrange */
+	mockStoreRepository := new(MockStoreRepository)
+	mockStoreRepository.On("GetTopStores").Return(makeDummyDbStores())
+	sg := &StoreGateway{storeDriver: mockStoreRepository}
+	stores := make([]*model.Store, 0)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id001",
+			Name:                "UEC cafe",
+			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
+		},
+	)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id002",
+			Name:                "UEC restaurant",
+			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
+			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+			Location:            model.Location{Lat: "35.714", Lng: "139.763"},
+		},
+	)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id002",
+			Name:                "UEC restaurant",
+			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
+			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+			Location:            model.Location{Lat: "35.714", Lng: "139.763"},
+		},
+	)
+	expected := stores
+
+	/* Act */
+	actual, _ := sg.GetTopFavoriteStores()
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockStoreRepository.AssertNumberOfCalls(t, "GetTopStores", 1)
 }

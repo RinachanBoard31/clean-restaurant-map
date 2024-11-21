@@ -24,6 +24,7 @@ type StoreI interface {
 	GetStores(c echo.Context) error
 	GetNearStores(c echo.Context) error
 	SaveFavoriteStore(c echo.Context) error
+	GetTopFavoriteStores(c echo.Context) error
 }
 
 type StoreOutputFactory func(echo.Context) port.StoreOutputPort
@@ -77,6 +78,10 @@ func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return sc.newStoreInputPort(c).SaveFavoriteStore(store, s.UserId)
+}
+
+func (sc *StoreController) GetTopFavoriteStores(c echo.Context) error {
+	return sc.newStoreInputPort(c).GetTopFavoriteStores()
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

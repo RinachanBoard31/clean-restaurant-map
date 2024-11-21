@@ -50,3 +50,26 @@ func (dbs *DbStoreDriver) SaveStore(dbStore *FavoriteStore) error {
 	}
 	return nil
 }
+
+func (dbs *DbStoreDriver) GetTopStores() ([]*FavoriteStore, error) {
+	var stores []*FavoriteStore
+	oneWeekAgo := time.Now().AddDate(0, 0, -7)
+
+	// 1週間以内のデータを集計し、store_idごとにカウント、上位10件を取得
+	subQuery := DB.Model(&FavoriteStore{}).
+		Select("store_id, COUNT(*) as count").
+		Where("created_at >= ?", oneWeekAgo).
+		Group("store_id").
+		Order("count(*) desc").
+		Limit(10)
+
+	// subQueryをJOINして取得
+	err := DB.Model(&FavoriteStore{}).
+		Joins("JOIN (?) as top_stores ON favorite_stores.store_id = top_stores.store_id", subQuery).
+		Find(&stores).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return stores, nil
+}

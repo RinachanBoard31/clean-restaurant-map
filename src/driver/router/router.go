@@ -43,6 +43,7 @@ func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/", router.storeController.GetStores)
 	router.echo.GET("/stores/opening-hours", router.storeController.GetNearStores)
 	router.echo.POST("/stores/favorite", router.storeController.SaveFavoriteStore)
+	router.echo.GET("/stores/favorite-ranking", router.storeController.GetTopFavoriteStores)
 	router.echo.POST("/user", router.userController.CreateUser) // こっちは時期に使わなくなります。
 	router.echo.POST("/login", router.userController.LoginUser)
 	router.echo.GET("/auth", router.userController.GetAuthUrl)            // Google認証用のURLを取得し返す
