@@ -78,7 +78,7 @@ func (m *MockStoreRepositoryFactoryFuncObject) GetNearStores() ([]*model.Store, 
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(*model.Store) error {
+func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -97,7 +97,7 @@ func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 	return args.Error(0)
 }
 
-func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(*model.Store) error {
+func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -194,8 +194,9 @@ func TestFavoriteSaveStore(t *testing.T) {
 	c, rec := newRouter()
 
 	reqBody := `{
-		"id": "Id001",
-		"name": "UEC cafe",
+		"userId": "test@example.com",
+		"storeId": "Id001",
+		"storeName": "UEC cafe",
 		"regularOpeningHours": "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 		"priceLevel": "PRICE_LEVEL_MODERATE",
 		"latitude": "35.713",

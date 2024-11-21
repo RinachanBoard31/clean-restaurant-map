@@ -11,8 +11,9 @@ import (
 )
 
 type StoreRequestBody struct {
-	Id                  string `json:"id" validate:"required"`
-	Name                string `json:"name" validate:"required"`
+	UserId              string `json:"userId" validate:"required"`
+	StoreId             string `json:"storeId" validate:"required"`
+	StoreName           string `json:"storeName" validate:"required"`
 	RegularOpeningHours string `json:"regularOpeningHours"`
 	PriceLevel          string `json:"priceLevel"`
 	Latitude            string `json:"latitude" validate:"required"`
@@ -71,11 +72,11 @@ func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
 	if err := c.Validate(&s); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
 	}
-	store, err := model.NewStore(s.Id, s.Name, s.RegularOpeningHours, s.PriceLevel, s.Latitude, s.Longitude)
+	store, err := model.NewStore(s.StoreId, s.StoreName, s.RegularOpeningHours, s.PriceLevel, s.Latitude, s.Longitude)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return sc.newStoreInputPort(c).SaveFavoriteStore(store)
+	return sc.newStoreInputPort(c).SaveFavoriteStore(store, s.UserId)
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */

@@ -13,7 +13,9 @@ func NewStoreDriver() *DbStoreDriver {
 /* interfaceと型は同義。仮にgatewayがDBの型を知ったとしても、どんなDBから来たかわかるわけではないのでおk */
 type FavoriteStore struct {
 	Id                  string `gorm:"primaryKey"`
-	Name                string `gorm:"not null"`
+	UserId              string `gorm:"not null"`
+	StoreId             string `gorm:"not null"`
+	StoreName           string `gorm:"not null"`
 	RegularOpeningHours string
 	PriceLevel          string
 	Latitude            string `gorm:"not null"`
@@ -31,8 +33,8 @@ func (dbs *DbStoreDriver) GetStores() ([]*FavoriteStore, error) {
 	return stores, nil
 }
 
-func (dbs *DbStoreDriver) SaveStore(store *FavoriteStore) error {
-	err := DB.Create(&store).Error
+func (dbs *DbStoreDriver) SaveStore(dbStore *FavoriteStore) error {
+	err := DB.Create(&dbStore).Error
 	if err != nil {
 		return err
 	}

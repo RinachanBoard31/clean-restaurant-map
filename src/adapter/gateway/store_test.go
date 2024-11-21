@@ -14,7 +14,7 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	dummyStores := make([]*db.FavoriteStore, 0)
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "Id001",
-		Name:                "UEC cafe",
+		StoreName:           "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
 		Latitude:            "35.713",
@@ -22,7 +22,7 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "Id002",
-		Name:                "UEC restaurant",
+		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
 		PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
 		Latitude:            "35.714",
@@ -59,8 +59,8 @@ func (m *MockStoreRepository) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
-func (m *MockStoreRepository) SaveStore(*db.FavoriteStore) error {
-	args := m.Called()
+func (m *MockStoreRepository) SaveStore(dbStore *db.FavoriteStore) error {
+	args := m.Called(dbStore)
 	return args.Error(0)
 }
 
@@ -148,7 +148,17 @@ func TestSaveFavoriteStore(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	mockStoreRepository := new(MockStoreRepository)
-	mockStoreRepository.On("SaveStore").Return(nil)
+	mockStoreRepository.On("SaveStore", mock.MatchedBy(func(dbStore *db.FavoriteStore) bool {
+		// UUIDはテストで完全一致が不可能なため、dbStore.id以外のフィールドを検証
+		return dbStore.UserId == "test@example.com" &&
+			dbStore.StoreId == "Id001" &&
+			dbStore.StoreName == "UEC cafe" &&
+			dbStore.RegularOpeningHours == "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00" &&
+			dbStore.PriceLevel == "PRICE_LEVEL_MODERATE" &&
+			dbStore.Latitude == "35.713" &&
+			dbStore.Longitude == "139.762"
+	})).Return(nil)
+
 	sg := &StoreGateway{storeDriver: mockStoreRepository}
 	store := &model.Store{
 		Id:                  "Id001",
@@ -157,9 +167,10 @@ func TestSaveFavoriteStore(t *testing.T) {
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
 		Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 	}
+	userId := "test@example.com"
 
 	/* Act */
-	actual := sg.SaveFavoriteStore(store)
+	actual := sg.SaveFavoriteStore(store, userId)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
