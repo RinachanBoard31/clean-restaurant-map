@@ -1,0 +1,9 @@
+{
+    "userId": 1,
+    "storeId": "Id002",
+    "storeName": "UEC cafe",
+    "regularOpeningHours": "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+    "priceLevel": "PRICE_LEVEL_MODERATE",
+    "latitude": "35.713",
+    "longitude": "139.762"
+}
