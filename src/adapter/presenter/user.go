@@ -21,6 +21,10 @@ func (up *UserPresenter) OutputCreateResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
+func (up *UserPresenter) OutputUpdateResult() error {
+	return up.c.JSON(http.StatusOK, map[string]interface{}{})
+}
+
 func (up *UserPresenter) OutputLoginResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }

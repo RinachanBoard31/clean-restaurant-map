@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -13,6 +14,7 @@ import (
 
 type UserI interface {
 	CreateUser(c echo.Context) error
+	UpdateUser(c echo.Context) error
 	LoginUser(c echo.Context) error
 	GetAuthUrl(c echo.Context) error
 	SignupWithAuth(c echo.Context) error
@@ -36,6 +38,7 @@ type UserController struct {
 // 数字型のものが未入力であれば0として扱われる
 // 0を存在する値とする場合にはカスタムバリデーションを使用する必要があり、カスタムバリデーションにはrouterで定義されたecho.New()を使用するため今回はカスタムバリデーションを使用しない。
 type UserRequestBody struct {
+	Id     int     `json:"id"`
 	Name   string  `json:"name" validate:"required"`
 	Email  string  `json:"email" validate:"required,email"`
 	Age    int     `json:"age"`
@@ -75,6 +78,19 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return uc.newUserInputPort(c).CreateUser(user)
+}
+
+func (uc *UserController) UpdateUser(c echo.Context) error {
+	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまい、今回、int型の0を有効な値としているためkeyの判断がつかないのでUserRequestBodyにバインドさせずに取得する
+	var requestBody map[string]interface{}
+	if err := json.NewDecoder(c.Request().Body).Decode(&requestBody); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	// updateの条件を満たすかを確認する
+	if err := model.UpdateConditions(requestBody); err != nil {
+		return err
+	}
+	return uc.newUserInputPort(c).UpdateUser(requestBody)
 }
 
 func (uc *UserController) LoginUser(c echo.Context) error {

@@ -40,9 +40,17 @@ func (m *MockUserDriverFactory) CreateUser(*db.User) (*db.User, error) {
 	return args.Get(0).(*db.User), args.Error(1)
 }
 
-func (m *MockUserDriverFactory) FindByEmail(string) error {
+func (m *MockUserDriverFactory) UpdateUser(*db.User, map[string]interface{}) error {
 	args := m.Called()
 	return args.Error(0)
+}
+func (m *MockUserDriverFactory) GetUser(int) (*db.User, error) {
+	args := m.Called()
+	return args.Get(0).(*db.User), args.Error(1)
+}
+func (m *MockUserDriverFactory) FindByEmail(string) (*db.User, error) {
+	args := m.Called()
+	return args.Get(0).(*db.User), args.Error(1)
 }
 
 func (m *MockGoogleOAuthDriverFactory) GenerateUrl() string {
@@ -56,6 +64,11 @@ func (m *MockGoogleOAuthDriverFactory) GetEmail(string) (string, error) {
 }
 
 func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputFactoryFuncObject) OutputUpdateResult() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -88,18 +101,30 @@ func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) (*model.User, 
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
+
 func (m *MockUserRepositoryFactoryFuncObject) Exist(*model.User) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
+
+func (m *MockUserRepositoryFactoryFuncObject) Update(*model.User, map[string]interface{}) error {
 	args := m.Called()
-	return args.Get(0).(string)
+	return args.Error(0)
+}
+
+func (m *MockUserRepositoryFactoryFuncObject) Get(int) (*model.User, error) {
+	args := m.Called()
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
+	args := m.Called()
+	return args.Get(0).(string)
 }
 
 func (m *MockUserRepositoryFactoryFuncObject) GetUserInfoWithAuthCode(string) (string, error) {
@@ -112,6 +137,10 @@ func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDri
 }
 
 func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *MockUserInputFactoryFuncObject) UpdateUser(map[string]interface{}) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -171,6 +200,40 @@ func TestCreateUser(t *testing.T) {
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "CreateUser", 1)
 }
 
+func TestUpdateUser(t *testing.T) {
+	/* Arrange */
+	c, rec := newRouter()
+	var expected error = nil
+	// 更新するデータ
+	reqBody := `{"id":1,"name":"noiman","age":10,"sex":0.4, "gender":0}`
+	req := httptest.NewRequest(http.MethodPatch, "/user", bytes.NewBufferString(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
+
+	// Driver用
+	mockUserDriverFactory := new(MockUserDriverFactory)
+
+	uc := &UserController{
+		userDriverFactory:     mockUserDriverFactory,
+		userOutputFactory:     mockUserOutputFactoryFunc,
+		userRepositoryFactory: mockUserRepositoryFactoryFunc,
+	}
+
+	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
+	mockUserInputFactoryFuncObject.On("UpdateUser").Return(nil)
+	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
+		return mockUserInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := uc.UpdateUser(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "UpdateUser", 1)
+}
+
 func TestLoginUser(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
@@ -183,7 +246,7 @@ func TestLoginUser(t *testing.T) {
 
 	// Driverだけは実体が必要
 	mockUserDriverFactory := new(MockUserDriverFactory)
-	mockUserDriverFactory.On("FindByEmail").Return(true)
+	mockUserDriverFactory.On("FindByEmail").Return(nil, nil)
 
 	// InputPortのLoginUserのモックを作成
 	uc := &UserController{

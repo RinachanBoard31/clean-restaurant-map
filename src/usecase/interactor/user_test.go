@@ -26,6 +26,14 @@ func (m *MockUserRepository) Exist(user *model.User) error {
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *MockUserRepository) Update(*model.User, map[string]interface{}) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *MockUserRepository) Get(int) (*model.User, error) {
+	args := m.Called()
+	return args.Get(0).(*model.User), args.Error(1)
+}
 
 func (m *MockUserRepository) GenerateAuthUrl() string {
 	args := m.Called()
@@ -43,6 +51,11 @@ func (m *MockUserRepository) GetUserInfoWithAuthCode(string) (string, error) {
 }
 
 func (m *MockUserOutputPort) OutputCreateResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputPort) OutputUpdateResult() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -88,6 +101,37 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputCreateResult", 1)
+}
+
+func TestUpdateUser(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	id := 1
+	existUser := &model.User{
+		Id:     id,
+		Name:   "sample",
+		Age:    10,
+		Sex:    0.1,
+		Gender: -0.1,
+	}
+	updatedColumns := map[string]interface{}{"id": 1, "name": "sample2", "sex": 1.0, "gender": -1.0}
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserRepository.On("Get").Return(existUser, nil)
+	mockUserRepository.On("Update").Return(nil)
+	mockUserOutputPort := new(MockUserOutputPort)
+	mockUserOutputPort.On("OutputUpdateResult").Return(nil)
+
+	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
+
+	/* Act */
+	actual := ui.UpdateUser(updatedColumns)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "Get", 1)
+	mockUserRepository.AssertNumberOfCalls(t, "Update", 1)
+	mockUserOutputPort.AssertNumberOfCalls(t, "OutputUpdateResult", 1)
 }
 
 func TestLoginUser(t *testing.T) {

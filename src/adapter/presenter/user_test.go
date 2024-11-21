@@ -24,6 +24,21 @@ func TestOutputCreateResult(t *testing.T) {
 	}
 }
 
+func TestOutputUpdateResult(t *testing.T) {
+	/* Arrange */
+	expected := "{}\n"
+	c, rec := newRouter()
+	up := &UserPresenter{c: c}
+
+	/* Act */
+	actual := up.OutputCreateResult()
+
+	/* Assert */
+	if assert.NoError(t, actual) {
+		assert.Equal(t, expected, rec.Body.String())
+	}
+}
+
 func TestOutputLoginResult(t *testing.T) {
 	/* Arrange */
 	expected := "{}\n"

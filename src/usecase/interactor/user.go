@@ -28,6 +28,31 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	return nil
 }
 
+func (ui *UserInteractor) UpdateUser(updatedData map[string]interface{}) error {
+	// データの整形(entityのカラムの有効範囲に基づいて整形するので、controllerではなくusecaseで行う)
+	formatedData, err := model.UserFormat(updatedData)
+	if err != nil {
+		return err
+	}
+	// idを取得しidは更新しないので削除
+	id := formatedData["id"].(int)
+	delete(formatedData, "id")
+
+	// userが存在するか確認
+	user, err := ui.userRepository.Get(id)
+	if err != nil {
+		return err
+	}
+
+	if err := ui.userRepository.Update(user, formatedData); err != nil {
+		return err
+	}
+	if err := ui.userOutputPort.OutputUpdateResult(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
 	if err := ui.userRepository.FindBy(user); err != nil {
 		return err

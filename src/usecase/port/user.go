@@ -6,6 +6,7 @@ import (
 
 type UserInputPort interface {
 	CreateUser(*model.User) error
+	UpdateUser(map[string]interface{}) error
 	LoginUser(*model.UserCredentials) error
 	GetAuthUrl() error
 	SignupDraft(string) error
@@ -14,6 +15,8 @@ type UserInputPort interface {
 type UserRepository interface {
 	Exist(*model.User) error
 	Create(*model.User) (*model.User, error)
+	Update(*model.User, map[string]interface{}) error
+	Get(int) (*model.User, error)
 	FindBy(*model.UserCredentials) error
 	GenerateAuthUrl() string
 	GetUserInfoWithAuthCode(string) (string, error)
@@ -21,6 +24,7 @@ type UserRepository interface {
 
 type UserOutputPort interface {
 	OutputCreateResult() error
+	OutputUpdateResult() error
 	OutputLoginResult() error
 	OutputAuthUrl(string) error
 	OutputSignupWithAuth(int) error
