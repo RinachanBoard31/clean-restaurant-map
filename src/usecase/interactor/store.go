@@ -34,5 +34,11 @@ func (si *StoreInteractor) GetNearStores() error {
 }
 
 func (si *StoreInteractor) SaveFavoriteStore(store *model.Store) error {
+	if err := si.storeRepository.SaveFavoriteStore(store); err != nil {
+		return err
+	}
+	if err := si.storeOutputPort.OutputSaveFavoriteStoreResult(); err != nil {
+		return err
+	}
 	return nil
 }

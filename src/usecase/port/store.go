@@ -13,8 +13,10 @@ type StoreInputPort interface {
 type StoreRepository interface {
 	GetAll() ([]*model.Store, error)
 	GetNearStores() ([]*model.Store, error)
+	SaveFavoriteStore(*model.Store) error
 }
 
 type StoreOutputPort interface {
 	OutputAllStores([]*model.Store) error
+	OutputSaveFavoriteStoreResult() error
 }
