@@ -59,6 +59,11 @@ func (m *MockStoreRepository) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
+func (m *MockStoreRepository) SaveStore(*db.FavoriteStore) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 type MockGoogleMapRepository struct {
 	mock.Mock
 }
@@ -137,4 +142,26 @@ func TestGetNearStores(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockGoogleMapRepository.AssertNumberOfCalls(t, "GetStores", 1)
+}
+
+func TestSaveFavoriteStore(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	mockStoreRepository := new(MockStoreRepository)
+	mockStoreRepository.On("SaveStore").Return(nil)
+	sg := &StoreGateway{storeDriver: mockStoreRepository}
+	store := &model.Store{
+		Id:                  "Id001",
+		Name:                "UEC cafe",
+		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+		PriceLevel:          "PRICE_LEVEL_MODERATE",
+		Location:            model.Location{Lat: "35.713", Lng: "139.762"},
+	}
+
+	/* Act */
+	actual := sg.SaveFavoriteStore(store)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockStoreRepository.AssertNumberOfCalls(t, "SaveStore", 1)
 }

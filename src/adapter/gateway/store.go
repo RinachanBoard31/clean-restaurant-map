@@ -17,6 +17,7 @@ type StoreGateway struct {
 
 type StoreDriver interface {
 	GetStores() ([]*db.FavoriteStore, error)
+	SaveStore(*db.FavoriteStore) error
 }
 
 type GoogleMapDriver interface {
@@ -70,4 +71,22 @@ func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 		})
 	}
 	return stores, nil
+}
+
+func (sg *StoreGateway) SaveFavoriteStore(store *model.Store) error {
+	dbStore := &db.FavoriteStore{
+		Id:                  store.Id,
+		Name:                store.Name,
+		RegularOpeningHours: store.RegularOpeningHours,
+		PriceLevel:          store.PriceLevel,
+		Latitude:            store.Location.Lat,
+		Longitude:           store.Location.Lng,
+	}
+
+	err := sg.storeDriver.SaveStore(dbStore)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

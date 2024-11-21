@@ -30,3 +30,11 @@ func (dbs *DbStoreDriver) GetStores() ([]*FavoriteStore, error) {
 	}
 	return stores, nil
 }
+
+func (dbs *DbStoreDriver) SaveStore(store *FavoriteStore) error {
+	err := DB.Create(&store).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
