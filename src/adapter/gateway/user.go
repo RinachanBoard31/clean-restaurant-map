@@ -12,12 +12,13 @@ type UserGateway struct {
 }
 
 type UserDriver interface {
-	CreateUser(*db.User) error
+	CreateUser(*db.User) (*db.User, error)
 	FindByEmail(string) error
 }
 
 type GoogleOAuthDriver interface {
 	GenerateUrl() string
+	GetEmail(string) (string, error)
 }
 
 func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver) port.UserRepository {
@@ -27,7 +28,7 @@ func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDrive
 	}
 }
 
-func (ug *UserGateway) Create(user *model.User) error {
+func (ug *UserGateway) Create(user *model.User) (*model.User, error) {
 	dbUser := &db.User{
 		Name:   user.Name,
 		Email:  user.Email,
@@ -35,7 +36,17 @@ func (ug *UserGateway) Create(user *model.User) error {
 		Sex:    user.Sex,
 		Gender: user.Gender,
 	}
-	if err := ug.userDriver.CreateUser(dbUser); err != nil {
+
+	dbUser, err := ug.userDriver.CreateUser(dbUser)
+	if err != nil {
+		return nil, err
+	}
+	user.Id = dbUser.Id // createが成功していればidを取得できるのでセットする
+	return user, nil
+}
+
+func (ug *UserGateway) Exist(user *model.User) error {
+	if err := ug.userDriver.FindByEmail(user.Email); err != nil {
 		return err
 	}
 	return nil
@@ -49,4 +60,12 @@ func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
 }
 func (ug *UserGateway) GenerateAuthUrl() string {
 	return ug.googleOAuthDriver.GenerateUrl()
+}
+
+func (ug *UserGateway) GetUserInfoWithAuthCode(code string) (string, error) {
+	email, err := ug.googleOAuthDriver.GetEmail(code)
+	if err != nil {
+		return "", err
+	}
+	return email, nil
 }

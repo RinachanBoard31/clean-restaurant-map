@@ -35,9 +35,9 @@ type MockUserInputFactoryFuncObject struct {
 	mock.Mock
 }
 
-func (m *MockUserDriverFactory) CreateUser(*db.User) error {
+func (m *MockUserDriverFactory) CreateUser(*db.User) (*db.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*db.User), args.Error(1)
 }
 
 func (m *MockUserDriverFactory) FindByEmail(string) error {
@@ -48,6 +48,11 @@ func (m *MockUserDriverFactory) FindByEmail(string) error {
 func (m *MockGoogleOAuthDriverFactory) GenerateUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
+}
+
+func (m *MockGoogleOAuthDriverFactory) GetEmail(string) (string, error) {
+	args := m.Called()
+	return args.Get(0).(string), args.Error(1)
 }
 
 func (m *MockUserOutputFactoryFuncObject) OutputCreateResult() error {
@@ -65,15 +70,28 @@ func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
 	return args.Error(0)
 }
 
-func mockUserOutputFactoryFunc(c echo.Context) port.UserOutputPort {
-	return &MockUserOutputFactoryFuncObject{}
-}
-
-func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) error {
+func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(int) error {
 	args := m.Called()
 	return args.Error(0)
 }
 
+func (m *MockUserOutputFactoryFuncObject) OutputAlreadySignedup() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func mockUserOutputFactoryFunc(c echo.Context) port.UserOutputPort {
+	return &MockUserOutputFactoryFuncObject{}
+}
+
+func (m *MockUserRepositoryFactoryFuncObject) Create(*model.User) (*model.User, error) {
+	args := m.Called()
+	return args.Get(0).(*model.User), args.Error(1)
+}
+func (m *MockUserRepositoryFactoryFuncObject) Exist(*model.User) error {
+	args := m.Called()
+	return args.Error(0)
+}
 func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
 	args := m.Called()
 	return args.Get(0).(string)
@@ -82,6 +100,11 @@ func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {
 func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
 	args := m.Called()
 	return args.Error(0)
+}
+
+func (m *MockUserRepositoryFactoryFuncObject) GetUserInfoWithAuthCode(string) (string, error) {
+	args := m.Called()
+	return args.Get(0).(string), args.Error(1)
 }
 
 func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
@@ -93,16 +116,17 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	return args.Error(0)
 }
 
-
-
-
-
 func (m *MockUserInputFactoryFuncObject) GetAuthUrl() error {
-  args := m.Called()
+	args := m.Called()
 	return args.Error(0)
 }
 
 func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserInputFactoryFuncObject) SignupDraft(string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -160,7 +184,6 @@ func TestLoginUser(t *testing.T) {
 	// Driverだけは実体が必要
 	mockUserDriverFactory := new(MockUserDriverFactory)
 	mockUserDriverFactory.On("FindByEmail").Return(true)
-
 
 	// InputPortのLoginUserのモックを作成
 	uc := &UserController{
@@ -220,3 +243,38 @@ func TestGetAuthUrl(t *testing.T) {
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "GetAuthUrl", 1)
 }
 
+func TestSignupWithAuth(t *testing.T) {
+	/* Arrange */
+	c, _ := newRouter()
+	var expected error = nil
+	reqBody := `{"code":"123456"}`
+	req := httptest.NewRequest(http.MethodPost, "/auth/signup", bytes.NewBufferString(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
+
+	// OAuth用(関数が実行されるわけではないので、mockの戻り値を設定しない)
+	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
+
+	// DB用(関数が実行されるわけではないので、mockの戻り値を設定しない)
+	mockUserDriverFactory := new(MockUserDriverFactory)
+
+	uc := &UserController{
+		googleOAuthDriverFactory: mockGoogleOAuthDriverFactory,
+		userDriverFactory:        mockUserDriverFactory,
+		userOutputFactory:        mockUserOutputFactoryFunc,
+		userRepositoryFactory:    mockUserRepositoryFactoryFunc,
+	}
+
+	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
+	mockUserInputFactoryFuncObject.On("SignupDraft").Return(nil)
+	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
+		return mockUserInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := uc.SignupWithAuth(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "SignupDraft", 1)
+}
