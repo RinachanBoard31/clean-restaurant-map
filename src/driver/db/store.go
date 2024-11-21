@@ -14,6 +14,7 @@ func NewStoreDriver() *DbStoreDriver {
 type FavoriteStore struct {
 	Id                  string `gorm:"primaryKey"`
 	UserId              int    `gorm:"not null"`
+	User                User   `gorm:"foreignKey:UserId;references:Id"`
 	StoreId             string `gorm:"not null"`
 	StoreName           string `gorm:"not null"`
 	RegularOpeningHours string
