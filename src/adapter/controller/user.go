@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
@@ -13,6 +15,7 @@ import (
 
 type UserI interface {
 	CreateUser(c echo.Context) error
+	UpdateUser(c echo.Context) error
 	LoginUser(c echo.Context) error
 	GetAuthUrl(c echo.Context) error
 	SignupWithAuth(c echo.Context) error
@@ -36,6 +39,7 @@ type UserController struct {
 // 数字型のものが未入力であれば0として扱われる
 // 0を存在する値とする場合にはカスタムバリデーションを使用する必要があり、カスタムバリデーションにはrouterで定義されたecho.New()を使用するため今回はカスタムバリデーションを使用しない。
 type UserRequestBody struct {
+	Id     int     `json:"id"`
 	Name   string  `json:"name" validate:"required"`
 	Email  string  `json:"email" validate:"required,email"`
 	Age    int     `json:"age"`
@@ -75,6 +79,64 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 	return uc.newUserInputPort(c).CreateUser(user)
+}
+
+func (uc *UserController) UpdateUser(c echo.Context) error {
+	idStr := c.Param("id")
+	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまうため、UserRequestBodyにバインドさせずに取得する
+	var requestBody map[string]interface{}
+	// 数字 -> float64, 文字列-> stringと変換される
+	if err := json.NewDecoder(c.Request().Body).Decode(&requestBody); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	updateData := make(model.ChangeForUser)
+	// 更新データを型変換しつつ格納する
+	// id
+	var id int
+	var err error
+	if id, err = strconv.Atoi(idStr); err != nil {
+		return c.JSON(http.StatusInternalServerError, "id is not int")
+	}
+
+	// name
+	if name, ok := requestBody["name"]; ok {
+		updateData["name"] = name
+	}
+
+	// email
+	if email, ok := requestBody["email"]; ok {
+		updateData["email"] = email
+	}
+
+	// age
+	if age, ok := requestBody["age"].(string); ok {
+		updateData["age"], _ = strconv.Atoi(age)
+	} else if age, ok := requestBody["age"].(float64); ok {
+		updateData["age"] = int(age)
+	} else {
+		updateData["age"] = requestBody["age"]
+	}
+
+	// sex
+	if sex, ok := requestBody["sex"].(string); ok {
+		updateData["sex"], _ = strconv.ParseFloat(sex, 32)
+	} else if sex, ok := requestBody["sex"].(float64); ok {
+		updateData["sex"] = float32(sex)
+	} else {
+		updateData["sex"] = requestBody["sex"]
+	}
+
+	// gender
+	if gender, ok := requestBody["gender"].(string); ok {
+		updateData["gender"], _ = strconv.ParseFloat(gender, 32)
+	} else if gender, ok := requestBody["gender"].(float64); ok {
+		updateData["gender"] = float32(gender)
+	} else {
+		updateData["gender"] = requestBody["gender"]
+	}
+
+	return uc.newUserInputPort(c).UpdateUser(id, updateData)
 }
 
 func (uc *UserController) LoginUser(c echo.Context) error {

@@ -26,6 +26,14 @@ func (m *MockUserRepository) Exist(user *model.User) error {
 	args := m.Called()
 	return args.Error(0)
 }
+func (m *MockUserRepository) Update(*model.User, model.ChangeForUser) error {
+	args := m.Called()
+	return args.Error(0)
+}
+func (m *MockUserRepository) Get(int) (*model.User, error) {
+	args := m.Called()
+	return args.Get(0).(*model.User), args.Error(1)
+}
 
 func (m *MockUserRepository) GenerateAuthUrl() string {
 	args := m.Called()
@@ -47,6 +55,11 @@ func (m *MockUserOutputPort) OutputCreateResult() error {
 	return args.Error(0)
 }
 
+func (m *MockUserOutputPort) OutputUpdateResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockUserOutputPort) OutputLoginResult() error {
 	args := m.Called()
 	return args.Error(0)
@@ -63,6 +76,11 @@ func (m *MockUserOutputPort) OutputSignupWithAuth(id int) error {
 }
 
 func (m *MockUserOutputPort) OutputAlreadySignedup() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockUserOutputPort) OutputHasEmailInRequestBody() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -88,6 +106,38 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputCreateResult", 1)
+}
+
+func TestUpdateUser(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	id := 1
+	existUser := &model.User{
+		Id:     id,
+		Name:   "sample",
+		Age:    10,
+		Sex:    0.1,
+		Gender: -0.1,
+	}
+	updateData := model.ChangeForUser{"name": "sample2", "sex": 1.0, "gender": -1.0}
+
+	mockUserRepository := new(MockUserRepository)
+	mockUserOutputPort := new(MockUserOutputPort)
+	mockUserOutputPort.On("OutputHasEmailInRequestBody").Return(nil)
+	mockUserRepository.On("Get").Return(existUser, nil)
+	mockUserRepository.On("Update").Return(nil)
+	mockUserOutputPort.On("OutputUpdateResult").Return(nil)
+
+	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
+
+	/* Act */
+	actual := ui.UpdateUser(id, updateData)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "Get", 1)
+	mockUserRepository.AssertNumberOfCalls(t, "Update", 1)
+	mockUserOutputPort.AssertNumberOfCalls(t, "OutputUpdateResult", 1)
 }
 
 func TestLoginUser(t *testing.T) {

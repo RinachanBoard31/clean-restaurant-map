@@ -18,6 +18,8 @@ type UserCredentials struct {
 	Email string
 }
 
+type ChangeForUser map[string]interface{}
+
 func emailValid(email string) error {
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	re := regexp.MustCompile(emailRegex)
@@ -27,14 +29,14 @@ func emailValid(email string) error {
 	return nil
 }
 
-func ageValid(age int) error {
+func AgeValid(age int) error {
 	if age < 0 {
 		return errors.New("年齢が0未満です。")
 	}
 	return nil
 }
 
-func ageFormat(age int) int {
+func AgeFormat(age int) int {
 	// ageValidで0未満はエラーとなるので0未満は扱わない。
 	if age >= 60 {
 		return 60
@@ -42,7 +44,7 @@ func ageFormat(age int) int {
 	return (age / 10) * 10
 }
 
-func sexFormat(sex float32) float32 {
+func SexFormat(sex float32) float32 {
 	if sex < -1.0 {
 		return -1.0
 	}
@@ -52,7 +54,7 @@ func sexFormat(sex float32) float32 {
 	return sex
 }
 
-func genderFormat(gender float32) float32 {
+func GenderFormat(gender float32) float32 {
 	if gender < -1.0 {
 		return -1.0
 	}
@@ -65,7 +67,7 @@ func genderFormat(gender float32) float32 {
 func NewUser(name string, email string, age int, sex float32, gender float32) (*User, error) {
 	// バリデーションのチェック
 	emailValidError := emailValid(email)
-	ageValidError := ageValid(age)
+	ageValidError := AgeValid(age)
 	if err := errors.Join(emailValidError, ageValidError); err != nil {
 		return nil, err
 	}
@@ -73,9 +75,9 @@ func NewUser(name string, email string, age int, sex float32, gender float32) (*
 	user := &User{
 		Name:   name,
 		Email:  email,
-		Age:    ageFormat(age),
-		Sex:    sexFormat(sex),
-		Gender: genderFormat(gender),
+		Age:    AgeFormat(age),
+		Sex:    SexFormat(sex),
+		Gender: GenderFormat(gender),
 	}
 	return user, nil
 }
