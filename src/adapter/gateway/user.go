@@ -13,7 +13,9 @@ type UserGateway struct {
 
 type UserDriver interface {
 	CreateUser(*db.User) (*db.User, error)
-	FindByEmail(string) error
+	UpdateUser(*db.User, map[string]interface{}) error
+	FindById(int) (*db.User, error)
+	FindByEmail(string) (*db.User, error)
 }
 
 type GoogleOAuthDriver interface {
@@ -46,18 +48,51 @@ func (ug *UserGateway) Create(user *model.User) (*model.User, error) {
 }
 
 func (ug *UserGateway) Exist(user *model.User) error {
-	if err := ug.userDriver.FindByEmail(user.Email); err != nil {
+	if _, err := ug.userDriver.FindByEmail(user.Email); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
-	if err := ug.userDriver.FindByEmail(user.Email); err != nil {
+func (ug *UserGateway) Update(user *model.User, updateData model.ChangeForUser) error {
+	// updateされるUserをdb.Userに変換
+	dbUser := &db.User{
+		Id:     user.Id,
+		Name:   user.Name,
+		Email:  user.Email,
+		Age:    user.Age,
+		Sex:    user.Sex,
+		Gender: user.Gender,
+	}
+	if err := ug.userDriver.UpdateUser(dbUser, updateData); err != nil {
 		return err
 	}
 	return nil
 }
+
+func (ug *UserGateway) Get(id int) (*model.User, error) {
+	dbUser, err := ug.userDriver.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+	user := &model.User{
+		Id:     dbUser.Id,
+		Name:   dbUser.Name,
+		Email:  dbUser.Email,
+		Age:    dbUser.Age,
+		Sex:    dbUser.Sex,
+		Gender: dbUser.Gender,
+	}
+	return user, nil
+}
+
+func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
+	if _, err := ug.userDriver.FindByEmail(user.Email); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ug *UserGateway) GenerateAuthUrl() string {
 	return ug.googleOAuthDriver.GenerateUrl()
 }

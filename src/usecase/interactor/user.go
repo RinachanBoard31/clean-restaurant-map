@@ -28,6 +28,42 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	return nil
 }
 
+func (ui *UserInteractor) UpdateUser(id int, updateData model.ChangeForUser) error {
+	// emailを更新しようとした場合にはエラーを返す
+	if _, ok := updateData["email"]; ok {
+		return ui.userOutputPort.OutputHasEmailInRequestBody()
+	}
+	// 整形する
+	if age, ok := updateData["age"].(int); ok {
+		if err := model.AgeValid(age); err != nil {
+			return err
+		}
+		updateData["age"] = model.AgeFormat(age)
+	}
+
+	if sex, ok := updateData["sex"].(float32); ok {
+		updateData["sex"] = model.SexFormat(sex)
+	}
+
+	if gender, ok := updateData["gender"].(float32); ok {
+		updateData["gender"] = model.GenderFormat(gender)
+	}
+
+	// userが存在するか確認
+	user, err := ui.userRepository.Get(id)
+	if err != nil {
+		return err
+	}
+
+	if err := ui.userRepository.Update(user, updateData); err != nil {
+		return err
+	}
+	if err := ui.userOutputPort.OutputUpdateResult(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
 	if err := ui.userRepository.FindBy(user); err != nil {
 		return err
