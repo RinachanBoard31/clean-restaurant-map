@@ -93,20 +93,3 @@ func NewUserCredentials(email string) (*UserCredentials, error) {
 	}
 	return user, nil
 }
-
-// func ValidateUser(emial: string, age) (map[string]interface{}, error) {
-// 	// バリデーションのチェック
-// 	var emailValidError error = nil
-// 	var ageValidError error = nil
-// 	if email, ok := formatedData["email"].(string); ok {
-// 		emailValidError = emailValid(email)
-// 	}
-// 	if age, ok := formatedData["age"].(int); ok {
-// 		ageValidError = AgeValid(age)
-// 	}
-// 	if err := errors.Join(emailValidError, ageValidError); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return formatedData, nil
-// }
