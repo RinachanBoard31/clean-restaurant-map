@@ -77,8 +77,11 @@ func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 }
 
 func (sg *StoreGateway) ExistFavorite(store *model.Store, userId int) (bool, error) {
-	_, err := sg.storeDriver.FindFavorite(store.Id, userId)
+	dbStore, err := sg.storeDriver.FindFavorite(store.Id, userId)
 	if err != nil {
+		return false, err
+	}
+	if dbStore == nil {
 		return false, nil
 	}
 	return true, nil

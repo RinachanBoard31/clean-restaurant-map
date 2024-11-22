@@ -1,7 +1,10 @@
 package db
 
 import (
+	"errors"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type DbStoreDriver struct{}
@@ -38,6 +41,9 @@ func (dbs *DbStoreDriver) FindFavorite(storeId string, userId int) (*FavoriteSto
 	var store FavoriteStore
 	err := DB.Where("store_id = ? AND user_id = ?", storeId, userId).First(&store).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	return &store, nil
