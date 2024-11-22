@@ -29,4 +29,5 @@ type UserOutputPort interface {
 	OutputAuthUrl(string) error
 	OutputSignupWithAuth(int) error
 	OutputAlreadySignedup() error
+	OutputHasEmailInRequestBody() error
 }

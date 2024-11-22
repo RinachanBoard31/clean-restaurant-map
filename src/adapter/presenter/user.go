@@ -42,3 +42,8 @@ func (up *UserPresenter) OutputAlreadySignedup() error {
 	url := os.Getenv("FRONT_URL") // すでに登録済みの場合はトップページにリダイレクト
 	return up.c.Redirect(http.StatusFound, url)
 }
+
+func (up *UserPresenter) OutputHasEmailInRequestBody() error {
+	errMsg := "Email is included in Request Body"
+	return up.c.JSON(http.StatusBadRequest, map[string]interface{}{"error": errMsg})
+}

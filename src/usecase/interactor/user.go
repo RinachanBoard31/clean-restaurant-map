@@ -3,7 +3,6 @@ package interactor
 import (
 	model "clean-storemap-api/src/entity"
 	port "clean-storemap-api/src/usecase/port"
-	"errors"
 )
 
 type UserInteractor struct {
@@ -32,7 +31,7 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 func (ui *UserInteractor) UpdateUser(id int, updateData model.ChangeForUser) error {
 	// emailを更新しようとした場合にはエラーを返す
 	if _, ok := updateData["email"]; ok {
-		return errors.New("emailは更新できません")
+		return ui.userOutputPort.OutputHasEmailInRequestBody()
 	}
 	// 整形する
 	if age, ok := updateData["age"].(int); ok {

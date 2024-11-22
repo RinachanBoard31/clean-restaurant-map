@@ -80,6 +80,11 @@ func (m *MockUserOutputPort) OutputAlreadySignedup() error {
 	return args.Error(0)
 }
 
+func (m *MockUserOutputPort) OutputHasEmailInRequestBody() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func TestCreateUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
@@ -117,9 +122,10 @@ func TestUpdateUser(t *testing.T) {
 	updateData := model.ChangeForUser{"name": "sample2", "sex": 1.0, "gender": -1.0}
 
 	mockUserRepository := new(MockUserRepository)
+	mockUserOutputPort := new(MockUserOutputPort)
+	mockUserOutputPort.On("OutputHasEmailInRequestBody").Return(nil)
 	mockUserRepository.On("Get").Return(existUser, nil)
 	mockUserRepository.On("Update").Return(nil)
-	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputUpdateResult").Return(nil)
 
 	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
