@@ -209,7 +209,6 @@ func TestFavoriteSaveStore(t *testing.T) {
 	c, rec := newRouter()
 
 	reqBody := `{
-		"userId": 1,
 		"storeId": "Id001",
 		"storeName": "UEC cafe",
 		"regularOpeningHours": "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
@@ -218,9 +217,11 @@ func TestFavoriteSaveStore(t *testing.T) {
 		"longitude": "139.762"
 	}`
 
-	req := httptest.NewRequest(http.MethodPost, "/favorite-store", bytes.NewBufferString(reqBody))
+	req := httptest.NewRequest(http.MethodPost, "/user/:user_id/favorite-store", bytes.NewBufferString(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
+	c.SetParamNames("user_id")
+	c.SetParamValues("1")
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
