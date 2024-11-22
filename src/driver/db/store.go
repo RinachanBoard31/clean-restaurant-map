@@ -1,10 +1,7 @@
 package db
 
 import (
-	"errors"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type DbStoreDriver struct{}
@@ -38,15 +35,16 @@ func (dbs *DbStoreDriver) GetStores() ([]*FavoriteStore, error) {
 }
 
 func (dbs *DbStoreDriver) FindFavorite(storeId string, userId int) (*FavoriteStore, error) {
-	var store FavoriteStore
-	err := DB.Where("store_id = ? AND user_id = ?", storeId, userId).First(&store).Error
+	var stores []FavoriteStore
+	err := DB.Where("store_id = ? AND user_id = ?", storeId, userId).Find(&stores).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil
-		}
 		return nil, err
 	}
-	return &store, nil
+	if len(stores) == 0 {
+		return nil, nil
+	}
+
+	return &stores[0], nil
 }
 
 func (dbs *DbStoreDriver) SaveStore(dbStore *FavoriteStore) error {
