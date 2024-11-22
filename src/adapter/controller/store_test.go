@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"clean-storemap-api/src/adapter/gateway"
 	api "clean-storemap-api/src/driver/api"
 	db "clean-storemap-api/src/driver/db"
@@ -38,9 +39,19 @@ type MockStoreInputFactoryFuncObject struct {
 	mock.Mock
 }
 
-func (m *MockStoreDriverFactory) GetStores() ([]*db.Store, error) {
+func (m *MockStoreDriverFactory) GetStores() ([]*db.FavoriteStore, error) {
 	args := m.Called()
-	return args.Get(0).([]*db.Store), args.Error(1)
+	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
+}
+
+func (m *MockStoreDriverFactory) FindFavorite(string, int) (*db.FavoriteStore, error) {
+	args := m.Called()
+	return args.Get(0).(*db.FavoriteStore), args.Error(1)
+}
+
+func (m *MockStoreDriverFactory) SaveStore(*db.FavoriteStore) error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func (m *MockGoogleMapDriverFactory) GetStores() ([]*api.Store, error) {
@@ -49,6 +60,16 @@ func (m *MockGoogleMapDriverFactory) GetStores() ([]*api.Store, error) {
 }
 
 func (m *MockStoreOutputFactoryFuncObject) OutputAllStores([]*model.Store) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockStoreOutputFactoryFuncObject) OutputSaveFavoriteStoreResult() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockStoreOutputFactoryFuncObject) OutputAlreadyExistFavorite() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -67,6 +88,16 @@ func (m *MockStoreRepositoryFactoryFuncObject) GetNearStores() ([]*model.Store, 
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
+func (m *MockStoreRepositoryFactoryFuncObject) ExistFavorite(store *model.Store, userId int) (bool, error) {
+	args := m.Called(store, userId)
+	return args.Get(0).(bool), args.Error(1)
+}
+
+func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func mockStoreRepositoryFactoryFunc(storeDriver gateway.StoreDriver, googleMapDriver gateway.GoogleMapDriver) port.StoreRepository {
 	return &MockStoreRepositoryFactoryFuncObject{}
 }
@@ -77,6 +108,11 @@ func (m *MockStoreInputFactoryFuncObject) GetStores() error {
 }
 
 func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -109,7 +145,8 @@ func TestGetStores(t *testing.T) {
 
 	// Driverだけは実体が必要
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
-	mockStoreDriverFactory.On("GetStores").Return([]*db.Store{}, nil)
+	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
+	mockStoreDriverFactory.On("SaveStore").Return(nil)
 
 	// InputPortのGetStoresのモックを作成
 	sc := &StoreController{
@@ -164,4 +201,49 @@ func TestGetNearStores(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	assert.Equal(t, http.StatusOK, rec.Code)
 	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetNearStores", 1)
+}
+
+func TestFavoriteSaveStore(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	c, rec := newRouter()
+
+	reqBody := `{
+		"storeId": "Id001",
+		"storeName": "UEC cafe",
+		"regularOpeningHours": "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+		"priceLevel": "PRICE_LEVEL_MODERATE",
+		"latitude": "35.713",
+		"longitude": "139.762"
+	}`
+
+	req := httptest.NewRequest(http.MethodPost, "/user/:user_id/favorite-store", bytes.NewBufferString(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
+	c.SetParamNames("user_id")
+	c.SetParamValues("1")
+
+	mockStoreDriverFactory := new(MockStoreDriverFactory)
+	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
+	mockStoreDriverFactory.On("SaveStore").Return(nil)
+
+	sc := &StoreController{
+		storeDriverFactory:     mockStoreDriverFactory,
+		storeOutputFactory:     mockStoreOutputFactoryFunc,
+		storeRepositoryFactory: mockStoreRepositoryFactoryFunc,
+	}
+
+	mockStoreInputFactoryFuncObject := new(MockStoreInputFactoryFuncObject)
+	mockStoreInputFactoryFuncObject.On("SaveFavoriteStore").Return(nil)
+	sc.storeInputFactory = func(repository port.StoreRepository, output port.StoreOutputPort) port.StoreInputPort {
+		return mockStoreInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := sc.SaveFavoriteStore(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "SaveFavoriteStore", 1)
 }

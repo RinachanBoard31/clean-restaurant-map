@@ -9,6 +9,7 @@ import (
 )
 
 var DB *gorm.DB
+
 func InitDB() {
 	dsn := os.Getenv("TESTDB_CONNECTION")
 
@@ -19,7 +20,13 @@ func InitDB() {
 		log.Fatalf("failed to connect database: %v", err)
 	}
 
-	// ここで使用するすべての構造体をMigrate
-	DB.AutoMigrate(&Store{})
-	DB.AutoMigrate(&User{})
+	// Userテーブルを先に作成する必要がある
+	if err := DB.AutoMigrate(&User{}); err != nil {
+		log.Fatalf("failed to migrate User: %v", err)
+	}
+
+	// FavoriteStoreテーブルを作成
+	if err := DB.AutoMigrate(&FavoriteStore{}); err != nil {
+		log.Fatalf("failed to migrate FavoriteStore: %v", err)
+	}
 }

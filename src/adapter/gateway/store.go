@@ -7,6 +7,8 @@ import (
 	"clean-storemap-api/src/usecase/port"
 	"fmt"
 	"strings"
+
+	"github.com/google/uuid"
 )
 
 // Dbの要素を構造体として渡す必要がある。
@@ -16,7 +18,9 @@ type StoreGateway struct {
 }
 
 type StoreDriver interface {
-	GetStores() ([]*db.Store, error)
+	GetStores() ([]*db.FavoriteStore, error)
+	FindFavorite(storeId string, userId int) (*db.FavoriteStore, error)
+	SaveStore(*db.FavoriteStore) error
 }
 
 type GoogleMapDriver interface {
@@ -39,7 +43,7 @@ func (sg *StoreGateway) GetAll() ([]*model.Store, error) {
 	for _, v := range dbStores {
 		stores = append(stores, &model.Store{
 			Id:                  v.Id,
-			Name:                v.Name,
+			Name:                v.StoreName,
 			RegularOpeningHours: v.RegularOpeningHours,
 			PriceLevel:          v.PriceLevel,
 			Location: model.Location{
@@ -71,3 +75,37 @@ func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 	}
 	return stores, nil
 }
+
+func (sg *StoreGateway) ExistFavorite(store *model.Store, userId int) (bool, error) {
+	dbStore, err := sg.storeDriver.FindFavorite(store.Id, userId)
+	if err != nil {
+		return false, err
+	}
+	if dbStore == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId int) error {
+	dbStore := &db.FavoriteStore{
+		Id:                  uuid.New().String(),
+		UserId:              userId,
+		StoreId:             store.Id,
+		StoreName:           store.Name,
+		RegularOpeningHours: store.RegularOpeningHours,
+		PriceLevel:          store.PriceLevel,
+		Latitude:            store.Location.Lat,
+		Longitude:           store.Location.Lng,
+	}
+
+	err := sg.storeDriver.SaveStore(dbStore)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DoesDuplicateFavorite()
+// -> storeId && userIdが favorite store tableに存在するかどうかを確認する

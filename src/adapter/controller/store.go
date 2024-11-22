@@ -2,25 +2,28 @@ package controller
 
 import (
 	"clean-storemap-api/src/adapter/gateway"
+	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
+	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"gopkg.in/go-playground/validator.v9"
 )
 
-type storeForController struct {
-	Id   int
-	Name string
-}
-
-type StoreJson struct {
-	ResponseCode int
-	Message      string
-	Stores       []storeForController
+type StoreRequestBody struct {
+	StoreId             string `json:"storeId" validate:"required"`
+	StoreName           string `json:"storeName" validate:"required"`
+	RegularOpeningHours string `json:"regularOpeningHours"`
+	PriceLevel          string `json:"priceLevel"`
+	Latitude            string `json:"latitude" validate:"required"`
+	Longitude           string `json:"longitude" validate:"required"`
 }
 
 type StoreI interface {
 	GetStores(c echo.Context) error
 	GetNearStores(c echo.Context) error
+	SaveFavoriteStore(c echo.Context) error
 }
 
 type StoreOutputFactory func(echo.Context) port.StoreOutputPort
@@ -59,6 +62,30 @@ func (sc *StoreController) GetStores(c echo.Context) error {
 
 func (sc *StoreController) GetNearStores(c echo.Context) error {
 	return sc.newStoreInputPort(c).GetNearStores()
+}
+
+func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
+	var s StoreRequestBody
+	userIdParam := c.Param("user_id")
+	if userIdParam == "" {
+		return c.JSON(http.StatusBadRequest, "user_id is required")
+	}
+	userId, err := strconv.Atoi(userIdParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "user_id must be a valid integer")
+	}
+
+	if err := c.Bind(&s); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if err := c.Validate(&s); err != nil {
+		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
+	}
+	store, err := model.NewStore(s.StoreId, s.StoreName, s.RegularOpeningHours, s.PriceLevel, s.Latitude, s.Longitude)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return sc.newStoreInputPort(c).SaveFavoriteStore(store, userId)
 }
 
 /* ここでpresenterにecho.Contextを渡している！起爆！！！（遅延） */
