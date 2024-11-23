@@ -49,3 +49,11 @@ func (si *StoreInteractor) SaveFavoriteStore(store *model.Store, userId int) err
 	}
 	return nil
 }
+
+func (si *StoreInteractor) GetTopFavoriteStores() error {
+	stores, err := si.storeRepository.GetTopFavoriteStores()
+	if err != nil {
+		return err
+	}
+	return si.storeOutputPort.OutputAllStores(stores)
+}

@@ -1,7 +1,10 @@
 package db
 
 import (
+	"errors"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type DbStoreDriver struct{}
@@ -38,6 +41,9 @@ func (dbs *DbStoreDriver) FindFavorite(storeId string, userId int) (*FavoriteSto
 	var stores []FavoriteStore
 	err := DB.Where("store_id = ? AND user_id = ?", storeId, userId).Find(&stores).Error
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
 		return nil, err
 	}
 	if len(stores) == 0 {
@@ -53,4 +59,35 @@ func (dbs *DbStoreDriver) SaveStore(dbStore *FavoriteStore) error {
 		return err
 	}
 	return nil
+}
+
+func (dbs *DbStoreDriver) GetTopStores() ([]*FavoriteStore, error) {
+	oneWeekAgo := time.Now().AddDate(0, 0, -7)
+
+	// store_idごとにカウント、多い順に最大10件を取得
+	var topStoreIds []string
+	err := DB.Model(&FavoriteStore{}).
+		Select("store_id").
+		Where("created_at >= ?", oneWeekAgo).
+		Group("store_id").
+		Order("COUNT(*) desc").
+		Limit(10).
+		Pluck("store_id", &topStoreIds).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 取得したstore_idに対応するfavorite_storeを順番に取得
+	var stores []*FavoriteStore
+	for _, storeId := range topStoreIds {
+		var store FavoriteStore
+		err = DB.Where("store_id = ?", storeId).
+			First(&store).Error
+		if err != nil {
+			return nil, err
+		}
+		stores = append(stores, &store)
+	}
+
+	return stores, nil
 }

@@ -8,6 +8,7 @@ type StoreInputPort interface {
 	GetStores() error
 	GetNearStores() error
 	SaveFavoriteStore(store *model.Store, userId int) error
+	GetTopFavoriteStores() error
 }
 
 type StoreRepository interface {
@@ -15,6 +16,7 @@ type StoreRepository interface {
 	GetNearStores() ([]*model.Store, error)
 	ExistFavorite(store *model.Store, userId int) (bool, error)
 	SaveFavoriteStore(store *model.Store, userId int) error
+	GetTopFavoriteStores() ([]*model.Store, error)
 }
 
 type StoreOutputPort interface {

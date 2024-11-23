@@ -21,6 +21,7 @@ type StoreDriver interface {
 	GetStores() ([]*db.FavoriteStore, error)
 	FindFavorite(storeId string, userId int) (*db.FavoriteStore, error)
 	SaveStore(*db.FavoriteStore) error
+	GetTopStores() ([]*db.FavoriteStore, error)
 }
 
 type GoogleMapDriver interface {
@@ -107,5 +108,24 @@ func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId int) error 
 	return nil
 }
 
-// DoesDuplicateFavorite()
-// -> storeId && userIdが favorite store tableに存在するかどうかを確認する
+func (sg *StoreGateway) GetTopFavoriteStores() ([]*model.Store, error) {
+	dbStores, err := sg.storeDriver.GetTopStores()
+	if err != nil {
+		return nil, err
+	}
+	stores := make([]*model.Store, 0)
+	for _, v := range dbStores {
+		stores = append(stores, &model.Store{
+			Id:                  v.StoreId,
+			Name:                v.StoreName,
+			RegularOpeningHours: v.RegularOpeningHours,
+			PriceLevel:          v.PriceLevel,
+			Location: model.Location{
+				Lat: v.Latitude,
+				Lng: v.Longitude,
+			},
+		})
+	}
+
+	return stores, nil
+}

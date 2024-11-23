@@ -54,6 +54,11 @@ func (m *MockStoreDriverFactory) SaveStore(*db.FavoriteStore) error {
 	return args.Error(0)
 }
 
+func (m *MockStoreDriverFactory) GetTopStores() ([]*db.FavoriteStore, error) {
+	args := m.Called()
+	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
+}
+
 func (m *MockGoogleMapDriverFactory) GetStores() ([]*api.Store, error) {
 	args := m.Called()
 	return args.Get(0).([]*api.Store), args.Error(1)
@@ -98,6 +103,11 @@ func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.St
 	return args.Error(0)
 }
 
+func (m *MockStoreRepositoryFactoryFuncObject) GetTopFavoriteStores() ([]*model.Store, error) {
+	args := m.Called()
+	return args.Get(0).([]*model.Store), args.Error(1)
+}
+
 func mockStoreRepositoryFactoryFunc(storeDriver gateway.StoreDriver, googleMapDriver gateway.GoogleMapDriver) port.StoreRepository {
 	return &MockStoreRepositoryFactoryFuncObject{}
 }
@@ -113,6 +123,11 @@ func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 }
 
 func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
+	args := m.Called()
+	return args.Error(0)
+}
+
+func (m *MockStoreInputFactoryFuncObject) GetTopFavoriteStores() error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -246,4 +261,33 @@ func TestFavoriteSaveStore(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	assert.Equal(t, http.StatusOK, rec.Code)
 	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "SaveFavoriteStore", 1)
+}
+
+func TestGetTopFavoriteStores(t *testing.T) {
+	/* Arrange */
+	var expected error = nil
+	c, rec := newRouter()
+
+	mockStoreDriverFactory := new(MockStoreDriverFactory)
+	mockStoreDriverFactory.On("GetTopStores").Return([]*db.FavoriteStore{}, nil)
+
+	sc := &StoreController{
+		storeDriverFactory:     mockStoreDriverFactory,
+		storeOutputFactory:     mockStoreOutputFactoryFunc,
+		storeRepositoryFactory: mockStoreRepositoryFactoryFunc,
+	}
+
+	mockStoreInputFactoryFuncObject := new(MockStoreInputFactoryFuncObject)
+	mockStoreInputFactoryFuncObject.On("GetTopFavoriteStores").Return(nil)
+	sc.storeInputFactory = func(repository port.StoreRepository, output port.StoreOutputPort) port.StoreInputPort {
+		return mockStoreInputFactoryFuncObject
+	}
+
+	/* Act */
+	actual := sc.GetTopFavoriteStores(c)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	mockStoreInputFactoryFuncObject.AssertNumberOfCalls(t, "GetTopFavoriteStores", 1)
 }
