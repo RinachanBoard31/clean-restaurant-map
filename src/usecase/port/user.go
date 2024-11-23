@@ -25,7 +25,7 @@ type UserRepository interface {
 type UserOutputPort interface {
 	OutputCreateResult() error
 	OutputUpdateResult() error
-	OutputLoginResult() error
+	OutputLoginResult(int) error
 	OutputAuthUrl(string) error
 	OutputSignupWithAuth(int) error
 	OutputAlreadySignedup() error

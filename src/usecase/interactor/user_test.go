@@ -60,7 +60,7 @@ func (m *MockUserOutputPort) OutputUpdateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputLoginResult() error {
+func (m *MockUserOutputPort) OutputLoginResult(int) error {
 	args := m.Called()
 	return args.Error(0)
 }

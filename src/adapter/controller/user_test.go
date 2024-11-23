@@ -78,7 +78,7 @@ func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputLoginResult() error {
+func (m *MockUserOutputFactoryFuncObject) OutputLoginResult(int) error {
 	args := m.Called()
 	return args.Error(0)
 }

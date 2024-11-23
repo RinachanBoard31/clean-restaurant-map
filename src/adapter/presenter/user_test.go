@@ -41,15 +41,15 @@ func TestOutputUpdateResult(t *testing.T) {
 
 func TestOutputLoginResult(t *testing.T) {
 	/* Arrange */
-	expected := "{}\n"
+	expected := "{\"userId\":1}\n"
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
+	userId := 1
 
 	/* Act */
-	actual := up.OutputLoginResult()
+	actual := up.OutputLoginResult(userId)
 
 	/* Assert */
-	// up.OutputLoginResultがJSONを返すこと
 	if assert.NoError(t, actual) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
