@@ -5,13 +5,13 @@ import (
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
 )
 
 type StoreRequestBody struct {
-	UserId              int    `json:"userId" validate:"required"`
 	StoreId             string `json:"storeId" validate:"required"`
 	StoreName           string `json:"storeName" validate:"required"`
 	RegularOpeningHours string `json:"regularOpeningHours"`
@@ -67,6 +67,15 @@ func (sc *StoreController) GetNearStores(c echo.Context) error {
 
 func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
 	var s StoreRequestBody
+	userIdParam := c.Param("user_id")
+	if userIdParam == "" {
+		return c.JSON(http.StatusBadRequest, "user_id is required")
+	}
+	userId, err := strconv.Atoi(userIdParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "user_id must be a valid integer")
+	}
+
 	if err := c.Bind(&s); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -77,7 +86,7 @@ func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return sc.newStoreInputPort(c).SaveFavoriteStore(store, s.UserId)
+	return sc.newStoreInputPort(c).SaveFavoriteStore(store, userId)
 }
 
 func (sc *StoreController) GetTopFavoriteStores(c echo.Context) error {

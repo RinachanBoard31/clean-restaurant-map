@@ -21,6 +21,10 @@ func (up *UserPresenter) OutputCreateResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
+func (up *UserPresenter) OutputUpdateResult() error {
+	return up.c.JSON(http.StatusOK, map[string]interface{}{})
+}
+
 func (up *UserPresenter) OutputLoginResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
@@ -37,4 +41,9 @@ func (up *UserPresenter) OutputSignupWithAuth(id int) error {
 func (up *UserPresenter) OutputAlreadySignedup() error {
 	url := os.Getenv("FRONT_URL") // すでに登録済みの場合はトップページにリダイレクト
 	return up.c.Redirect(http.StatusFound, url)
+}
+
+func (up *UserPresenter) OutputHasEmailInRequestBody() error {
+	errMsg := "Email is included in Request Body"
+	return up.c.JSON(http.StatusBadRequest, map[string]interface{}{"error": errMsg})
 }
