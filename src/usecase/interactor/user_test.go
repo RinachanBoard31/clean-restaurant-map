@@ -40,9 +40,9 @@ func (m *MockUserRepository) GenerateAuthUrl() string {
 	return args.Get(0).(string)
 }
 
-func (m *MockUserRepository) FindBy(user *model.UserCredentials) error {
+func (m *MockUserRepository) FindBy(user *model.UserCredentials) (*model.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockUserRepository) GetUserInfoWithAuthCode(string) (string, error) {
@@ -143,17 +143,23 @@ func TestUpdateUser(t *testing.T) {
 func TestLoginUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
-	user := &model.UserCredentials{Email: "test@example.com"}
-
+	userCredentials := &model.UserCredentials{Email: "test@example.com"}
+	user := &model.User{
+		Id:     1,
+		Email:  userCredentials.Email,
+		Age:    52,
+		Sex:    -0.2,
+		Gender: 1.0,
+	}
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindBy").Return(nil)
+	mockUserRepository.On("FindBy").Return(user, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputLoginResult").Return(nil)
 
 	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
 
 	/* Act */
-	actual := ui.LoginUser(user)
+	actual := ui.LoginUser(userCredentials)
 
 	/* Assert */
 	// LoginUser()がOutputLoginResult()を返すこと

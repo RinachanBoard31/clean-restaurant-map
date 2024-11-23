@@ -122,9 +122,9 @@ func (m *MockUserRepositoryFactoryFuncObject) Get(int) (*model.User, error) {
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) error {
+func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) (*model.User, error) {
 	args := m.Called()
-	return args.Error(0)
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl() string {

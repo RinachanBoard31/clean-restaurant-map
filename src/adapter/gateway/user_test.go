@@ -167,21 +167,36 @@ func TestGet(t *testing.T) {
 
 func TestFindBy(t *testing.T) {
 	/* Arrange */
-	var expected error = nil
-	user := &model.UserCredentials{
+	userCredentials := &model.UserCredentials{
 		Email: "noiman@groovex.co.jp",
 	}
+	dbUser := &db.User{
+		Id:     1,
+		Name:   "noiman",
+		Email:  userCredentials.Email,
+		Age:    35,
+		Sex:    1.0,
+		Gender: -0.5,
+	}
+	user := &model.User{
+		Id:     dbUser.Id,
+		Name:   dbUser.Name,
+		Email:  dbUser.Email,
+		Age:    dbUser.Age,
+		Sex:    dbUser.Sex,
+		Gender: dbUser.Gender,
+	}
+	expected := user
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindByEmail").Return(&db.User{}, nil)
+	mockUserRepository.On("FindByEmail").Return(dbUser, nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
-	actual := ug.FindBy(user)
+	actual, _ := ug.FindBy(userCredentials)
 
 	/* Assert */
 	// 返り値が正しいこと
 	assert.Equal(t, expected, actual)
-	// userDriver.FindByEmail()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
 }
 
