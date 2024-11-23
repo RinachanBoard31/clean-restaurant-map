@@ -64,11 +64,12 @@ func (ui *UserInteractor) UpdateUser(id int, updateData model.ChangeForUser) err
 	return nil
 }
 
-func (ui *UserInteractor) LoginUser(user *model.UserCredentials) error {
-	if err := ui.userRepository.FindBy(user); err != nil {
+func (ui *UserInteractor) LoginUser(userCredentials *model.UserCredentials) error {
+	user, err := ui.userRepository.FindBy(userCredentials)
+	if err != nil {
 		return err
 	}
-	if err := ui.userOutputPort.OutputLoginResult(); err != nil {
+	if err := ui.userOutputPort.OutputLoginResult(user.Id); err != nil {
 		return err
 	}
 	return nil

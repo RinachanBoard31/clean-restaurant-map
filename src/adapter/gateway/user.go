@@ -86,11 +86,20 @@ func (ug *UserGateway) Get(id int) (*model.User, error) {
 	return user, nil
 }
 
-func (ug *UserGateway) FindBy(user *model.UserCredentials) error {
-	if _, err := ug.userDriver.FindByEmail(user.Email); err != nil {
-		return err
+func (ug *UserGateway) FindBy(userCredentials *model.UserCredentials) (*model.User, error) {
+	dbUser, err := ug.userDriver.FindByEmail(userCredentials.Email)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	user := &model.User{
+		Id:     dbUser.Id,
+		Name:   dbUser.Name,
+		Email:  dbUser.Email,
+		Age:    dbUser.Age,
+		Sex:    dbUser.Sex,
+		Gender: dbUser.Gender,
+	}
+	return user, nil
 }
 
 func (ug *UserGateway) GenerateAuthUrl() string {

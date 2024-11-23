@@ -25,8 +25,8 @@ func (up *UserPresenter) OutputUpdateResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
-func (up *UserPresenter) OutputLoginResult() error {
-	return up.c.JSON(http.StatusOK, map[string]interface{}{})
+func (up *UserPresenter) OutputLoginResult(userId int) error {
+	return up.c.JSON(http.StatusOK, map[string]interface{}{"userId": userId})
 }
 
 func (up *UserPresenter) OutputAuthUrl(url string) error {
