@@ -45,6 +45,31 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	return dummyStores, nil
 }
 
+func makeDummyDbStoresByUser() ([]*db.FavoriteStore, error) {
+	dummyStores := make([]*db.FavoriteStore, 0)
+	dummyStores = append(dummyStores, &db.FavoriteStore{
+		Id:                  "id_1",
+		UserId:              1,
+		StoreId:             "Id001",
+		StoreName:           "UEC cafe",
+		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+		PriceLevel:          "PRICE_LEVEL_MODERATE",
+		Latitude:            "35.713",
+		Longitude:           "139.762",
+	})
+	dummyStores = append(dummyStores, &db.FavoriteStore{
+		Id:                  "id_2",
+		UserId:              1,
+		StoreId:             "Id002",
+		StoreName:           "UEC restaurant",
+		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
+		PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+		Latitude:            "35.714",
+		Longitude:           "139.763",
+	})
+	return dummyStores, nil
+}
+
 func makeDummyApiStores() ([]*api.Store, error) {
 	dummyStores := make([]*api.Store, 0)
 	dummyStores = append(dummyStores, &api.Store{
@@ -76,6 +101,11 @@ func (m *MockStoreRepository) GetStores() ([]*db.FavoriteStore, error) {
 func (m *MockStoreRepository) FindFavorite(storeId string, userId int) (*db.FavoriteStore, error) {
 	args := m.Called(storeId, userId)
 	return args.Get(0).(*db.FavoriteStore), args.Error(1)
+}
+
+func (m *MockStoreRepository) FindFavoriteByUser(userId int) ([]*db.FavoriteStore, error) {
+	args := m.Called(userId)
+	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
 func (m *MockStoreRepository) SaveStore(dbStore *db.FavoriteStore) error {
@@ -176,6 +206,43 @@ func TestGetNearStores(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockGoogleMapRepository.AssertNumberOfCalls(t, "GetStores", 1)
+}
+
+func TestGetFavoriteStores(t *testing.T) {
+	/* Arrange */
+	userId := 1
+	mockStoreRepository := new(MockStoreRepository)
+	mockStoreRepository.On("FindFavoriteByUser", userId).Return(makeDummyDbStoresByUser())
+	sg := &StoreGateway{storeDriver: mockStoreRepository}
+	stores := make([]*model.Store, 0)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id001",
+			Name:                "UEC cafe",
+			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
+		},
+	)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id002",
+			Name:                "UEC restaurant",
+			RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
+			PriceLevel:          "PRICE_LEVEL_INEXPENSIVE",
+			Location:            model.Location{Lat: "35.714", Lng: "139.763"},
+		},
+	)
+	expected := stores
+
+	/* Act */
+	actual, _ := sg.GetFavoriteStores(userId)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	mockStoreRepository.AssertNumberOfCalls(t, "FindFavoriteByUser", userId)
 }
 
 func TestSaveFavoriteStore(t *testing.T) {
