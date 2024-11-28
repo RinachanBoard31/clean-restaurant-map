@@ -131,7 +131,6 @@ func TestGetNearStores(t *testing.T) {
 
 func TestGetFavoriteStores(t *testing.T) {
 	/* Arrange */
-	expected := errors.New("")
 	stores := make([]*model.Store, 0)
 	stores = append(
 		stores,
@@ -148,7 +147,7 @@ func TestGetFavoriteStores(t *testing.T) {
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("GetFavoriteStores", userId).Return(stores, nil)
 	mockStoreOutputPort := new(MockStoreOutputPort)
-	mockStoreOutputPort.On("OutputAllStores", stores).Return(expected)
+	mockStoreOutputPort.On("OutputAllStores", stores).Return(nil)
 
 	si := &StoreInteractor{storeRepository: mockStoreRepository, storeOutputPort: mockStoreOutputPort}
 
@@ -156,7 +155,7 @@ func TestGetFavoriteStores(t *testing.T) {
 	actual := si.GetFavoriteStores(userId)
 
 	/* Assert */
-	assert.Equal(t, expected, actual)
+	assert.Equal(t, nil, actual)
 	mockStoreRepository.AssertNumberOfCalls(t, "GetFavoriteStores", 1)
 	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputAllStores", 1)
 	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
