@@ -43,6 +43,7 @@ func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/", router.storeController.GetStores)
 	router.echo.GET("/stores/opening-hours", router.storeController.GetNearStores)
 	router.echo.GET("/stores/favorite-ranking", router.storeController.GetTopFavoriteStores)
+	router.echo.GET("/user/:user_id/favorite-store", router.storeController.GetFavoriteStores)
 	router.echo.POST("/user/:user_id/favorite-store", router.storeController.SaveFavoriteStore)
 	router.echo.POST("/user", router.userController.CreateUser) // こっちは時期に使わなくなります。
 	router.echo.POST("/login", router.userController.LoginUser)

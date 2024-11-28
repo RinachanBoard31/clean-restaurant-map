@@ -31,6 +31,11 @@ func (m *MockStoreRepository) ExistFavorite(store *model.Store, userId int) (boo
 	return args.Bool(0), args.Error(1)
 }
 
+func (m *MockStoreRepository) GetFavoriteStores(userId int) ([]*model.Store, error) {
+	args := m.Called(userId)
+	return args.Get(0).([]*model.Store), args.Error(1)
+}
+
 func (m *MockStoreRepository) SaveFavoriteStore(store *model.Store, userId int) error {
 	args := m.Called(store, userId)
 	return args.Error(0)
@@ -120,6 +125,38 @@ func TestGetNearStores(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockStoreRepository.AssertNumberOfCalls(t, "GetNearStores", 1)
+	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputAllStores", 1)
+	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
+}
+
+func TestGetFavoriteStores(t *testing.T) {
+	/* Arrange */
+	stores := make([]*model.Store, 0)
+	stores = append(
+		stores,
+		&model.Store{
+			Id:                  "Id001",
+			Name:                "UEC cafe",
+			RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
+			PriceLevel:          "PRICE_LEVEL_MODERATE",
+			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
+		},
+	)
+	userId := 1
+
+	mockStoreRepository := new(MockStoreRepository)
+	mockStoreRepository.On("GetFavoriteStores", userId).Return(stores, nil)
+	mockStoreOutputPort := new(MockStoreOutputPort)
+	mockStoreOutputPort.On("OutputAllStores", stores).Return(nil)
+
+	si := &StoreInteractor{storeRepository: mockStoreRepository, storeOutputPort: mockStoreOutputPort}
+
+	/* Act */
+	actual := si.GetFavoriteStores(userId)
+
+	/* Assert */
+	assert.Equal(t, nil, actual)
+	mockStoreRepository.AssertNumberOfCalls(t, "GetFavoriteStores", 1)
 	mockStoreOutputPort.AssertNumberOfCalls(t, "OutputAllStores", 1)
 	mockStoreOutputPort.AssertCalled(t, "OutputAllStores", stores)
 }

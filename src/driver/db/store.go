@@ -53,6 +53,15 @@ func (dbs *DbStoreDriver) FindFavorite(storeId string, userId int) (*FavoriteSto
 	return &stores[0], nil
 }
 
+func (dbs *DbStoreDriver) FindFavoriteByUser(userId int) ([]*FavoriteStore, error) {
+	var stores []*FavoriteStore
+	err := DB.Where("user_id = ?", userId).Find(&stores).Error
+	if err != nil {
+		return nil, err
+	}
+	return stores, nil
+}
+
 func (dbs *DbStoreDriver) SaveStore(dbStore *FavoriteStore) error {
 	err := DB.Create(&dbStore).Error
 	if err != nil {

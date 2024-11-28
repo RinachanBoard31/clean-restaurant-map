@@ -23,6 +23,7 @@ type StoreRequestBody struct {
 type StoreI interface {
 	GetStores(c echo.Context) error
 	GetNearStores(c echo.Context) error
+	GetFavoriteStores(c echo.Context) error
 	SaveFavoriteStore(c echo.Context) error
 	GetTopFavoriteStores(c echo.Context) error
 }
@@ -63,6 +64,18 @@ func (sc *StoreController) GetStores(c echo.Context) error {
 
 func (sc *StoreController) GetNearStores(c echo.Context) error {
 	return sc.newStoreInputPort(c).GetNearStores()
+}
+
+func (sc *StoreController) GetFavoriteStores(c echo.Context) error {
+	userIdParam := c.Param("user_id")
+	if userIdParam == "" {
+		return c.JSON(http.StatusBadRequest, "user_id is required")
+	}
+	userId, err := strconv.Atoi(userIdParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "user_id must be a valid integer")
+	}
+	return sc.newStoreInputPort(c).GetFavoriteStores(userId)
 }
 
 func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
