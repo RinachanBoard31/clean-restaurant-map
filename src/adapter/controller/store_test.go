@@ -44,12 +44,12 @@ func (m *MockStoreDriverFactory) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
-func (m *MockStoreDriverFactory) FindFavorite(string, int) (*db.FavoriteStore, error) {
+func (m *MockStoreDriverFactory) FindFavorite(string, string) (*db.FavoriteStore, error) {
 	args := m.Called()
 	return args.Get(0).(*db.FavoriteStore), args.Error(1)
 }
 
-func (m *MockStoreDriverFactory) FindFavoriteByUser(int) ([]*db.FavoriteStore, error) {
+func (m *MockStoreDriverFactory) FindFavoriteByUser(string) ([]*db.FavoriteStore, error) {
 	args := m.Called()
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
@@ -98,17 +98,17 @@ func (m *MockStoreRepositoryFactoryFuncObject) GetNearStores() ([]*model.Store, 
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepositoryFactoryFuncObject) ExistFavorite(store *model.Store, userId int) (bool, error) {
+func (m *MockStoreRepositoryFactoryFuncObject) ExistFavorite(store *model.Store, userId string) (bool, error) {
 	args := m.Called(store, userId)
 	return args.Get(0).(bool), args.Error(1)
 }
 
-func (m *MockStoreRepositoryFactoryFuncObject) GetFavoriteStores(userId int) ([]*model.Store, error) {
+func (m *MockStoreRepositoryFactoryFuncObject) GetFavoriteStores(userId string) ([]*model.Store, error) {
 	args := m.Called()
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
+func (m *MockStoreRepositoryFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -132,12 +132,12 @@ func (m *MockStoreInputFactoryFuncObject) GetNearStores() error {
 	return args.Error(0)
 }
 
-func (m *MockStoreInputFactoryFuncObject) GetFavoriteStores(userId int) error {
+func (m *MockStoreInputFactoryFuncObject) GetFavoriteStores(userId string) error {
 	args := m.Called()
 	return args.Error(0)
 }
 
-func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId int) error {
+func (m *MockStoreInputFactoryFuncObject) SaveFavoriteStore(store *model.Store, userId string) error {
 	args := m.Called()
 	return args.Error(0)
 }

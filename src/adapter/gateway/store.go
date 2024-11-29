@@ -19,8 +19,8 @@ type StoreGateway struct {
 
 type StoreDriver interface {
 	GetStores() ([]*db.FavoriteStore, error)
-	FindFavorite(storeId string, userId int) (*db.FavoriteStore, error)
-	FindFavoriteByUser(userId int) ([]*db.FavoriteStore, error)
+	FindFavorite(storeId string, userId string) (*db.FavoriteStore, error)
+	FindFavoriteByUser(userId string) ([]*db.FavoriteStore, error)
 	SaveStore(*db.FavoriteStore) error
 	GetTopStores() ([]*db.FavoriteStore, error)
 }
@@ -78,7 +78,7 @@ func (sg *StoreGateway) GetNearStores() ([]*model.Store, error) {
 	return stores, nil
 }
 
-func (sg *StoreGateway) ExistFavorite(store *model.Store, userId int) (bool, error) {
+func (sg *StoreGateway) ExistFavorite(store *model.Store, userId string) (bool, error) {
 	dbStore, err := sg.storeDriver.FindFavorite(store.Id, userId)
 	if err != nil {
 		return false, err
@@ -89,7 +89,7 @@ func (sg *StoreGateway) ExistFavorite(store *model.Store, userId int) (bool, err
 	return true, nil
 }
 
-func (sg *StoreGateway) GetFavoriteStores(userId int) ([]*model.Store, error) {
+func (sg *StoreGateway) GetFavoriteStores(userId string) ([]*model.Store, error) {
 	dbStores, err := sg.storeDriver.FindFavoriteByUser(userId)
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (sg *StoreGateway) GetFavoriteStores(userId int) ([]*model.Store, error) {
 	return stores, nil
 }
 
-func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId int) error {
+func (sg *StoreGateway) SaveFavoriteStore(store *model.Store, userId string) error {
 	dbStore := &db.FavoriteStore{
 		Id:                  uuid.New().String(),
 		UserId:              userId,

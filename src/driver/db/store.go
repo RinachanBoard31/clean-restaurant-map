@@ -16,7 +16,7 @@ func NewStoreDriver() *DbStoreDriver {
 /* interfaceと型は同義。仮にgatewayがDBの型を知ったとしても、どんなDBから来たかわかるわけではないのでおk */
 type FavoriteStore struct {
 	Id                  string `gorm:"primaryKey"`
-	UserId              int    `gorm:"not null"`
+	UserId              string `gorm:"not null;size:64"`
 	User                User   `gorm:"foreignKey:UserId;references:Id"`
 	StoreId             string `gorm:"not null"`
 	StoreName           string `gorm:"not null"`
@@ -37,7 +37,7 @@ func (dbs *DbStoreDriver) GetStores() ([]*FavoriteStore, error) {
 	return stores, nil
 }
 
-func (dbs *DbStoreDriver) FindFavorite(storeId string, userId int) (*FavoriteStore, error) {
+func (dbs *DbStoreDriver) FindFavorite(storeId string, userId string) (*FavoriteStore, error) {
 	var stores []FavoriteStore
 	err := DB.Where("store_id = ? AND user_id = ?", storeId, userId).Find(&stores).Error
 	if err != nil {
@@ -53,7 +53,7 @@ func (dbs *DbStoreDriver) FindFavorite(storeId string, userId int) (*FavoriteSto
 	return &stores[0], nil
 }
 
-func (dbs *DbStoreDriver) FindFavoriteByUser(userId int) ([]*FavoriteStore, error) {
+func (dbs *DbStoreDriver) FindFavoriteByUser(userId string) ([]*FavoriteStore, error) {
 	var stores []*FavoriteStore
 	err := DB.Where("user_id = ?", userId).Find(&stores).Error
 	if err != nil {

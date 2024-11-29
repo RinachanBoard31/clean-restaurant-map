@@ -14,7 +14,7 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	dummyStores := make([]*db.FavoriteStore, 0)
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "id_1",
-		UserId:              1,
+		UserId:              "Id001",
 		StoreId:             "Id001",
 		StoreName:           "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
@@ -24,7 +24,7 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "id_2",
-		UserId:              1,
+		UserId:              "Id001",
 		StoreId:             "Id002",
 		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
@@ -34,7 +34,7 @@ func makeDummyDbStores() ([]*db.FavoriteStore, error) {
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "id_2",
-		UserId:              2,
+		UserId:              "Id002",
 		StoreId:             "Id002",
 		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
@@ -49,7 +49,7 @@ func makeDummyDbStoresByUser() ([]*db.FavoriteStore, error) {
 	dummyStores := make([]*db.FavoriteStore, 0)
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "id_1",
-		UserId:              1,
+		UserId:              "Id001",
 		StoreId:             "Id001",
 		StoreName:           "UEC cafe",
 		RegularOpeningHours: "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00",
@@ -59,7 +59,7 @@ func makeDummyDbStoresByUser() ([]*db.FavoriteStore, error) {
 	})
 	dummyStores = append(dummyStores, &db.FavoriteStore{
 		Id:                  "id_2",
-		UserId:              1,
+		UserId:              "Id001",
 		StoreId:             "Id002",
 		StoreName:           "UEC restaurant",
 		RegularOpeningHours: "Sat: 11:00 - 20:00, Sun: 11:00 - 20:00",
@@ -98,12 +98,12 @@ func (m *MockStoreRepository) GetStores() ([]*db.FavoriteStore, error) {
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
 
-func (m *MockStoreRepository) FindFavorite(storeId string, userId int) (*db.FavoriteStore, error) {
+func (m *MockStoreRepository) FindFavorite(storeId string, userId string) (*db.FavoriteStore, error) {
 	args := m.Called(storeId, userId)
 	return args.Get(0).(*db.FavoriteStore), args.Error(1)
 }
 
-func (m *MockStoreRepository) FindFavoriteByUser(userId int) ([]*db.FavoriteStore, error) {
+func (m *MockStoreRepository) FindFavoriteByUser(userId string) ([]*db.FavoriteStore, error) {
 	args := m.Called(userId)
 	return args.Get(0).([]*db.FavoriteStore), args.Error(1)
 }
@@ -210,7 +210,7 @@ func TestGetNearStores(t *testing.T) {
 
 func TestGetFavoriteStores(t *testing.T) {
 	/* Arrange */
-	userId := 1
+	userId := "Id001"
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("FindFavoriteByUser", userId).Return(makeDummyDbStoresByUser())
 	sg := &StoreGateway{storeDriver: mockStoreRepository}
@@ -242,7 +242,7 @@ func TestGetFavoriteStores(t *testing.T) {
 
 	/* Assert */
 	assert.Equal(t, expected, actual)
-	mockStoreRepository.AssertNumberOfCalls(t, "FindFavoriteByUser", userId)
+	mockStoreRepository.AssertNumberOfCalls(t, "FindFavoriteByUser", 1)
 }
 
 func TestSaveFavoriteStore(t *testing.T) {
@@ -251,7 +251,7 @@ func TestSaveFavoriteStore(t *testing.T) {
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("SaveStore", mock.MatchedBy(func(dbStore *db.FavoriteStore) bool {
 		// UUIDはテストで完全一致が不可能なため、dbStore.id以外のフィールドを検証
-		return dbStore.UserId == 1 &&
+		return dbStore.UserId == "Id001" &&
 			dbStore.StoreId == "Id001" &&
 			dbStore.StoreName == "UEC cafe" &&
 			dbStore.RegularOpeningHours == "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00" &&
@@ -268,7 +268,7 @@ func TestSaveFavoriteStore(t *testing.T) {
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
 		Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 	}
-	userId := 1
+	userId := "Id001"
 
 	/* Act */
 	actual := sg.SaveFavoriteStore(store, userId)
