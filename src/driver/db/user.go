@@ -53,7 +53,7 @@ func (dbu *DbUserDriver) UpdateUser(user *User, updateData map[string]interface{
 func (dbu *DbUserDriver) FindById(id string) (*User, error) {
 	var user *User
 	// Firstだと存在しない場合にサーバー側でエラーが発生してしまうため、Findでエラーを発生しないようにしている
-	result := DB.Find(&user)
+	result := DB.Find(&user, "id = ?", id)
 	// 存在しない場合にエラーは発生しないので、エラーを作成する
 	if result.RowsAffected == 0 {
 		return nil, errors.New("user is not found")
