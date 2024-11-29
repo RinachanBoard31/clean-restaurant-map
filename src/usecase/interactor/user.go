@@ -28,7 +28,7 @@ func (ui *UserInteractor) CreateUser(user *model.User) error {
 	return nil
 }
 
-func (ui *UserInteractor) UpdateUser(id int, updateData model.ChangeForUser) error {
+func (ui *UserInteractor) UpdateUser(id string, updateData model.ChangeForUser) error {
 	// emailを更新しようとした場合にはエラーを返す
 	if _, ok := updateData["email"]; ok {
 		return ui.userOutputPort.OutputHasEmailInRequestBody()
@@ -69,10 +69,7 @@ func (ui *UserInteractor) LoginUser(userCredentials *model.UserCredentials) erro
 	if err != nil {
 		return err
 	}
-	if err := ui.userOutputPort.OutputLoginResult(user.Id); err != nil {
-		return err
-	}
-	return nil
+	return ui.userOutputPort.OutputLoginResult(user.Id)
 }
 
 func (ui *UserInteractor) GetAuthUrl() error {

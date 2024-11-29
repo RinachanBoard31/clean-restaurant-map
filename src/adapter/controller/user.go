@@ -82,7 +82,7 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 }
 
 func (uc *UserController) UpdateUser(c echo.Context) error {
-	idStr := c.Param("id")
+	id := c.Param("id")
 	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまうため、UserRequestBodyにバインドさせずに取得する
 	var requestBody map[string]interface{}
 	// 数字 -> float64, 文字列-> stringと変換される
@@ -92,12 +92,6 @@ func (uc *UserController) UpdateUser(c echo.Context) error {
 
 	updateData := make(model.ChangeForUser)
 	// 更新データを型変換しつつ格納する
-	// id
-	var id int
-	var err error
-	if id, err = strconv.Atoi(idStr); err != nil {
-		return c.JSON(http.StatusInternalServerError, "id is not int")
-	}
 
 	// name
 	if name, ok := requestBody["name"]; ok {

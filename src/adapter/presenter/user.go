@@ -4,7 +4,6 @@ import (
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,7 +24,7 @@ func (up *UserPresenter) OutputUpdateResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
-func (up *UserPresenter) OutputLoginResult(userId int) error {
+func (up *UserPresenter) OutputLoginResult(userId string) error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{"userId": userId})
 }
 
@@ -33,8 +32,8 @@ func (up *UserPresenter) OutputAuthUrl(url string) error {
 	return up.c.Redirect(http.StatusFound, url)
 }
 
-func (up *UserPresenter) OutputSignupWithAuth(id int) error {
-	url := os.Getenv("FRONT_URL") + "/editUser" + "?id=" + strconv.Itoa(id) // 認証以外のユーザ情報を入力するページ
+func (up *UserPresenter) OutputSignupWithAuth(id string) error {
+	url := os.Getenv("FRONT_URL") + "/editUser" + "?id=" + id // 認証以外のユーザ情報を入力するページ
 	return up.c.Redirect(http.StatusFound, url)
 }
 

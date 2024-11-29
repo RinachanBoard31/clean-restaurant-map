@@ -4,6 +4,8 @@ import (
 	"clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
+
+	"github.com/google/uuid"
 )
 
 type UserGateway struct {
@@ -14,7 +16,7 @@ type UserGateway struct {
 type UserDriver interface {
 	CreateUser(*db.User) (*db.User, error)
 	UpdateUser(*db.User, map[string]interface{}) error
-	FindById(int) (*db.User, error)
+	FindById(string) (*db.User, error)
 	FindByEmail(string) (*db.User, error)
 }
 
@@ -32,6 +34,7 @@ func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDrive
 
 func (ug *UserGateway) Create(user *model.User) (*model.User, error) {
 	dbUser := &db.User{
+		Id:     uuid.New().String(),
 		Name:   user.Name,
 		Email:  user.Email,
 		Age:    user.Age,
@@ -70,7 +73,7 @@ func (ug *UserGateway) Update(user *model.User, updateData model.ChangeForUser) 
 	return nil
 }
 
-func (ug *UserGateway) Get(id int) (*model.User, error) {
+func (ug *UserGateway) Get(id string) (*model.User, error) {
 	dbUser, err := ug.userDriver.FindById(id)
 	if err != nil {
 		return nil, err
