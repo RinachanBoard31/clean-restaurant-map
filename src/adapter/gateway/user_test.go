@@ -191,16 +191,6 @@ func TestFindBy(t *testing.T) {
 		Sex:    1.0,
 		Gender: -0.5,
 	}
-	// mockStoreRepository.On("SaveStore", mock.MatchedBy(func(dbStore *db.FavoriteStore) bool {
-	// 	// UUIDはテストで完全一致が不可能なため、dbStore.id以外のフィールドを検証
-	// 	return dbStore.UserId == 1 &&
-	// 		dbStore.StoreId == "Id001" &&
-	// 		dbStore.StoreName == "UEC cafe" &&
-	// 		dbStore.RegularOpeningHours == "Sat: 06:00 - 22:00, Sun: 06:00 - 22:00" &&
-	// 		dbStore.PriceLevel == "PRICE_LEVEL_MODERATE" &&
-	// 		dbStore.Latitude == "35.713" &&
-	// 		dbStore.Longitude == "139.762"
-	// })).Return(nil)
 	user := &model.User{
 		Id:     dbUser.Id,
 		Name:   dbUser.Name,
