@@ -137,6 +137,11 @@ func (m *MockUserRepositoryFactoryFuncObject) GetUserInfoWithAuthCode(string) (s
 	return args.Get(0).(string), args.Error(1)
 }
 
+func (m *MockUserRepositoryFactoryFuncObject) GenerateAccessToken(id string) (string, error) {
+	args := m.Called(id)
+	return args.Get(0).(string), args.Error(1)
+}
+
 func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
 	return &MockUserRepositoryFactoryFuncObject{}
 }

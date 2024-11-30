@@ -116,3 +116,7 @@ func (ug *UserGateway) GetUserInfoWithAuthCode(code string) (string, error) {
 	}
 	return email, nil
 }
+
+func (ug *UserGateway) GenerateAccessToken(id string) (string, error) {
+	return id, nil
+}

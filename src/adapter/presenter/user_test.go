@@ -74,23 +74,20 @@ func TestOutputAuthUrl(t *testing.T) {
 }
 func TestOutputSignupWithAuth(t *testing.T) {
 	/* Arrange */
-	id := "id_1"
+	token := "token"
 	requestPath := "/editUser"
-	queryParameter := "id=" + id
 
 	var expected error = nil
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
 
 	/* Act */
-	actual := up.OutputSignupWithAuth(id)
+	actual := up.OutputSignupWithAuth(token)
 
 	/* Assert */
-	// up.OutputLoginResultがJSONを返すこと
 	if assert.NoError(t, actual) {
 		assert.Equal(t, http.StatusFound, rec.Code)
 		assert.Contains(t, rec.HeaderMap["Location"][0], requestPath)
-		assert.Contains(t, rec.HeaderMap["Location"][0], queryParameter)
 		assert.Equal(t, expected, actual)
 	}
 }

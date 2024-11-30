@@ -32,8 +32,8 @@ func (up *UserPresenter) OutputAuthUrl(url string) error {
 	return up.c.Redirect(http.StatusFound, url)
 }
 
-func (up *UserPresenter) OutputSignupWithAuth(id string) error {
-	url := os.Getenv("FRONT_URL") + "/editUser" + "?id=" + id // 認証以外のユーザ情報を入力するページ
+func (up *UserPresenter) OutputSignupWithAuth(token string) error {
+	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
 	return up.c.Redirect(http.StatusFound, url)
 }
 
