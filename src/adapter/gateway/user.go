@@ -11,6 +11,7 @@ import (
 type UserGateway struct {
 	userDriver        UserDriver
 	googleOAuthDriver GoogleOAuthDriver
+	jwtDriver         JwtDriver
 }
 
 type UserDriver interface {
@@ -23,6 +24,10 @@ type UserDriver interface {
 type GoogleOAuthDriver interface {
 	GenerateUrl() string
 	GetEmail(string) (string, error)
+}
+
+type JwtDriver interface {
+	GenerateToken(string) (string, error)
 }
 
 func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver) port.UserRepository {
@@ -118,5 +123,9 @@ func (ug *UserGateway) GetUserInfoWithAuthCode(code string) (string, error) {
 }
 
 func (ug *UserGateway) GenerateAccessToken(id string) (string, error) {
-	return id, nil
+	token, err := ug.jwtDriver.GenerateToken(id)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }
