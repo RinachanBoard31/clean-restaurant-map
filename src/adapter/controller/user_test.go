@@ -23,6 +23,10 @@ type MockGoogleOAuthDriverFactory struct {
 	mock.Mock
 }
 
+type MockJwtDriverFactory struct {
+	mock.Mock
+}
+
 type MockUserOutputFactoryFuncObject struct {
 	mock.Mock
 }
@@ -60,6 +64,11 @@ func (m *MockGoogleOAuthDriverFactory) GenerateUrl() string {
 
 func (m *MockGoogleOAuthDriverFactory) GetEmail(string) (string, error) {
 	args := m.Called()
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (m *MockJwtDriverFactory) GenerateToken(subject string) (string, error) {
+	args := m.Called(subject)
 	return args.Get(0).(string), args.Error(1)
 }
 
@@ -142,7 +151,7 @@ func (m *MockUserRepositoryFactoryFuncObject) GenerateAccessToken(id string) (st
 	return args.Get(0).(string), args.Error(1)
 }
 
-func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver) port.UserRepository {
+func mockUserRepositoryFactoryFunc(userDriver gateway.UserDriver, googleOAuthDriver gateway.GoogleOAuthDriver, jwtDriver gateway.JwtDriver) port.UserRepository {
 	return &MockUserRepositoryFactoryFuncObject{}
 }
 
@@ -330,11 +339,15 @@ func TestSignupWithAuth(t *testing.T) {
 	// OAuth用(関数が実行されるわけではないので、mockの戻り値を設定しない)
 	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
 
+	// auth用
+	mockJwtDriverFactory := new(MockJwtDriverFactory)
+
 	// DB用(関数が実行されるわけではないので、mockの戻り値を設定しない)
 	mockUserDriverFactory := new(MockUserDriverFactory)
 
 	uc := &UserController{
 		googleOAuthDriverFactory: mockGoogleOAuthDriverFactory,
+		jwtDriverFactory:         mockJwtDriverFactory,
 		userDriverFactory:        mockUserDriverFactory,
 		userOutputFactory:        mockUserOutputFactoryFunc,
 		userRepositoryFactory:    mockUserRepositoryFactoryFunc,

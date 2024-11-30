@@ -8,6 +8,7 @@ import (
 	"clean-storemap-api/src/adapter/gateway"
 	"clean-storemap-api/src/adapter/presenter"
 	"clean-storemap-api/src/driver/api"
+	"clean-storemap-api/src/driver/auth"
 	"clean-storemap-api/src/driver/db"
 	"clean-storemap-api/src/driver/oauth"
 	"clean-storemap-api/src/usecase/interactor"
@@ -28,6 +29,7 @@ var driverSet = wire.NewSet(
 	NewUserDriverFactory,
 	NewGoogleMapDriverFactory,
 	NewGoogleOAuthDriverFactory,
+	NewJwtDriverFactory,
 )
 
 var inputPortSet = wire.NewSet(
@@ -103,6 +105,10 @@ func NewUserDriverFactory() controller.UserDriverFactory {
 
 func NewGoogleOAuthDriverFactory() controller.GoogleOAuthDriverFactory {
 	return &oauth.GoogleOAuthDriver{}
+}
+
+func NewJwtDriverFactory() controller.JwtDriverFactory {
+	return &auth.JwtDriver{}
 }
 
 func NewUserOutputFactory() controller.UserOutputFactory {

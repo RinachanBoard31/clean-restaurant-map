@@ -30,10 +30,11 @@ type JwtDriver interface {
 	GenerateToken(string) (string, error)
 }
 
-func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver) port.UserRepository {
+func NewUserRepository(userDriver UserDriver, googleOAuthDriver GoogleOAuthDriver, jwtDriver JwtDriver) port.UserRepository {
 	return &UserGateway{
 		userDriver:        userDriver,
 		googleOAuthDriver: googleOAuthDriver,
+		jwtDriver:         jwtDriver,
 	}
 }
 
