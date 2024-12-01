@@ -2,10 +2,27 @@ package presenter
 
 import (
 	"net/http"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func parseSetCookie(setCookie string) map[string]string {
+	attributes := make(map[string]string)
+	parts := strings.Split(setCookie, ";")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		// "key=value"形式の属性を解析
+		keyValue := strings.SplitN(part, "=", 2)
+		if len(keyValue) == 2 {
+			attributes[strings.TrimSpace(keyValue[0])] = strings.TrimSpace(keyValue[1])
+		} else {
+			attributes[strings.TrimSpace(keyValue[0])] = ""
+		}
+	}
+	return attributes
+}
 
 func TestOutputCreateResult(t *testing.T) {
 	/* Arrange */
@@ -72,9 +89,10 @@ func TestOutputAuthUrl(t *testing.T) {
 		assert.Equal(t, expected, rec.HeaderMap["Location"][0])
 	}
 }
+
 func TestOutputSignupWithAuth(t *testing.T) {
 	/* Arrange */
-	token := "token"
+	token := "test_token"
 	requestPath := "/editUser"
 
 	var expected error = nil
@@ -85,11 +103,14 @@ func TestOutputSignupWithAuth(t *testing.T) {
 	actual := up.OutputSignupWithAuth(token)
 
 	/* Assert */
-	if assert.NoError(t, actual) {
-		assert.Equal(t, http.StatusFound, rec.Code)
-		assert.Contains(t, rec.HeaderMap["Location"][0], requestPath)
-		assert.Equal(t, expected, actual)
-	}
+	assert.Equal(t, http.StatusFound, rec.Code)
+	assert.Contains(t, rec.HeaderMap["Location"][0], requestPath)
+	assert.Equal(t, expected, actual)
+
+	// レスポンスヘッダーからSet-Cookieを取得
+	setCookie := rec.Header().Get("Set-Cookie")
+	cookieAttributes := parseSetCookie(setCookie)
+	assert.Equal(t, token, cookieAttributes["auth_token"])
 }
 
 func TestOutputAlreadySignedup(t *testing.T) {

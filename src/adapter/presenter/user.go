@@ -4,6 +4,7 @@ import (
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,6 +35,15 @@ func (up *UserPresenter) OutputAuthUrl(url string) error {
 
 func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
+	cookie := new(http.Cookie)
+	cookie.Name = "auth_token"
+	cookie.Value = token
+	cookie.Expires = time.Now().Add(24 * time.Hour) // 24時間有効
+	cookie.Path = "/"
+	cookie.SameSite = http.SameSiteNoneMode // クロスサイトリクエストを許可
+	cookie.HttpOnly = true
+	cookie.Secure = true
+	up.c.SetCookie(cookie)
 	return up.c.Redirect(http.StatusFound, url)
 }
 
