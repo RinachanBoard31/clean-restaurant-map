@@ -237,12 +237,11 @@ func TestGetFavoriteStores(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	expected := errors.New("")
-
-	req := httptest.NewRequest(http.MethodGet, "/user/:user_id/favorite-store", nil)
+	userId := "id_1"
+	req := httptest.NewRequest(http.MethodGet, "/user/favorite-store", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.Set("userId", userId)
 	c.SetRequest(req)
-	c.SetParamNames("user_id")
-	c.SetParamValues("1")
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("FindStores").Return(&db.FavoriteStore{}, nil)
@@ -272,7 +271,7 @@ func TestFavoriteSaveStore(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	c, rec := newRouter()
-
+	userId := "id_1"
 	reqBody := `{
 		"storeId": "Id001",
 		"storeName": "UEC cafe",
@@ -282,11 +281,10 @@ func TestFavoriteSaveStore(t *testing.T) {
 		"longitude": "139.762"
 	}`
 
-	req := httptest.NewRequest(http.MethodPost, "/user/:user_id/favorite-store", bytes.NewBufferString(reqBody))
+	req := httptest.NewRequest(http.MethodPost, "/user/favorite-store", bytes.NewBufferString(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
-	c.SetParamNames("user_id")
-	c.SetParamValues("1")
+	c.Set("userId", userId)
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)

@@ -66,7 +66,7 @@ func (sc *StoreController) GetNearStores(c echo.Context) error {
 }
 
 func (sc *StoreController) GetFavoriteStores(c echo.Context) error {
-	userId := c.Param("user_id")
+	userId := c.Get("userId").(string)
 	if userId == "" {
 		return c.JSON(http.StatusBadRequest, "user_id is required")
 	}
@@ -75,7 +75,7 @@ func (sc *StoreController) GetFavoriteStores(c echo.Context) error {
 
 func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
 	var s StoreRequestBody
-	userId := c.Param("user_id")
+	userId := c.Get("userId").(string)
 	if userId == "" {
 		return c.JSON(http.StatusBadRequest, "user_id is required")
 	}

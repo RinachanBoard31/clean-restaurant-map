@@ -49,14 +49,15 @@ func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/auth", router.userController.GetAuthUrl)            // Google認証用のURLを取得し返す
 	router.echo.GET("/auth/signup", router.userController.SignupWithAuth) // ユーザの認証を確認し仮登録する(本登録は未実装,UpdateUserで行う)
 
-	// ログイン後のルーティング
-	afterLoginPath := router.echo.Group("")
-	middleware.SetupJwtMiddleware(afterLoginPath)
+	// ログイン後のルーティング(認証が必要なパスはここより下に書く)
+	// 認証のためのJWTMiddlewareを設定
+	secured := router.echo.Group("")
+	middleware.SetupJwtMiddleware(secured)
 
-	afterLoginPath.GET("/stores/opening-hours", router.storeController.GetNearStores)
-	afterLoginPath.GET("/stores/favorite-ranking", router.storeController.GetTopFavoriteStores)
-	afterLoginPath.GET("/user/:user_id/favorite-store", router.storeController.GetFavoriteStores)
-	afterLoginPath.POST("/user/:user_id/favorite-store", router.storeController.SaveFavoriteStore)
-	afterLoginPath.PUT("/user/:id", router.userController.UpdateUser)
+	secured.GET("/stores/opening-hours", router.storeController.GetNearStores)
+	secured.GET("/stores/favorite-ranking", router.storeController.GetTopFavoriteStores)
+	secured.GET("/user/favorite-store", router.storeController.GetFavoriteStores)
+	secured.POST("/user/favorite-store", router.storeController.SaveFavoriteStore)
+	secured.PUT("/user", router.userController.UpdateUser)
 	router.echo.Logger.Fatal(router.echo.Start(":8080"))
 }

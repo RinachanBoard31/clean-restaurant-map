@@ -86,7 +86,7 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 }
 
 func (uc *UserController) UpdateUser(c echo.Context) error {
-	id := c.Param("id")
+	id := c.Get("userId").(string)
 	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまうため、UserRequestBodyにバインドさせずに取得する
 	var requestBody map[string]interface{}
 	// 数字 -> float64, 文字列-> stringと変換される
