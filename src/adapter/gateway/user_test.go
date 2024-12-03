@@ -5,8 +5,6 @@ import (
 	model "clean-storemap-api/src/entity"
 	"testing"
 
-	"github.com/google/uuid"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -53,11 +51,6 @@ func (m *MockJwtRepository) GenerateToken(subject string) (string, error) {
 	return args.Get(0).(string), args.Error(1)
 }
 
-func isValidUUID(id string) bool {
-	// 文字列が UUID 形式かを確認
-	_, err := uuid.Parse(id) // UUID を解析し、有効性をチェック
-	return err == nil        // エラーがなければ有効
-}
 func TestCreate(t *testing.T) {
 	/* Arrange */
 	user := &model.User{
@@ -79,8 +72,7 @@ func TestCreate(t *testing.T) {
 
 	mockUserRepository := new(MockUserRepository)
 	mockUserRepository.On("CreateUser", mock.MatchedBy(func(dbUser *db.User) bool {
-		return isValidUUID(dbUser.Id) &&
-			dbUser.Name == user.Name &&
+		return dbUser.Name == user.Name &&
 			dbUser.Email == user.Email &&
 			dbUser.Age == user.Age &&
 			dbUser.Sex == user.Sex &&

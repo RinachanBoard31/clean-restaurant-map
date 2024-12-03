@@ -41,7 +41,6 @@ type UserController struct {
 // 数字型のものが未入力であれば0として扱われる
 // 0を存在する値とする場合にはカスタムバリデーションを使用する必要があり、カスタムバリデーションにはrouterで定義されたecho.New()を使用するため今回はカスタムバリデーションを使用しない。
 type UserRequestBody struct {
-	Id     int     `json:"id"`
 	Name   string  `json:"name" validate:"required"`
 	Email  string  `json:"email" validate:"required,email"`
 	Age    int     `json:"age"`
