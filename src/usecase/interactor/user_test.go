@@ -41,7 +41,7 @@ func (m *MockUserRepository) GenerateAuthUrl() string {
 }
 
 func (m *MockUserRepository) FindBy(user *model.UserCredentials) (*model.User, error) {
-	args := m.Called()
+	args := m.Called(user)
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
@@ -65,8 +65,8 @@ func (m *MockUserOutputPort) OutputUpdateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputLoginResult(userId string) error {
-	args := m.Called(userId)
+func (m *MockUserOutputPort) OutputLoginResult(token string) error {
+	args := m.Called(token)
 	return args.Error(0)
 }
 
@@ -149,6 +149,7 @@ func TestLoginUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	userCredentials := &model.UserCredentials{Email: "test@example.com"}
+	token := "test_token"
 	user := &model.User{
 		Id:     "id_1",
 		Email:  userCredentials.Email,
@@ -157,21 +158,19 @@ func TestLoginUser(t *testing.T) {
 		Gender: 1.0,
 	}
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindBy").Return(user, nil)
+	mockUserRepository.On("FindBy", userCredentials).Return(user, nil)
+	mockUserRepository.On("GenerateAccessToken", user.Id).Return(token, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
-	mockUserOutputPort.On("OutputLoginResult", user.Id).Return(nil)
-
+	mockUserOutputPort.On("OutputLoginResult", token).Return(nil)
 	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
 
 	/* Act */
 	actual := ui.LoginUser(userCredentials)
 
 	/* Assert */
-	// LoginUser()がOutputLoginResult()を返すこと
 	assert.Equal(t, expected, actual)
-	// RepositoryのFindBy()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "FindBy", 1)
-	// OutputPortのOutputLoginResult()が1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "GenerateAccessToken", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputLoginResult", 1)
 }
 

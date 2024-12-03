@@ -69,7 +69,15 @@ func (ui *UserInteractor) LoginUser(userCredentials *model.UserCredentials) erro
 	if err != nil {
 		return err
 	}
-	return ui.userOutputPort.OutputLoginResult(user.Id)
+	token, err := ui.userRepository.GenerateAccessToken(user.Id)
+	if err != nil {
+		return err
+	}
+	// urlのクエリパラメータにidを付与してそのidをユーザの更新時に受け取りどのユーザを更新するかを判別する
+	if err := ui.userOutputPort.OutputLoginResult(token); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (ui *UserInteractor) GetAuthUrl() error {

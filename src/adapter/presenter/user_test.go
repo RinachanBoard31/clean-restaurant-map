@@ -58,18 +58,23 @@ func TestOutputUpdateResult(t *testing.T) {
 
 func TestOutputLoginResult(t *testing.T) {
 	/* Arrange */
-	expected := "{\"userId\":\"id_1\"}\n"
+	expected := "{}\n"
+	token := "test_token"
+	os.Setenv("JWT_TOKEN_NAME", "auth_token")
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
-	userId := "id_1"
 
 	/* Act */
-	actual := up.OutputLoginResult(userId)
+	actual := up.OutputLoginResult(token)
 
 	/* Assert */
 	if assert.NoError(t, actual) {
 		assert.Equal(t, expected, rec.Body.String())
 	}
+	// レスポンスヘッダーからSet-Cookieを取得
+	setCookie := rec.Header().Get("Set-Cookie")
+	cookieAttributes := parseSetCookie(setCookie)
+	assert.Equal(t, token, cookieAttributes[os.Getenv("JWT_TOKEN_NAME")])
 }
 
 func TestOutputAuthUrl(t *testing.T) {
