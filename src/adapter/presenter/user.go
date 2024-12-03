@@ -56,8 +56,8 @@ func settingCookie(token string) *http.Cookie {
 	cookie.Value = token
 	cookie.Expires = time.Now().Add(24 * time.Hour) // 24時間有効
 	cookie.Path = "/"
-	cookie.SameSite = http.SameSiteNoneMode // クロスサイトリクエストを許可
-	cookie.HttpOnly = true
-	cookie.Secure = true
+	cookie.SameSite = http.SameSiteLaxMode // クロスサイトリクエストを許可
+	cookie.HttpOnly = false
+	cookie.Secure = false
 	return cookie
 }
