@@ -210,12 +210,12 @@ func TestUpdateUser(t *testing.T) {
 	c, rec := newRouter()
 	var expected error = nil
 	reqBody := `{"name":"test","age":10,"sex":0.4, "gender":0}`
-	req := httptest.NewRequest(http.MethodPut, "/user/1", bytes.NewBufferString(reqBody))
+	req := httptest.NewRequest(http.MethodPut, "/user/:id", bytes.NewBufferString(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
 	// パスパラメータを設定
 	c.SetParamNames("id")
-	c.SetParamValues("1")
+	c.SetParamValues("id_1")
 
 	// Driver用
 	mockUserDriverFactory := new(MockUserDriverFactory)

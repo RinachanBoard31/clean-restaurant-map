@@ -242,7 +242,7 @@ func TestGetFavoriteStores(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
 	c.SetParamNames("user_id")
-	c.SetParamValues("1")
+	c.SetParamValues("id_1")
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("FindStores").Return(&db.FavoriteStore{}, nil)
@@ -286,7 +286,7 @@ func TestFavoriteSaveStore(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
 	c.SetParamNames("user_id")
-	c.SetParamValues("1")
+	c.SetParamValues("id_1")
 
 	mockStoreDriverFactory := new(MockStoreDriverFactory)
 	mockStoreDriverFactory.On("GetStores").Return([]*db.FavoriteStore{}, nil)
