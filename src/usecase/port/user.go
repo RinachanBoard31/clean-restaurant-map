@@ -6,7 +6,7 @@ import (
 
 type UserInputPort interface {
 	CreateUser(*model.User) error
-	UpdateUser(int, model.ChangeForUser) error
+	UpdateUser(string, model.ChangeForUser) error
 	LoginUser(*model.UserCredentials) error
 	GetAuthUrl() error
 	SignupDraft(string) error
@@ -16,7 +16,7 @@ type UserRepository interface {
 	Exist(*model.User) error
 	Create(*model.User) (*model.User, error)
 	Update(*model.User, model.ChangeForUser) error
-	Get(int) (*model.User, error)
+	Get(string) (*model.User, error)
 	FindBy(*model.UserCredentials) (*model.User, error)
 	GenerateAuthUrl() string
 	GetUserInfoWithAuthCode(string) (string, error)
@@ -25,9 +25,9 @@ type UserRepository interface {
 type UserOutputPort interface {
 	OutputCreateResult() error
 	OutputUpdateResult() error
-	OutputLoginResult(int) error
+	OutputLoginResult(string) error
 	OutputAuthUrl(string) error
-	OutputSignupWithAuth(int) error
+	OutputSignupWithAuth(string) error
 	OutputAlreadySignedup() error
 	OutputHasEmailInRequestBody() error
 }

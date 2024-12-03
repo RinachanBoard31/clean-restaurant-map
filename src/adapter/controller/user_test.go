@@ -44,7 +44,7 @@ func (m *MockUserDriverFactory) UpdateUser(*db.User, map[string]interface{}) err
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserDriverFactory) FindById(int) (*db.User, error) {
+func (m *MockUserDriverFactory) FindById(string) (*db.User, error) {
 	args := m.Called()
 	return args.Get(0).(*db.User), args.Error(1)
 }
@@ -78,12 +78,12 @@ func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputLoginResult(int) error {
+func (m *MockUserOutputFactoryFuncObject) OutputLoginResult(string) error {
 	args := m.Called()
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(int) error {
+func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(string) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -117,7 +117,7 @@ func (m *MockUserRepositoryFactoryFuncObject) Update(*model.User, model.ChangeFo
 	return args.Error(0)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) Get(int) (*model.User, error) {
+func (m *MockUserRepositoryFactoryFuncObject) Get(string) (*model.User, error) {
 	args := m.Called()
 	return args.Get(0).(*model.User), args.Error(1)
 }
@@ -145,7 +145,7 @@ func (m *MockUserInputFactoryFuncObject) CreateUser(*model.User) error {
 	args := m.Called()
 	return args.Error(0)
 }
-func (m *MockUserInputFactoryFuncObject) UpdateUser(int, model.ChangeForUser) error {
+func (m *MockUserInputFactoryFuncObject) UpdateUser(string, model.ChangeForUser) error {
 	args := m.Called()
 	return args.Error(0)
 }
@@ -210,12 +210,12 @@ func TestUpdateUser(t *testing.T) {
 	c, rec := newRouter()
 	var expected error = nil
 	reqBody := `{"name":"test","age":10,"sex":0.4, "gender":0}`
-	req := httptest.NewRequest(http.MethodPut, "/user/1", bytes.NewBufferString(reqBody))
+	req := httptest.NewRequest(http.MethodPut, "/user/:id", bytes.NewBufferString(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
 	// パスパラメータを設定
 	c.SetParamNames("id")
-	c.SetParamValues("1")
+	c.SetParamValues("id_1")
 
 	// Driver用
 	mockUserDriverFactory := new(MockUserDriverFactory)

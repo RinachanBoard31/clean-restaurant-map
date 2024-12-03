@@ -13,8 +13,8 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) CreateUser(*db.User) (*db.User, error) {
-	args := m.Called()
+func (m *MockUserRepository) CreateUser(dbUser *db.User) (*db.User, error) {
+	args := m.Called(dbUser)
 	return args.Get(0).(*db.User), args.Error(1)
 }
 
@@ -23,8 +23,8 @@ func (m *MockUserRepository) UpdateUser(*db.User, map[string]interface{}) error 
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) FindById(int) (*db.User, error) {
-	args := m.Called()
+func (m *MockUserRepository) FindById(id string) (*db.User, error) {
+	args := m.Called(id)
 	return args.Get(0).(*db.User), args.Error(1)
 }
 
@@ -52,7 +52,7 @@ func TestCreate(t *testing.T) {
 		Gender: -0.5,
 	}
 	dbUser := &db.User{
-		Id:     1,
+		Id:     "id_1",
 		Name:   user.Name,
 		Email:  user.Email,
 		Age:    user.Age,
@@ -62,7 +62,13 @@ func TestCreate(t *testing.T) {
 	expected := user
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("CreateUser").Return(dbUser, nil)
+	mockUserRepository.On("CreateUser", mock.MatchedBy(func(dbUser *db.User) bool {
+		return dbUser.Name == user.Name &&
+			dbUser.Email == user.Email &&
+			dbUser.Age == user.Age &&
+			dbUser.Sex == user.Sex &&
+			dbUser.Gender == user.Gender
+	})).Return(dbUser, nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
@@ -99,14 +105,13 @@ func TestExist(t *testing.T) {
 	assert.Equal(t, expected, actual)
 	// userDriver.CreateUser()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
-	// mockUserRepository.AssertNumberOfCalls(t, "UpdateUser", 1)
 }
 func TestUpdate(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	// 更新されるUser
 	user := &model.User{
-		Id:     1,
+		Id:     "id_1",
 		Name:   "sample",
 		Email:  "sample@example.com",
 		Age:    10,
@@ -130,7 +135,7 @@ func TestUpdate(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	/* Arrange */
-	id := 1
+	id := "id_1"
 	dbUser := &db.User{
 		Id:     id,
 		Name:   "sample",
@@ -151,7 +156,7 @@ func TestGet(t *testing.T) {
 	}
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindById").Return(dbUser, nil)
+	mockUserRepository.On("FindById", id).Return(dbUser, nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
@@ -171,7 +176,7 @@ func TestFindBy(t *testing.T) {
 		Email: "noiman@groovex.co.jp",
 	}
 	dbUser := &db.User{
-		Id:     1,
+		Id:     "id_1",
 		Name:   "noiman",
 		Email:  userCredentials.Email,
 		Age:    35,

@@ -26,17 +26,17 @@ func (m *MockStoreRepository) GetNearStores() ([]*model.Store, error) {
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepository) ExistFavorite(store *model.Store, userId int) (bool, error) {
+func (m *MockStoreRepository) ExistFavorite(store *model.Store, userId string) (bool, error) {
 	args := m.Called(store, userId)
 	return args.Bool(0), args.Error(1)
 }
 
-func (m *MockStoreRepository) GetFavoriteStores(userId int) ([]*model.Store, error) {
+func (m *MockStoreRepository) GetFavoriteStores(userId string) ([]*model.Store, error) {
 	args := m.Called(userId)
 	return args.Get(0).([]*model.Store), args.Error(1)
 }
 
-func (m *MockStoreRepository) SaveFavoriteStore(store *model.Store, userId int) error {
+func (m *MockStoreRepository) SaveFavoriteStore(store *model.Store, userId string) error {
 	args := m.Called(store, userId)
 	return args.Error(0)
 }
@@ -142,7 +142,7 @@ func TestGetFavoriteStores(t *testing.T) {
 			Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 		},
 	)
-	userId := 1
+	userId := "Id001"
 
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("GetFavoriteStores", userId).Return(stores, nil)
@@ -171,7 +171,7 @@ func TestSaveFavoriteStore(t *testing.T) {
 		PriceLevel:          "PRICE_LEVEL_MODERATE",
 		Location:            model.Location{Lat: "35.713", Lng: "139.762"},
 	}
-	userId := 1
+	userId := "Id001"
 
 	mockStoreRepository := new(MockStoreRepository)
 	mockStoreRepository.On("SaveFavoriteStore", store, userId).Return(nil)

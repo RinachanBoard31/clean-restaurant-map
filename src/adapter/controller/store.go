@@ -5,7 +5,6 @@ import (
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
 	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
@@ -67,26 +66,18 @@ func (sc *StoreController) GetNearStores(c echo.Context) error {
 }
 
 func (sc *StoreController) GetFavoriteStores(c echo.Context) error {
-	userIdParam := c.Param("user_id")
-	if userIdParam == "" {
+	userId := c.Param("user_id")
+	if userId == "" {
 		return c.JSON(http.StatusBadRequest, "user_id is required")
-	}
-	userId, err := strconv.Atoi(userIdParam)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "user_id must be a valid integer")
 	}
 	return sc.newStoreInputPort(c).GetFavoriteStores(userId)
 }
 
 func (sc *StoreController) SaveFavoriteStore(c echo.Context) error {
 	var s StoreRequestBody
-	userIdParam := c.Param("user_id")
-	if userIdParam == "" {
+	userId := c.Param("user_id")
+	if userId == "" {
 		return c.JSON(http.StatusBadRequest, "user_id is required")
-	}
-	userId, err := strconv.Atoi(userIdParam)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, "user_id must be a valid integer")
 	}
 
 	if err := c.Bind(&s); err != nil {

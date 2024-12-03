@@ -8,7 +8,7 @@ import (
 // type UserId string
 
 type User struct {
-	Id     int // TODO: UserIdに変更したい
+	Id     string // uuidを使用
 	Name   string
 	Email  string
 	Age    int     // xx代として表記する(60代以上は全て60とする)

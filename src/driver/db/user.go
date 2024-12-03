@@ -12,7 +12,7 @@ func NewUserDriver() *DbUserDriver {
 }
 
 type User struct {
-	Id        int `gorm:"primaryKey"`
+	Id        string `gorm:"primaryKey"`
 	Name      string
 	Email     string `gorm:"unique"`
 	Age       int
@@ -50,10 +50,10 @@ func (dbu *DbUserDriver) UpdateUser(user *User, updateData map[string]interface{
 	return nil
 }
 
-func (dbu *DbUserDriver) FindById(id int) (*User, error) {
+func (dbu *DbUserDriver) FindById(id string) (*User, error) {
 	var user *User
 	// Firstだと存在しない場合にサーバー側でエラーが発生してしまうため、Findでエラーを発生しないようにしている
-	result := DB.Find(&user, id)
+	result := DB.Find(&user, "id = ?", id)
 	// 存在しない場合にエラーは発生しないので、エラーを作成する
 	if result.RowsAffected == 0 {
 		return nil, errors.New("user is not found")

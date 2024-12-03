@@ -2,7 +2,6 @@ package presenter
 
 import (
 	"net/http"
-	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -41,10 +40,10 @@ func TestOutputUpdateResult(t *testing.T) {
 
 func TestOutputLoginResult(t *testing.T) {
 	/* Arrange */
-	expected := "{\"userId\":1}\n"
+	expected := "{\"userId\":\"id_1\"}\n"
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
-	userId := 1
+	userId := "id_1"
 
 	/* Act */
 	actual := up.OutputLoginResult(userId)
@@ -75,9 +74,9 @@ func TestOutputAuthUrl(t *testing.T) {
 }
 func TestOutputSignupWithAuth(t *testing.T) {
 	/* Arrange */
-	var id int = 1
+	id := "id_1"
 	requestPath := "/editUser"
-	queryParameter := "id=" + strconv.Itoa(id)
+	queryParameter := "id=" + id
 
 	var expected error = nil
 	c, rec := newRouter()
