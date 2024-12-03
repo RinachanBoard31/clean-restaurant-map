@@ -36,7 +36,7 @@ func (up *UserPresenter) OutputAuthUrl(url string) error {
 func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
 	cookie := new(http.Cookie)
-	cookie.Name = "auth_token"
+	cookie.Name = os.Getenv("JWT_TOKEN_NAME")
 	cookie.Value = token
 	cookie.Expires = time.Now().Add(24 * time.Hour) // 24時間有効
 	cookie.Path = "/"

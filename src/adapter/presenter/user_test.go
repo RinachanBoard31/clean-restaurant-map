@@ -2,6 +2,7 @@ package presenter
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 
@@ -92,9 +93,9 @@ func TestOutputAuthUrl(t *testing.T) {
 
 func TestOutputSignupWithAuth(t *testing.T) {
 	/* Arrange */
-	token := "test_token"
+	t.Setenv("JWT_TOKEN_NAME", "auth_token")
 	requestPath := "/editUser"
-
+	token := "test_token"
 	var expected error = nil
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
@@ -110,7 +111,7 @@ func TestOutputSignupWithAuth(t *testing.T) {
 	// レスポンスヘッダーからSet-Cookieを取得
 	setCookie := rec.Header().Get("Set-Cookie")
 	cookieAttributes := parseSetCookie(setCookie)
-	assert.Equal(t, token, cookieAttributes["auth_token"])
+	assert.Equal(t, token, cookieAttributes[os.Getenv("JWT_TOKEN_NAME")])
 }
 
 func TestOutputAlreadySignedup(t *testing.T) {
