@@ -38,21 +38,13 @@ $ ./main
 ## Usage
 
 ### Get store
-
 ```
 $ curl http://localhost:8080
 ```
 
 ### Save user
-
 ```
 $ curl -H "Content-Type: application/json" -X POST -d "@example/create_user_api_example.json" http://localhost:8080/user
-```
-
-### update user
-
-```
-$ curl -H "Content-Type: application/json" -X PUT -d "@example/update_user_api_example.json" http://localhost:8080/user/1
 ```
 
 ### Login user
@@ -61,6 +53,7 @@ $ curl -H "Content-Type: application/json" -X PUT -d "@example/update_user_api_e
 ```
 $ curl -H "Content-Type: application/json" -X POST -d "@example/login_user_api_example.json" http://localhost:8080/login
 ```
+
 ### Auth
 ```
 $ curl http://localhost:8080/auth
