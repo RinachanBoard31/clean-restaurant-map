@@ -2,9 +2,9 @@ package router
 
 import (
 	controller "clean-storemap-api/src/adapter/controller"
-	"context"
-
 	"clean-storemap-api/src/driver/middleware"
+
+	"context"
 
 	"github.com/labstack/echo/v4"
 	"gopkg.in/go-playground/validator.v9"
@@ -50,7 +50,7 @@ func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/auth/signup", router.userController.SignupWithAuth) // ユーザの認証を確認し仮登録する(本登録は未実装,UpdateUserで行う)
 
 	// ログイン後のルーティング
-	afterLoginPath := router.echo.Group("/")
+	afterLoginPath := router.echo.Group("")
 	middleware.SetupJwtMiddleware(afterLoginPath)
 
 	afterLoginPath.GET("/stores/opening-hours", router.storeController.GetNearStores)
