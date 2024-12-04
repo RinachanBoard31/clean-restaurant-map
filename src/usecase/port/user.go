@@ -5,7 +5,6 @@ import (
 )
 
 type UserInputPort interface {
-	CreateUser(*model.User) error
 	UpdateUser(string, model.ChangeForUser) error
 	LoginUser(*model.UserCredentials) error
 	GetAuthUrl() error
