@@ -83,15 +83,3 @@ func NewUser(name string, email string, age int, sex float32, gender float32) (*
 	}
 	return user, nil
 }
-
-func NewUserCredentials(email string) (*UserCredentials, error) {
-	// バリデーションのチェック
-	emailValidError := emailValid(email)
-	if err := errors.Join(emailValidError); err != nil {
-		return &UserCredentials{}, err
-	}
-	user := &UserCredentials{
-		Email: email,
-	}
-	return user, nil
-}

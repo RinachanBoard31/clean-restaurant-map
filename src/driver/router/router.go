@@ -46,7 +46,7 @@ func (router *Router) Serve(ctx context.Context) {
 	router.echo.GET("/", router.storeController.GetStores)
 	router.echo.GET("/auth", router.userController.GetAuthUrl)            // Google認証用のURLを取得し返す(?accessedType=login, signup)
 	router.echo.GET("/auth/signup", router.userController.SignupWithAuth) // ユーザの認証を確認し仮登録する
-	router.echo.POST("/auth/login", router.userController.LoginUser)
+	router.echo.POST("/auth/login", router.userController.LoginWithAuth)
 
 	// ログイン後のルーティング(認証が必要なパスはここより下に書く)
 	// 認証のためのJWTMiddlewareを設定

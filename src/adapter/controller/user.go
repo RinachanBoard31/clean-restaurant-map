@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"gopkg.in/go-playground/validator.v9"
 
 	"clean-storemap-api/src/adapter/gateway"
 	accssesTypel "clean-storemap-api/src/entity"
@@ -15,7 +14,7 @@ import (
 
 type UserI interface {
 	UpdateUser(c echo.Context) error
-	LoginUser(c echo.Context) error
+	LoginWithAuth(c echo.Context) error
 	GetAuthUrl(c echo.Context) error
 	SignupWithAuth(c echo.Context) error
 }
@@ -34,10 +33,6 @@ type UserController struct {
 	userOutputFactory        UserOutputFactory
 	userInputFactory         UserInputFactory
 	userRepositoryFactory    UserRepositoryFactory
-}
-
-type UserCredentialsRequestBody struct {
-	Email string `json:"email" validate:"required,email"`
 }
 
 func NewUserController(
@@ -110,24 +105,9 @@ func (uc *UserController) UpdateUser(c echo.Context) error {
 	return uc.newUserInputPort(c).UpdateUser(id, updateData)
 }
 
-func (uc *UserController) LoginUser(c echo.Context) error {
-	// UserCredentialsの値を受け取りuserが既に登録されているかを確かめるキー用の型を作成する
-	var u UserCredentialsRequestBody
-	if err := c.Bind(&u); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-	if err := c.Validate(&u); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
-	}
-	user, err := accssesTypel.NewUserCredentials(u.Email)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-
-	if err := uc.newUserInputPort(c).LoginUser(user); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
-	}
-	return nil
+func (uc *UserController) LoginWithAuth(c echo.Context) error {
+	codeParameter := c.QueryParam("code")
+	return uc.newUserInputPort(c).LoginUser(codeParameter)
 }
 
 func (uc *UserController) GetAuthUrl(c echo.Context) error {

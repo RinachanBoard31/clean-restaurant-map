@@ -53,7 +53,7 @@ func (ui *UserInteractor) UpdateUser(id string, updateData model.ChangeForUser) 
 	return nil
 }
 
-func (ui *UserInteractor) LoginUser(userCredentials *model.UserCredentials) error {
+func (ui *UserInteractor) LoginUser(code string) error {
 	user, err := ui.userRepository.FindBy(userCredentials)
 	if err != nil {
 		return err

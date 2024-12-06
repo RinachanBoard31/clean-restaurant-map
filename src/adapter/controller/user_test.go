@@ -161,13 +161,13 @@ func (m *MockUserInputFactoryFuncObject) GetAuthUrl(accessedType string) error {
 	return args.Error(0)
 }
 
-func (m *MockUserInputFactoryFuncObject) LoginUser(*model.UserCredentials) error {
-	args := m.Called()
+func (m *MockUserInputFactoryFuncObject) LoginUser(code string) error {
+	args := m.Called(code)
 	return args.Error(0)
 }
 
-func (m *MockUserInputFactoryFuncObject) SignupDraft(string) error {
-	args := m.Called()
+func (m *MockUserInputFactoryFuncObject) SignupDraft(code string) error {
+	args := m.Called(code)
 	return args.Error(0)
 }
 
@@ -206,43 +206,41 @@ func TestUpdateUser(t *testing.T) {
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "UpdateUser", 1)
 }
 
-func TestLoginUser(t *testing.T) {
+func TestLoginWithAuth(t *testing.T) {
 	/* Arrange */
 	c, rec := newRouter()
 	var expected error = nil
-	// デフォルトでリクエストメソッドがGETのため、POSTに変更。こういうPOSTリクエストが来たことにする
-	reqBody := `{"email":"johnathan@example.com"}`
-	req := httptest.NewRequest(http.MethodPost, "/user/login", bytes.NewBufferString(reqBody))
+	code := "test_code"
+	queryParams := fmt.Sprintf("?code=%s", code)
+	req := httptest.NewRequest(http.MethodGet, "/user/login"+queryParams, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
 
-	// Driverだけは実体が必要
-	mockUserDriverFactory := new(MockUserDriverFactory)
-	mockUserDriverFactory.On("FindByEmail").Return(nil, nil)
+	// OAuth用
+	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
 
-	// InputPortのLoginUserのモックを作成
+	// auth用
+	mockJwtDriverFactory := new(MockJwtDriverFactory)
+
 	uc := &UserController{
-		userDriverFactory:     mockUserDriverFactory,
-		userOutputFactory:     mockUserOutputFactoryFunc,
-		userRepositoryFactory: mockUserRepositoryFactoryFunc,
+		googleOAuthDriverFactory: mockGoogleOAuthDriverFactory,
+		jwtDriverFactory:         mockJwtDriverFactory,
+		userOutputFactory:        mockUserOutputFactoryFunc,
+		userRepositoryFactory:    mockUserRepositoryFactoryFunc,
 	}
 
-	// newUserInputPort.LoginUser()をするためには、LoginUser()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
 	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
-	mockUserInputFactoryFuncObject.On("LoginUser").Return(expected)
+	mockUserInputFactoryFuncObject.On("LoginUser", code).Return(nil)
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
 
 	/* Act */
-	actual := uc.LoginUser(c)
+	actual := uc.LoginWithAuth(c)
 
 	/* Assert */
-	// uc.LoginUser()がUserInputPort.LoginUser()を返すこと
 	assert.Equal(t, expected, actual)
-	// echoが正しく起動したか
 	assert.Equal(t, http.StatusOK, rec.Code)
-	// InputPortのLoginUser()が1回呼ばれること
 	mockUserInputFactoryFuncObject.AssertNumberOfCalls(t, "LoginUser", 1)
 }
 
@@ -287,8 +285,9 @@ func TestSignupWithAuth(t *testing.T) {
 	/* Arrange */
 	c, _ := newRouter()
 	var expected error = nil
-	reqBody := `{"code":"123456"}`
-	req := httptest.NewRequest(http.MethodPost, "/auth/signup", bytes.NewBufferString(reqBody))
+	code := "test_code"
+	queryParams := fmt.Sprintf("?code=%s", code)
+	req := httptest.NewRequest(http.MethodPost, "/auth/signup"+queryParams, nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.SetRequest(req)
 
@@ -310,7 +309,7 @@ func TestSignupWithAuth(t *testing.T) {
 	}
 
 	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
-	mockUserInputFactoryFuncObject.On("SignupDraft").Return(nil)
+	mockUserInputFactoryFuncObject.On("SignupDraft", code).Return(nil)
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
