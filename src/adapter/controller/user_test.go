@@ -62,8 +62,8 @@ func (m *MockGoogleOAuthDriverFactory) GenerateUrl(actionType string) string {
 	return args.Get(0).(string)
 }
 
-func (m *MockGoogleOAuthDriverFactory) GetEmail(string) (string, error) {
-	args := m.Called()
+func (m *MockGoogleOAuthDriverFactory) GetEmail(code string, actionType string) (string, error) {
+	args := m.Called(code, actionType)
 	return args.Get(0).(string), args.Error(1)
 }
 

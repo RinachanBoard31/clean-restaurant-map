@@ -23,7 +23,7 @@ type UserDriver interface {
 
 type GoogleOAuthDriver interface {
 	GenerateUrl(string) string
-	GetEmail(string) (string, error)
+	GetEmail(string, string) (string, error)
 }
 
 type JwtDriver interface {
@@ -116,7 +116,7 @@ func (ug *UserGateway) GenerateAuthUrl(actionType string) string {
 }
 
 func (ug *UserGateway) GetUserInfoWithAuthCode(code string, actionType string) (string, error) {
-	email, err := ug.googleOAuthDriver.GetEmail(code)
+	email, err := ug.googleOAuthDriver.GetEmail(code, actionType)
 	if err != nil {
 		return "", err
 	}

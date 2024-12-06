@@ -37,8 +37,8 @@ func (m *MockUserRepository) GenerateUrl(actionType string) string {
 	return args.Get(0).(string)
 }
 
-func (m *MockUserRepository) GetEmail(string) (string, error) {
-	args := m.Called()
+func (m *MockUserRepository) GetEmail(code string, actionType string) (string, error) {
+	args := m.Called(code, actionType)
 	return args.Get(0).(string), args.Error(1)
 }
 
@@ -236,16 +236,17 @@ func TestGenerateAuthUrl(t *testing.T) {
 func TestGetUserInfoWithAuthCode(t *testing.T) {
 	/* Arrange */
 	code := ""
+	actionType := "signup"
 	email := "sample@example.com"
 	expected := email
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GetEmail").Return(email, nil)
+	mockUserRepository.On("GetEmail", code, actionType).Return(email, nil)
 	ug := &UserGateway{
 		googleOAuthDriver: mockUserRepository,
 	}
 
 	/* Act */
-	actual, _ := ug.GetUserInfoWithAuthCode(code, "actionType") // 仮の値
+	actual, _ := ug.GetUserInfoWithAuthCode(code, actionType)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

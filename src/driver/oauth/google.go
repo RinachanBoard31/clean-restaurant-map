@@ -38,8 +38,8 @@ func (oauth *GoogleOAuthDriver) GenerateUrl(actionType string) string {
 }
 
 // GoogleのOAuth認証を行い、ユーザー情報を取得する
-func getProfile(code string) (map[string]interface{}, error) {
-	config := newGoogleOauthConfig("") // 【一時的】
+func getProfile(code string, actionType string) (map[string]interface{}, error) {
+	config := newGoogleOauthConfig(actionType)
 	ctx := context.Background()
 	// 認証情報を取得
 	oauth2Token, err := config.Exchange(ctx, code)
@@ -68,8 +68,8 @@ func getProfile(code string) (map[string]interface{}, error) {
 	return profile, nil
 }
 
-func (oauth *GoogleOAuthDriver) GetEmail(code string) (string, error) {
-	profile, err := getProfile(code)
+func (oauth *GoogleOAuthDriver) GetEmail(code string, actionType string) (string, error) {
+	profile, err := getProfile(code, actionType)
 	if err != nil {
 		return "", err
 	}
