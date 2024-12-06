@@ -205,7 +205,7 @@ func TestSignupDraft(t *testing.T) {
 	var expected error = nil
 	err := errors.New("user is not found")
 
-	provisionalUser := &model.User{
+	draftUser := &model.User{
 		Name:   "",
 		Email:  email,
 		Age:    0,
@@ -224,8 +224,8 @@ func TestSignupDraft(t *testing.T) {
 
 	mockUserRepository := new(MockUserRepository)
 	mockUserRepository.On("GetUserInfoWithAuthCode", code).Return(email, nil)
-	mockUserRepository.On("Exist", provisionalUser).Return(err) // 存在していない場合にエラーが返る
-	mockUserRepository.On("Create", provisionalUser).Return(createdUser, nil)
+	mockUserRepository.On("Exist", draftUser).Return(err) // 存在していない場合にエラーが返る
+	mockUserRepository.On("Create", draftUser).Return(createdUser, nil)
 	mockUserRepository.On("GenerateAccessToken", createdUser.Id).Return(token, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputAlreadySignedup").Return(nil)
