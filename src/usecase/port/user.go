@@ -7,7 +7,7 @@ import (
 type UserInputPort interface {
 	UpdateUser(string, model.ChangeForUser) error
 	LoginUser(*model.UserCredentials) error
-	GetAuthUrl() error
+	GetAuthUrl(string) error
 	SignupDraft(string) error
 }
 

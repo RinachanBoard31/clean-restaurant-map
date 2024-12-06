@@ -9,7 +9,7 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 
 	"clean-storemap-api/src/adapter/gateway"
-	model "clean-storemap-api/src/entity"
+	accssesTypel "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
 )
 
@@ -67,7 +67,7 @@ func (uc *UserController) UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	updateData := make(model.ChangeForUser)
+	updateData := make(accssesTypel.ChangeForUser)
 	// 更新データを型変換しつつ格納する
 
 	// name
@@ -119,7 +119,7 @@ func (uc *UserController) LoginUser(c echo.Context) error {
 	if err := c.Validate(&u); err != nil {
 		return c.JSON(http.StatusInternalServerError, err.(validator.ValidationErrors).Error())
 	}
-	user, err := model.NewUserCredentials(u.Email)
+	user, err := accssesTypel.NewUserCredentials(u.Email)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -131,7 +131,11 @@ func (uc *UserController) LoginUser(c echo.Context) error {
 }
 
 func (uc *UserController) GetAuthUrl(c echo.Context) error {
-	return uc.newUserInputPort(c).GetAuthUrl()
+	accessedType := c.Param("accessedType")
+	if accessedType != "signup" && accessedType != "login" {
+		return c.JSON(http.StatusAccepted, map[string]interface{}{"error": "accessedType is not correct"})
+	}
+	return uc.newUserInputPort(c).GetAuthUrl(accessedType)
 }
 
 func (uc *UserController) SignupWithAuth(c echo.Context) error {

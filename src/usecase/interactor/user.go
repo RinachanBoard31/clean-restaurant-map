@@ -69,7 +69,7 @@ func (ui *UserInteractor) LoginUser(userCredentials *model.UserCredentials) erro
 	return nil
 }
 
-func (ui *UserInteractor) GetAuthUrl() error {
+func (ui *UserInteractor) GetAuthUrl(action string) error {
 	url := ui.userRepository.GenerateAuthUrl()
 	return ui.userOutputPort.OutputAuthUrl(url)
 }

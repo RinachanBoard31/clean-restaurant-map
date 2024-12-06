@@ -162,7 +162,7 @@ func TestGetAuthUrl(t *testing.T) {
 	}
 
 	/* Act */
-	actual := ui.GetAuthUrl()
+	actual := ui.GetAuthUrl("action") // 仮の引数
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

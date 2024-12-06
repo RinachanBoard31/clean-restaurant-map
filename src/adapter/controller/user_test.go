@@ -155,8 +155,8 @@ func (m *MockUserInputFactoryFuncObject) UpdateUser(string, model.ChangeForUser)
 	return args.Error(0)
 }
 
-func (m *MockUserInputFactoryFuncObject) GetAuthUrl() error {
-	args := m.Called()
+func (m *MockUserInputFactoryFuncObject) GetAuthUrl(accessedType string) error {
+	args := m.Called(accessedType)
 	return args.Error(0)
 }
 
@@ -250,6 +250,9 @@ func TestGetAuthUrl(t *testing.T) {
 	c, _ := newRouter()
 	url := "https://www.google.com"
 	var expected error = nil
+	accessedType := "signup"
+	c.SetParamNames("accessedType")
+	c.SetParamValues(accessedType)
 
 	// Driverだけは実体が必要
 	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
@@ -264,7 +267,7 @@ func TestGetAuthUrl(t *testing.T) {
 
 	// newUserInputPort.GetAuthUrl()をするためには、GetAuthUrl()を持つmockUserInputFactoryFuncObjectがuserInputFactoryに必要だから無名関数でreturnする必要があった
 	mockUserInputFactoryFuncObject := new(MockUserInputFactoryFuncObject)
-	mockUserInputFactoryFuncObject.On("GetAuthUrl").Return(nil)
+	mockUserInputFactoryFuncObject.On("GetAuthUrl", accessedType).Return(nil)
 	uc.userInputFactory = func(repository port.UserRepository, output port.UserOutputPort) port.UserInputPort {
 		return mockUserInputFactoryFuncObject
 	}
