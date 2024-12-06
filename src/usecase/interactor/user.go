@@ -75,7 +75,8 @@ func (ui *UserInteractor) GetAuthUrl(actionType string) error {
 }
 
 func (ui *UserInteractor) SignupDraft(code string) error {
-	email, err := ui.userRepository.GetUserInfoWithAuthCode(code)
+	actionType := "signup"
+	email, err := ui.userRepository.GetUserInfoWithAuthCode(code, actionType)
 	if err != nil {
 		return err
 	}

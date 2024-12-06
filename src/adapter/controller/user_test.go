@@ -136,8 +136,8 @@ func (m *MockUserRepositoryFactoryFuncObject) GenerateAuthUrl(actionType string)
 	return args.Get(0).(string)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) GetUserInfoWithAuthCode(string) (string, error) {
-	args := m.Called()
+func (m *MockUserRepositoryFactoryFuncObject) GetUserInfoWithAuthCode(code string, actionType string) (string, error) {
+	args := m.Called(code, actionType)
 	return args.Get(0).(string), args.Error(1)
 }
 

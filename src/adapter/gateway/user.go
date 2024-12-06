@@ -115,7 +115,7 @@ func (ug *UserGateway) GenerateAuthUrl(actionType string) string {
 	return ug.googleOAuthDriver.GenerateUrl(actionType)
 }
 
-func (ug *UserGateway) GetUserInfoWithAuthCode(code string) (string, error) {
+func (ug *UserGateway) GetUserInfoWithAuthCode(code string, actionType string) (string, error) {
 	email, err := ug.googleOAuthDriver.GetEmail(code)
 	if err != nil {
 		return "", err

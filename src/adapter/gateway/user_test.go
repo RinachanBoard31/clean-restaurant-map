@@ -245,7 +245,7 @@ func TestGetUserInfoWithAuthCode(t *testing.T) {
 	}
 
 	/* Act */
-	actual, _ := ug.GetUserInfoWithAuthCode(code)
+	actual, _ := ug.GetUserInfoWithAuthCode(code, "actionType") // 仮の値
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

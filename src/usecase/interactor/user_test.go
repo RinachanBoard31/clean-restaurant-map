@@ -45,8 +45,8 @@ func (m *MockUserRepository) FindBy(user *model.UserCredentials) (*model.User, e
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GetUserInfoWithAuthCode(code string) (string, error) {
-	args := m.Called(code)
+func (m *MockUserRepository) GetUserInfoWithAuthCode(code string, actionType string) (string, error) {
+	args := m.Called(code, actionType)
 	return args.Get(0).(string), args.Error(1)
 }
 
@@ -173,6 +173,7 @@ func TestGetAuthUrl(t *testing.T) {
 func TestSignupDraft(t *testing.T) {
 	/* Arrange */
 	code := ""
+	actionType := "signup"
 	email := "sample@example.com"
 	var expected error = nil
 	err := errors.New("user is not found")
@@ -195,7 +196,7 @@ func TestSignupDraft(t *testing.T) {
 	token := "token"
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GetUserInfoWithAuthCode", code).Return(email, nil)
+	mockUserRepository.On("GetUserInfoWithAuthCode", code, actionType).Return(email, nil)
 	mockUserRepository.On("Exist", draftUser).Return(err) // 存在していない場合にエラーが返る
 	mockUserRepository.On("Create", draftUser).Return(createdUser, nil)
 	mockUserRepository.On("GenerateAccessToken", createdUser.Id).Return(token, nil)
