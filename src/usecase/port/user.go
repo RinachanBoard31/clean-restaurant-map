@@ -16,7 +16,7 @@ type UserRepository interface {
 	Create(*model.User) (*model.User, error)
 	Update(*model.User, model.ChangeForUser) error
 	Get(string) (*model.User, error)
-	FindBy(*model.UserCredentials) (*model.User, error)
+	FindBy(*model.UserQuery) (*model.User, error)
 	GenerateAuthUrl(string) string
 	GetUserInfoWithAuthCode(string, string) (string, error)
 	GenerateAccessToken(string) (string, error)
@@ -24,8 +24,9 @@ type UserRepository interface {
 
 type UserOutputPort interface {
 	OutputUpdateResult() error
-	OutputLoginResult(string) error
 	OutputAuthUrl(string) error
+	OutputLoginWithAuth(string) error
+	OutputNotRegistered() error
 	OutputSignupWithAuth(string) error
 	OutputAlreadySignedup() error
 	OutputHasEmailInRequestBody() error

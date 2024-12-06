@@ -83,16 +83,20 @@ func (m *MockUserOutputFactoryFuncObject) OutputAuthUrl(url string) error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputLoginResult(string) error {
-	args := m.Called()
+func (m *MockUserOutputFactoryFuncObject) OutputLoginWithAuth(token string) error {
+	args := m.Called(token)
 	return args.Error(0)
 }
 
-func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(string) error {
-	args := m.Called()
+func (m *MockUserOutputFactoryFuncObject) OutputSignupWithAuth(token string) error {
+	args := m.Called(token)
 	return args.Error(0)
 }
 
+func (m *MockUserOutputFactoryFuncObject) OutputNotRegistered() error {
+	args := m.Called()
+	return args.Error(0)
+}
 func (m *MockUserOutputFactoryFuncObject) OutputAlreadySignedup() error {
 	args := m.Called()
 	return args.Error(0)
@@ -127,8 +131,8 @@ func (m *MockUserRepositoryFactoryFuncObject) Get(string) (*model.User, error) {
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *MockUserRepositoryFactoryFuncObject) FindBy(*model.UserCredentials) (*model.User, error) {
-	args := m.Called()
+func (m *MockUserRepositoryFactoryFuncObject) FindBy(userQuery *model.UserQuery) (*model.User, error) {
+	args := m.Called(userQuery)
 	return args.Get(0).(*model.User), args.Error(1)
 }
 

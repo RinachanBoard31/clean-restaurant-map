@@ -40,7 +40,7 @@ func TestOutputUpdateResult(t *testing.T) {
 	}
 }
 
-func TestOutputLoginResult(t *testing.T) {
+func TestOutputLoginWithAuth(t *testing.T) {
 	/* Arrange */
 	expected := "{}\n"
 	token := "test_token"
@@ -49,7 +49,7 @@ func TestOutputLoginResult(t *testing.T) {
 	up := &UserPresenter{c: c}
 
 	/* Act */
-	actual := up.OutputLoginResult(token)
+	actual := up.OutputLoginWithAuth(token)
 
 	/* Assert */
 	if assert.NoError(t, actual) {

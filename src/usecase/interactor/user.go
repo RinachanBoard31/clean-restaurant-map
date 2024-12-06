@@ -54,19 +54,27 @@ func (ui *UserInteractor) UpdateUser(id string, updateData model.ChangeForUser) 
 }
 
 func (ui *UserInteractor) LoginUser(code string) error {
-	user, err := ui.userRepository.FindBy(userCredentials)
+	actionType := "login"
+	email, err := ui.userRepository.GetUserInfoWithAuthCode(code, actionType)
 	if err != nil {
 		return err
 	}
+
+	userQuery := &model.UserQuery{
+		Email: email,
+	}
+
+	user, err := ui.userRepository.FindBy(userQuery)
+	if err != nil {
+		return ui.userOutputPort.OutputNotRegistered()
+	}
+
 	token, err := ui.userRepository.GenerateAccessToken(user.Id)
 	if err != nil {
 		return err
 	}
-	// urlのクエリパラメータにidを付与してそのidをユーザの更新時に受け取りどのユーザを更新するかを判別する
-	if err := ui.userOutputPort.OutputLoginResult(token); err != nil {
-		return err
-	}
-	return nil
+
+	return ui.userOutputPort.OutputLoginWithAuth(token)
 }
 
 func (ui *UserInteractor) GetAuthUrl(actionType string) error {

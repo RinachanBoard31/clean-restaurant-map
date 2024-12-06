@@ -20,6 +20,11 @@ type UserCredentials struct {
 	Email string
 }
 
+type UserQuery struct {
+	Email string
+	Id    string
+}
+
 type ChangeForUser map[string]interface{}
 
 func emailValid(email string) error {

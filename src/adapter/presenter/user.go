@@ -21,16 +21,14 @@ func (up *UserPresenter) OutputUpdateResult() error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
-func (up *UserPresenter) OutputLoginResult(token string) error {
-	cookie := createAuthCookie(token)
-	up.c.SetCookie(cookie)
+func (up *UserPresenter) OutputLoginWithAuth(token string) error {
+	up.c.SetCookie(createAuthCookie(token))
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
 func (up *UserPresenter) OutputAuthUrl(url string) error {
 	return up.c.Redirect(http.StatusFound, url)
 }
-
 func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
 	cookie := createAuthCookie(token)
@@ -38,6 +36,9 @@ func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 	return up.c.Redirect(http.StatusFound, url)
 }
 
+func (up *UserPresenter) OutputNotRegistered() error {
+	return nil
+}
 func (up *UserPresenter) OutputAlreadySignedup() error {
 	url := os.Getenv("FRONT_URL") // すでに登録済みの場合はトップページにリダイレクト
 	return up.c.Redirect(http.StatusFound, url)
