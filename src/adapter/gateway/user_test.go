@@ -224,7 +224,7 @@ func TestGenerateAuthUrl(t *testing.T) {
 	}
 
 	/* Act */
-	actual := ug.GenerateAuthUrl()
+	actual := ug.GenerateAuthUrl("actionType") // 仮の引数
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

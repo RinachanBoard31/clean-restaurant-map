@@ -111,7 +111,7 @@ func (ug *UserGateway) FindBy(userCredentials *model.UserCredentials) (*model.Us
 	return user, nil
 }
 
-func (ug *UserGateway) GenerateAuthUrl() string {
+func (ug *UserGateway) GenerateAuthUrl(actionType string) string {
 	return ug.googleOAuthDriver.GenerateUrl()
 }
 

@@ -35,8 +35,8 @@ func (m *MockUserRepository) Get(id string) (*model.User, error) {
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GenerateAuthUrl() string {
-	args := m.Called()
+func (m *MockUserRepository) GenerateAuthUrl(actionType string) string {
+	args := m.Called(actionType)
 	return args.Get(0).(string)
 }
 
@@ -148,13 +148,13 @@ func TestLoginUser(t *testing.T) {
 
 func TestGetAuthUrl(t *testing.T) {
 	/* Arrange */
-	url := "https://www.google.com"
+	gotUrl := "https://www.google.com"
 	var expected error = nil
-
+	actionType := "signup"
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GenerateAuthUrl").Return(url)
+	mockUserRepository.On("GenerateAuthUrl", actionType).Return(gotUrl)
 	mockUserOutputPort := new(MockUserOutputPort)
-	mockUserOutputPort.On("OutputAuthUrl", url).Return(nil)
+	mockUserOutputPort.On("OutputAuthUrl", gotUrl).Return(nil)
 
 	ui := &UserInteractor{
 		userRepository: mockUserRepository,
@@ -162,7 +162,7 @@ func TestGetAuthUrl(t *testing.T) {
 	}
 
 	/* Act */
-	actual := ui.GetAuthUrl("action") // 仮の引数
+	actual := ui.GetAuthUrl(actionType)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

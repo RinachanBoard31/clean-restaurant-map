@@ -69,8 +69,8 @@ func (ui *UserInteractor) LoginUser(userCredentials *model.UserCredentials) erro
 	return nil
 }
 
-func (ui *UserInteractor) GetAuthUrl(action string) error {
-	url := ui.userRepository.GenerateAuthUrl()
+func (ui *UserInteractor) GetAuthUrl(actionType string) error {
+	url := ui.userRepository.GenerateAuthUrl(actionType)
 	return ui.userOutputPort.OutputAuthUrl(url)
 }
 

@@ -17,7 +17,7 @@ type UserRepository interface {
 	Update(*model.User, model.ChangeForUser) error
 	Get(string) (*model.User, error)
 	FindBy(*model.UserCredentials) (*model.User, error)
-	GenerateAuthUrl() string
+	GenerateAuthUrl(string) string
 	GetUserInfoWithAuthCode(string) (string, error)
 	GenerateAccessToken(string) (string, error)
 }
