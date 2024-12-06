@@ -22,8 +22,9 @@ func (up *UserPresenter) OutputUpdateResult() error {
 }
 
 func (up *UserPresenter) OutputLoginWithAuth(token string) error {
+	url := os.Getenv("FRONT_URL")
 	up.c.SetCookie(createAuthCookie(token))
-	return up.c.JSON(http.StatusOK, map[string]interface{}{})
+	return up.c.Redirect(http.StatusFound, url)
 }
 
 func (up *UserPresenter) OutputAuthUrl(url string) error {
@@ -37,8 +38,11 @@ func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 }
 
 func (up *UserPresenter) OutputNotRegistered() error {
-	return nil
+	queryParams := "error=not registered"
+	url := os.Getenv("FRONT_URL") + "/?" + queryParams
+	return up.c.Redirect(http.StatusFound, url)
 }
+
 func (up *UserPresenter) OutputAlreadySignedup() error {
 	url := os.Getenv("FRONT_URL") // すでに登録済みの場合はトップページにリダイレクト
 	return up.c.Redirect(http.StatusFound, url)
