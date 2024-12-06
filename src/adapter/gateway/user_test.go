@@ -32,8 +32,8 @@ func (m *MockUserRepository) FindByEmail(string) (*db.User, error) {
 	args := m.Called()
 	return args.Get(0).(*db.User), args.Error(1)
 }
-func (m *MockUserRepository) GenerateUrl() string {
-	args := m.Called()
+func (m *MockUserRepository) GenerateUrl(actionType string) string {
+	args := m.Called(actionType)
 	return args.Get(0).(string)
 }
 
@@ -216,15 +216,17 @@ func TestFindBy(t *testing.T) {
 
 func TestGenerateAuthUrl(t *testing.T) {
 	/* Arrange */
-	expected := "https://www.google.com"
+	actionType := "signup" // もしくはlogin
+	generatedUrl := "https://www.google.com"
+	expected := generatedUrl
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GenerateUrl").Return(expected)
+	mockUserRepository.On("GenerateUrl", actionType).Return(generatedUrl)
 	ug := &UserGateway{
 		googleOAuthDriver: mockUserRepository,
 	}
 
 	/* Act */
-	actual := ug.GenerateAuthUrl("actionType") // 仮の引数
+	actual := ug.GenerateAuthUrl(actionType)
 
 	/* Assert */
 	assert.Equal(t, expected, actual)

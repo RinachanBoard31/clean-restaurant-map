@@ -57,8 +57,8 @@ func (m *MockUserDriverFactory) FindByEmail(string) (*db.User, error) {
 	return args.Get(0).(*db.User), args.Error(1)
 }
 
-func (m *MockGoogleOAuthDriverFactory) GenerateUrl() string {
-	args := m.Called()
+func (m *MockGoogleOAuthDriverFactory) GenerateUrl(actionType string) string {
+	args := m.Called(actionType)
 	return args.Get(0).(string)
 }
 

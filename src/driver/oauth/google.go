@@ -30,7 +30,7 @@ func newGoogleOauthConfig() *oauth2.Config {
 	return conf
 }
 
-func (oauth *GoogleOAuthDriver) GenerateUrl() string {
+func (oauth *GoogleOAuthDriver) GenerateUrl(actionType string) string {
 	//	認証情報を取得
 	config := newGoogleOauthConfig()
 	// URLの生成

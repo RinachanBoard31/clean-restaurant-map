@@ -22,7 +22,7 @@ type UserDriver interface {
 }
 
 type GoogleOAuthDriver interface {
-	GenerateUrl() string
+	GenerateUrl(string) string
 	GetEmail(string) (string, error)
 }
 
@@ -112,7 +112,7 @@ func (ug *UserGateway) FindBy(userCredentials *model.UserCredentials) (*model.Us
 }
 
 func (ug *UserGateway) GenerateAuthUrl(actionType string) string {
-	return ug.googleOAuthDriver.GenerateUrl()
+	return ug.googleOAuthDriver.GenerateUrl(actionType)
 }
 
 func (ug *UserGateway) GetUserInfoWithAuthCode(code string) (string, error) {
