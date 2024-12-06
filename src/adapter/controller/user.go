@@ -131,7 +131,7 @@ func (uc *UserController) LoginUser(c echo.Context) error {
 }
 
 func (uc *UserController) GetAuthUrl(c echo.Context) error {
-	accessedType := c.Param("accessedType")
+	accessedType := c.QueryParam("accessedType")
 	if accessedType != "signup" && accessedType != "login" {
 		return c.JSON(http.StatusAccepted, map[string]interface{}{"error": "accessedType is not correct"})
 	}

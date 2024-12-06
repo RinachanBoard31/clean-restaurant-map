@@ -6,6 +6,7 @@ import (
 	db "clean-storemap-api/src/driver/db"
 	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -251,8 +252,10 @@ func TestGetAuthUrl(t *testing.T) {
 	url := "https://www.google.com"
 	var expected error = nil
 	accessedType := "signup"
-	c.SetParamNames("accessedType")
-	c.SetParamValues(accessedType)
+	queryParams := fmt.Sprintf("?accessedType=%s", accessedType)
+	req := httptest.NewRequest(http.MethodPost, "/auth"+queryParams, nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.SetRequest(req)
 
 	// Driverだけは実体が必要
 	mockGoogleOAuthDriverFactory := new(MockGoogleOAuthDriverFactory)
