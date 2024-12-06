@@ -95,11 +95,23 @@ func (ug *UserGateway) Get(id string) (*model.User, error) {
 	return user, nil
 }
 
-func (ug *UserGateway) FindBy(userQuery *model.UserQuery) (*model.User, error) {
-	dbUser, err := ug.userDriver.FindByEmail(userCredentials.Email)
-	if err != nil {
-		return nil, err
+func (ug *UserGateway) FindBy(query *model.UserQuery) (*model.User, error) {
+	dbUser := &db.User{}
+	var err error = nil
+	if query.Id != "" {
+		dbUser, err = ug.userDriver.FindById(query.Id)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	if (query.Email != "" && *dbUser == db.User{}) {
+		dbUser, err = ug.userDriver.FindByEmail(query.Email)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	user := &model.User{
 		Id:     dbUser.Id,
 		Name:   dbUser.Name,

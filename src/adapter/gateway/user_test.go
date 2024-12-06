@@ -28,8 +28,8 @@ func (m *MockUserRepository) FindById(id string) (*db.User, error) {
 	return args.Get(0).(*db.User), args.Error(1)
 }
 
-func (m *MockUserRepository) FindByEmail(string) (*db.User, error) {
-	args := m.Called()
+func (m *MockUserRepository) FindByEmail(email string) (*db.User, error) {
+	args := m.Called(email)
 	return args.Get(0).(*db.User), args.Error(1)
 }
 func (m *MockUserRepository) GenerateUrl(actionType string) string {
@@ -103,7 +103,7 @@ func TestExist(t *testing.T) {
 	foundUser := &db.User{}
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindByEmail").Return(foundUser, nil)
+	mockUserRepository.On("FindByEmail", user.Email).Return(foundUser, nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
@@ -181,13 +181,14 @@ func TestGet(t *testing.T) {
 
 func TestFindBy(t *testing.T) {
 	/* Arrange */
-	userCredentials := &model.UserCredentials{
+	query := &model.UserQuery{
+		Id:    "Id_1",
 		Email: "noiman@groovex.co.jp",
 	}
 	dbUser := &db.User{
-		Id:     "id_1",
+		Id:     query.Id,
 		Name:   "noiman",
-		Email:  userCredentials.Email,
+		Email:  query.Email,
 		Age:    35,
 		Sex:    1.0,
 		Gender: -0.5,
@@ -202,15 +203,17 @@ func TestFindBy(t *testing.T) {
 	}
 	expected := user
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindByEmail").Return(dbUser, nil)
+	mockUserRepository.On("FindById", query.Id).Return(&db.User{}, nil)
+	mockUserRepository.On("FindByEmail", query.Email).Return(dbUser, nil)
 	ug := &UserGateway{userDriver: mockUserRepository}
 
 	/* Act */
-	actual, _ := ug.FindBy(userCredentials)
+	actual, _ := ug.FindBy(query)
 
 	/* Assert */
 	// 返り値が正しいこと
 	assert.Equal(t, expected, actual)
+	mockUserRepository.AssertNumberOfCalls(t, "FindById", 1)
 	mockUserRepository.AssertNumberOfCalls(t, "FindByEmail", 1)
 }
 
