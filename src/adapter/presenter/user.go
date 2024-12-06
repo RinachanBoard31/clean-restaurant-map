@@ -26,7 +26,8 @@ func (up *UserPresenter) OutputUpdateResult() error {
 }
 
 func (up *UserPresenter) OutputLoginResult(token string) error {
-	up.c.SetCookie(settingCookie(token))
+	cookie := createAuthCookie(token)
+	up.c.SetCookie(cookie)
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
@@ -36,7 +37,8 @@ func (up *UserPresenter) OutputAuthUrl(url string) error {
 
 func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
-	up.c.SetCookie(settingCookie(token))
+	cookie := createAuthCookie(token)
+	up.c.SetCookie(cookie)
 	return up.c.Redirect(http.StatusFound, url)
 }
 
@@ -50,7 +52,7 @@ func (up *UserPresenter) OutputHasEmailInRequestBody() error {
 	return up.c.JSON(http.StatusBadRequest, map[string]interface{}{"error": errMsg})
 }
 
-func settingCookie(token string) *http.Cookie {
+func createAuthCookie(token string) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Name = os.Getenv("JWT_TOKEN_NAME")
 	cookie.Value = token
