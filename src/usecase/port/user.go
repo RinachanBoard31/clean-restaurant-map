@@ -20,6 +20,7 @@ type UserRepository interface {
 	FindBy(*model.UserCredentials) (*model.User, error)
 	GenerateAuthUrl() string
 	GetUserInfoWithAuthCode(string) (string, error)
+	GenerateAccessToken(string) (string, error)
 }
 
 type UserOutputPort interface {

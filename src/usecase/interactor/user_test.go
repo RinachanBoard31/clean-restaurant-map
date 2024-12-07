@@ -18,12 +18,12 @@ type MockUserOutputPort struct {
 }
 
 func (m *MockUserRepository) Create(user *model.User) (*model.User, error) {
-	args := m.Called()
+	args := m.Called(user)
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockUserRepository) Exist(user *model.User) error {
-	args := m.Called()
+	args := m.Called(user)
 	return args.Error(0)
 }
 func (m *MockUserRepository) Update(user *model.User, updateData model.ChangeForUser) error {
@@ -41,12 +41,17 @@ func (m *MockUserRepository) GenerateAuthUrl() string {
 }
 
 func (m *MockUserRepository) FindBy(user *model.UserCredentials) (*model.User, error) {
-	args := m.Called()
+	args := m.Called(user)
 	return args.Get(0).(*model.User), args.Error(1)
 }
 
-func (m *MockUserRepository) GetUserInfoWithAuthCode(string) (string, error) {
-	args := m.Called()
+func (m *MockUserRepository) GetUserInfoWithAuthCode(code string) (string, error) {
+	args := m.Called(code)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (m *MockUserRepository) GenerateAccessToken(id string) (string, error) {
+	args := m.Called(id)
 	return args.Get(0).(string), args.Error(1)
 }
 
@@ -60,8 +65,8 @@ func (m *MockUserOutputPort) OutputUpdateResult() error {
 	return args.Error(0)
 }
 
-func (m *MockUserOutputPort) OutputLoginResult(userId string) error {
-	args := m.Called(userId)
+func (m *MockUserOutputPort) OutputLoginResult(token string) error {
+	args := m.Called(token)
 	return args.Error(0)
 }
 
@@ -93,7 +98,7 @@ func TestCreateUser(t *testing.T) {
 	returnedUser.Id = "id_1"
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("Create").Return(returnedUser, nil)
+	mockUserRepository.On("Create", user).Return(returnedUser, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputCreateResult").Return(nil)
 
@@ -144,6 +149,7 @@ func TestLoginUser(t *testing.T) {
 	/* Arrange */
 	var expected error = nil
 	userCredentials := &model.UserCredentials{Email: "test@example.com"}
+	token := "test_token"
 	user := &model.User{
 		Id:     "id_1",
 		Email:  userCredentials.Email,
@@ -152,21 +158,19 @@ func TestLoginUser(t *testing.T) {
 		Gender: 1.0,
 	}
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("FindBy").Return(user, nil)
+	mockUserRepository.On("FindBy", userCredentials).Return(user, nil)
+	mockUserRepository.On("GenerateAccessToken", user.Id).Return(token, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
-	mockUserOutputPort.On("OutputLoginResult", user.Id).Return(nil)
-
+	mockUserOutputPort.On("OutputLoginResult", token).Return(nil)
 	ui := &UserInteractor{userRepository: mockUserRepository, userOutputPort: mockUserOutputPort}
 
 	/* Act */
 	actual := ui.LoginUser(userCredentials)
 
 	/* Assert */
-	// LoginUser()がOutputLoginResult()を返すこと
 	assert.Equal(t, expected, actual)
-	// RepositoryのFindBy()が1回呼ばれること
 	mockUserRepository.AssertNumberOfCalls(t, "FindBy", 1)
-	// OutputPortのOutputLoginResult()が1回呼ばれること
+	mockUserRepository.AssertNumberOfCalls(t, "GenerateAccessToken", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputLoginResult", 1)
 }
 
@@ -201,21 +205,31 @@ func TestSignupDraft(t *testing.T) {
 	var expected error = nil
 	err := errors.New("user is not found")
 
-	user := &model.User{
-		Id:     "id_1",
+	draftUser := &model.User{
+		Name:   "",
 		Email:  email,
-		Age:    52,
-		Sex:    -0.2,
-		Gender: 1.0,
+		Age:    0,
+		Sex:    0.0,
+		Gender: 0.0,
 	}
+	createdUser := &model.User{
+		Id:     "id_1",
+		Name:   "",
+		Email:  email,
+		Age:    0,
+		Sex:    0.0,
+		Gender: 0.0,
+	}
+	token := "token"
 
 	mockUserRepository := new(MockUserRepository)
-	mockUserRepository.On("GetUserInfoWithAuthCode").Return(email, nil)
-	mockUserRepository.On("Exist").Return(err) // 存在していない場合にエラーが返る
-	mockUserRepository.On("Create").Return(user, nil)
+	mockUserRepository.On("GetUserInfoWithAuthCode", code).Return(email, nil)
+	mockUserRepository.On("Exist", draftUser).Return(err) // 存在していない場合にエラーが返る
+	mockUserRepository.On("Create", draftUser).Return(createdUser, nil)
+	mockUserRepository.On("GenerateAccessToken", createdUser.Id).Return(token, nil)
 	mockUserOutputPort := new(MockUserOutputPort)
 	mockUserOutputPort.On("OutputAlreadySignedup").Return(nil)
-	mockUserOutputPort.On("OutputSignupWithAuth", user.Id).Return(nil)
+	mockUserOutputPort.On("OutputSignupWithAuth", token).Return(nil)
 
 	ui := &UserInteractor{
 		userRepository: mockUserRepository,
@@ -230,5 +244,6 @@ func TestSignupDraft(t *testing.T) {
 	mockUserRepository.AssertNumberOfCalls(t, "GetUserInfoWithAuthCode", 1)
 	mockUserRepository.AssertNumberOfCalls(t, "Exist", 1)
 	mockUserRepository.AssertNumberOfCalls(t, "Create", 1)
+	mockUserRepository.AssertNumberOfCalls(t, "GenerateAccessToken", 1)
 	mockUserOutputPort.AssertNumberOfCalls(t, "OutputSignupWithAuth", 1)
 }

@@ -11,6 +11,7 @@ import (
 	"clean-storemap-api/src/adapter/gateway"
 	"clean-storemap-api/src/adapter/presenter"
 	"clean-storemap-api/src/driver/api"
+	"clean-storemap-api/src/driver/auth"
 	"clean-storemap-api/src/driver/db"
 	"clean-storemap-api/src/driver/oauth"
 	"clean-storemap-api/src/usecase/interactor"
@@ -33,10 +34,11 @@ func InitializeRouter(ctx context.Context) (RouterI, error) {
 	storeI := controller.NewStoreController(storeDriverFactory, googleMapDriverFactory, storeOutputFactory, storeInputFactory, storeRepositoryFactory)
 	userDriverFactory := NewUserDriverFactory()
 	googleOAuthDriverFactory := NewGoogleOAuthDriverFactory()
+	jwtDriverFactory := NewJwtDriverFactory()
 	userOutputFactory := NewUserOutputFactory()
 	userInputFactory := NewUserInputFactory()
 	userRepositoryFactory := NewUserRepositoryFactory()
-	userI := controller.NewUserController(userDriverFactory, googleOAuthDriverFactory, userOutputFactory, userInputFactory, userRepositoryFactory)
+	userI := controller.NewUserController(userDriverFactory, googleOAuthDriverFactory, jwtDriverFactory, userOutputFactory, userInputFactory, userRepositoryFactory)
 	routerI := NewRouter(echo, storeI, userI)
 	return routerI, nil
 }
@@ -52,6 +54,7 @@ var driverSet = wire.NewSet(
 	NewUserDriverFactory,
 	NewGoogleMapDriverFactory,
 	NewGoogleOAuthDriverFactory,
+	NewJwtDriverFactory,
 )
 
 var inputPortSet = wire.NewSet(
@@ -77,8 +80,10 @@ func NewEcho() *echo.Echo {
 
 	frontUrl := os.Getenv("FRONT_URL")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{frontUrl},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins:     []string{frontUrl},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowCredentials: true,
 	}))
 	return e
 }
@@ -111,6 +116,10 @@ func NewUserDriverFactory() controller.UserDriverFactory {
 
 func NewGoogleOAuthDriverFactory() controller.GoogleOAuthDriverFactory {
 	return &oauth.GoogleOAuthDriver{}
+}
+
+func NewJwtDriverFactory() controller.JwtDriverFactory {
+	return &auth.JwtDriver{}
 }
 
 func NewUserOutputFactory() controller.UserOutputFactory {

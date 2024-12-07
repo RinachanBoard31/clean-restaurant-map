@@ -8,6 +8,7 @@ import (
 	"clean-storemap-api/src/adapter/gateway"
 	"clean-storemap-api/src/adapter/presenter"
 	"clean-storemap-api/src/driver/api"
+	"clean-storemap-api/src/driver/auth"
 	"clean-storemap-api/src/driver/db"
 	"clean-storemap-api/src/driver/oauth"
 	"clean-storemap-api/src/usecase/interactor"
@@ -28,6 +29,7 @@ var driverSet = wire.NewSet(
 	NewUserDriverFactory,
 	NewGoogleMapDriverFactory,
 	NewGoogleOAuthDriverFactory,
+	NewJwtDriverFactory,
 )
 
 var inputPortSet = wire.NewSet(
@@ -69,8 +71,10 @@ func NewEcho() *echo.Echo {
 	// CORS設定
 	frontUrl := os.Getenv("FRONT_URL")
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{frontUrl},
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowOrigins:     []string{frontUrl},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+		AllowMethods:     []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
+		AllowCredentials: true, // Cookieの送信を許可
 	}))
 	return e
 }
@@ -103,6 +107,10 @@ func NewUserDriverFactory() controller.UserDriverFactory {
 
 func NewGoogleOAuthDriverFactory() controller.GoogleOAuthDriverFactory {
 	return &oauth.GoogleOAuthDriver{}
+}
+
+func NewJwtDriverFactory() controller.JwtDriverFactory {
+	return &auth.JwtDriver{}
 }
 
 func NewUserOutputFactory() controller.UserOutputFactory {

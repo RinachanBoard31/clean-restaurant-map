@@ -42,6 +42,15 @@ func (m *MockUserRepository) GetEmail(string) (string, error) {
 	return args.Get(0).(string), args.Error(1)
 }
 
+type MockJwtRepository struct {
+	mock.Mock
+}
+
+func (m *MockJwtRepository) GenerateToken(subject string) (string, error) {
+	args := m.Called(subject)
+	return args.Get(0).(string), args.Error(1)
+}
+
 func TestCreate(t *testing.T) {
 	/* Arrange */
 	user := &model.User{
@@ -239,4 +248,23 @@ func TestGetUserInfoWithAuthCode(t *testing.T) {
 	/* Assert */
 	assert.Equal(t, expected, actual)
 	mockUserRepository.AssertNumberOfCalls(t, "GetEmail", 1)
+}
+
+func TestGenerateAccessToken(t *testing.T) {
+	/* Arrange */
+	id := "Id001"
+	token := "token"
+	expected := token
+	MockJwtRepository := new(MockJwtRepository)
+	MockJwtRepository.On("GenerateToken", id).Return(token, nil)
+	ug := &UserGateway{
+		jwtDriver: MockJwtRepository,
+	}
+
+	/* Act */
+	actual, _ := ug.GenerateAccessToken(id)
+
+	/* Assert */
+	assert.Equal(t, expected, actual)
+	MockJwtRepository.AssertNumberOfCalls(t, "GenerateToken", 1)
 }

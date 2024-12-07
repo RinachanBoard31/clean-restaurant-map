@@ -23,13 +23,15 @@ type UserI interface {
 
 type UserOutputFactory func(echo.Context) port.UserOutputPort
 type UserInputFactory func(port.UserRepository, port.UserOutputPort) port.UserInputPort
-type UserRepositoryFactory func(gateway.UserDriver, gateway.GoogleOAuthDriver) port.UserRepository
+type UserRepositoryFactory func(gateway.UserDriver, gateway.GoogleOAuthDriver, gateway.JwtDriver) port.UserRepository
 type UserDriverFactory gateway.UserDriver
 type GoogleOAuthDriverFactory gateway.GoogleOAuthDriver
+type JwtDriverFactory gateway.JwtDriver
 
 type UserController struct {
 	userDriverFactory        UserDriverFactory
 	googleOAuthDriverFactory GoogleOAuthDriverFactory
+	jwtDriverFactory         JwtDriverFactory
 	userOutputFactory        UserOutputFactory
 	userInputFactory         UserInputFactory
 	userRepositoryFactory    UserRepositoryFactory
@@ -52,6 +54,7 @@ type UserCredentialsRequestBody struct {
 func NewUserController(
 	userDriverFactory UserDriverFactory,
 	googleOAuthDriverFactory GoogleOAuthDriverFactory,
+	jwtDriverFactory JwtDriverFactory,
 	userOutputFactory UserOutputFactory,
 	userInputFactory UserInputFactory,
 	userRepositoryFactory UserRepositoryFactory,
@@ -59,6 +62,7 @@ func NewUserController(
 	return &UserController{
 		userDriverFactory:        userDriverFactory,
 		googleOAuthDriverFactory: googleOAuthDriverFactory,
+		jwtDriverFactory:         jwtDriverFactory,
 		userOutputFactory:        userOutputFactory,
 		userInputFactory:         userInputFactory,
 		userRepositoryFactory:    userRepositoryFactory,
@@ -81,7 +85,7 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 }
 
 func (uc *UserController) UpdateUser(c echo.Context) error {
-	id := c.Param("id")
+	id := c.Get("userId").(string)
 	// UserRequestBodyを使用すると存在しないkeyに関しても値が生成されてしまうため、UserRequestBodyにバインドさせずに取得する
 	var requestBody map[string]interface{}
 	// 数字 -> float64, 文字列-> stringと変換される
@@ -167,6 +171,7 @@ func (uc *UserController) newUserInputPort(c echo.Context) port.UserInputPort {
 	userOutputPort := uc.userOutputFactory(c)
 	userDriver := uc.userDriverFactory
 	googleOAuthDriver := uc.googleOAuthDriverFactory
-	userRepository := uc.userRepositoryFactory(userDriver, googleOAuthDriver)
+	jwtDriver := uc.jwtDriverFactory
+	userRepository := uc.userRepositoryFactory(userDriver, googleOAuthDriver, jwtDriver)
 	return uc.userInputFactory(userRepository, userOutputPort)
 }
