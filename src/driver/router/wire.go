@@ -10,7 +10,6 @@ import (
 	"clean-storemap-api/src/driver/api"
 	"clean-storemap-api/src/driver/auth"
 	"clean-storemap-api/src/driver/db"
-	"clean-storemap-api/src/driver/oauth"
 	"clean-storemap-api/src/usecase/interactor"
 	"context"
 	"os"
@@ -106,7 +105,7 @@ func NewUserDriverFactory() controller.UserDriverFactory {
 }
 
 func NewGoogleOAuthDriverFactory() controller.GoogleOAuthDriverFactory {
-	return &oauth.GoogleOAuthDriver{}
+	return &auth.GoogleOAuthDriver{}
 }
 
 func NewJwtDriverFactory() controller.JwtDriverFactory {
