@@ -13,11 +13,11 @@ func NewUserDriver() *DbUserDriver {
 
 type User struct {
 	Id        string  `gorm:"primaryKey"`
-	Name      string  `gorm:"not nill"`
+	Name      string  `gorm:"not null"`
 	Email     string  `gorm:"unique"`
-	Age       int     `gorm:"not nill"`
-	Sex       float32 `gorm:"not nill"`
-	Gender    float32 `gorm:"not nill"`
+	Age       int     `gorm:"not null"`
+	Sex       float32 `gorm:"not null"`
+	Gender    float32 `gorm:"not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
