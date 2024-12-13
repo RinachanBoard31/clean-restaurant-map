@@ -38,7 +38,7 @@ func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 }
 
 func (up *UserPresenter) OutputNotRegistered() error {
-	queryParams := "error=not registered"
+	queryParams := "error=not_registered"
 	url := os.Getenv("FRONT_URL") + "/login" + "?" + queryParams
 	return up.c.Redirect(http.StatusFound, url)
 }
