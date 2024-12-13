@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"clean-storemap-api/src/adapter/gateway"
-	accssesTypel "clean-storemap-api/src/entity"
+	model "clean-storemap-api/src/entity"
 	"clean-storemap-api/src/usecase/port"
 )
 
@@ -62,7 +62,7 @@ func (uc *UserController) UpdateUser(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	updateData := make(accssesTypel.ChangeForUser)
+	updateData := make(model.ChangeForUser)
 	// 更新データを型変換しつつ格納する
 
 	// name
