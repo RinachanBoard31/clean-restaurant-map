@@ -22,7 +22,8 @@ func (up *UserPresenter) OutputUpdateResult() error {
 }
 
 func (up *UserPresenter) OutputLoginWithAuth(token string) error {
-	up.c.SetCookie(createAuthCookie(token))
+	cookie := createAuthCookie(token)
+	up.c.SetCookie(cookie)
 	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
@@ -30,10 +31,9 @@ func (up *UserPresenter) OutputAuthUrl(url string) error {
 	return up.c.JSON(http.StatusOK, map[string]interface{}{"url": url})
 }
 func (up *UserPresenter) OutputSignupWithAuth(token string) error {
-	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
 	cookie := createAuthCookie(token)
 	up.c.SetCookie(cookie)
-	return up.c.Redirect(http.StatusFound, url)
+	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
 func (up *UserPresenter) OutputNotRegistered() error {
@@ -41,8 +41,7 @@ func (up *UserPresenter) OutputNotRegistered() error {
 }
 
 func (up *UserPresenter) OutputAlreadySignedup() error {
-	url := os.Getenv("FRONT_URL") // すでに登録済みの場合はトップページにリダイレクト
-	return up.c.Redirect(http.StatusFound, url)
+	return up.c.JSON(http.StatusConflict, map[string]interface{}{"error": "Already exist favorite store"})
 }
 
 func (up *UserPresenter) OutputHasEmailInRequestBody() error {

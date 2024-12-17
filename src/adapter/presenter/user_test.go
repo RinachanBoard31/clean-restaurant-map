@@ -82,7 +82,6 @@ func TestOutputAuthUrl(t *testing.T) {
 func TestOutputSignupWithAuth(t *testing.T) {
 	/* Arrange */
 	t.Setenv("JWT_TOKEN_NAME", "auth_token")
-	requestPath := "/editUser"
 	token := "test_token"
 	var expected error = nil
 	c, rec := newRouter()
@@ -92,8 +91,7 @@ func TestOutputSignupWithAuth(t *testing.T) {
 	actual := up.OutputSignupWithAuth(token)
 
 	/* Assert */
-	assert.Equal(t, http.StatusFound, rec.Code)
-	assert.Contains(t, rec.HeaderMap["Location"][0], requestPath)
+	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, expected, actual)
 
 	// レスポンスヘッダーからSet-Cookieを取得
@@ -104,7 +102,7 @@ func TestOutputSignupWithAuth(t *testing.T) {
 
 func TestOutputAlreadySignedup(t *testing.T) {
 	/* Arrange */
-	var expected error = nil
+	expected := "{\"error\":\"Already exist favorite store\"}\n"
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
 
@@ -112,9 +110,9 @@ func TestOutputAlreadySignedup(t *testing.T) {
 	actual := up.OutputAlreadySignedup()
 
 	/* Assert */
+	assert.Equal(t, http.StatusConflict, rec.Code)
 	if assert.NoError(t, actual) {
-		assert.Equal(t, http.StatusFound, rec.Code)
-		assert.Equal(t, expected, actual)
+		assert.Equal(t, expected, rec.Body.String())
 	}
 }
 
