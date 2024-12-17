@@ -1,6 +1,7 @@
 package presenter
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -52,7 +53,7 @@ func TestOutputLoginWithAuth(t *testing.T) {
 	actual := up.OutputLoginWithAuth(token)
 
 	/* Assert */
-	assert.Equal(t, http.StatusFound, rec.Code)
+	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, expected, actual)
 
 	// レスポンスヘッダーからSet-Cookieを取得
@@ -63,7 +64,8 @@ func TestOutputLoginWithAuth(t *testing.T) {
 func TestOutputAuthUrl(t *testing.T) {
 	/* Arrange */
 	url := "https://www.google.com"
-	expected := url
+	expected := fmt.Sprintf("{\"url\":\"%s\"}\n", url)
+
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
 
@@ -71,12 +73,10 @@ func TestOutputAuthUrl(t *testing.T) {
 	actual := up.OutputAuthUrl(url)
 
 	/* Assert */
-	// up.OutputAuthUrlがJSONを返すこと
 	if assert.NoError(t, actual) {
-		assert.Equal(t, http.StatusFound, rec.Code)
-		// リダイレクト先のURLが正しいこと
-		assert.Equal(t, expected, rec.HeaderMap["Location"][0])
+		assert.Equal(t, expected, rec.Body.String())
 	}
+	assert.Equal(t, http.StatusOK, rec.Code)
 }
 
 func TestOutputSignupWithAuth(t *testing.T) {
@@ -136,7 +136,8 @@ func TestOutputHasEmailInRequestBody(t *testing.T) {
 
 func TestOutputNotRegistered(t *testing.T) {
 	/* Arrange */
-	var expected error = nil
+	error := "not_registered"
+	expected := fmt.Sprintf("{\"error\":\"%s\"}\n", error)
 	c, rec := newRouter()
 	up := &UserPresenter{c: c}
 
@@ -144,7 +145,9 @@ func TestOutputNotRegistered(t *testing.T) {
 	actual := up.OutputNotRegistered()
 
 	/* Assert */
-	assert.Equal(t, http.StatusFound, rec.Code)
-	assert.Equal(t, expected, actual)
+	if assert.NoError(t, actual) {
+		assert.Equal(t, expected, rec.Body.String())
+	}
+	assert.Equal(t, http.StatusNotFound, rec.Code)
 
 }

@@ -17,7 +17,7 @@ func NewGoogleOAuthDriver() *GoogleOAuthDriver {
 
 func newGoogleOauthConfig(actionType string) *oauth2.Config {
 	// Google認証を行うためのリダイレクト先のURL
-	redirectURL := os.Getenv("BACKEND_URL") + "/auth/" + actionType
+	redirectURL := os.Getenv("FRONT_URL") + "/" + actionType
 	clientID := os.Getenv("GOOGLE_CLIENT_ID")
 	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
 	conf := &oauth2.Config{

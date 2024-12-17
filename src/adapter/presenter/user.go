@@ -22,13 +22,12 @@ func (up *UserPresenter) OutputUpdateResult() error {
 }
 
 func (up *UserPresenter) OutputLoginWithAuth(token string) error {
-	url := os.Getenv("FRONT_URL")
 	up.c.SetCookie(createAuthCookie(token))
-	return up.c.Redirect(http.StatusFound, url)
+	return up.c.JSON(http.StatusOK, map[string]interface{}{})
 }
 
 func (up *UserPresenter) OutputAuthUrl(url string) error {
-	return up.c.Redirect(http.StatusFound, url)
+	return up.c.JSON(http.StatusOK, map[string]interface{}{"url": url})
 }
 func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 	url := os.Getenv("FRONT_URL") + "/editUser" // 認証以外のユーザ情報を入力するページ
@@ -38,9 +37,7 @@ func (up *UserPresenter) OutputSignupWithAuth(token string) error {
 }
 
 func (up *UserPresenter) OutputNotRegistered() error {
-	queryParams := "error=not_registered"
-	url := os.Getenv("FRONT_URL") + "/login" + "?" + queryParams
-	return up.c.Redirect(http.StatusFound, url)
+	return up.c.JSON(http.StatusNotFound, map[string]interface{}{"error": "not_registered"})
 }
 
 func (up *UserPresenter) OutputAlreadySignedup() error {
